@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Foto profil alumni: Publik dapat membaca, unggah wajib terautentikasi dan berupa file gambar <= 5MB
+    match /avatars/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Dokumen CV: Hanya dapat dibaca dan diunggah oleh pengguna terautentikasi,
+    // dibatasi ke dokumen PDF, Word, atau gambar <= 10MB
+    match /cv_documents/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && (
+                     request.resource.contentType.matches('application/pdf') ||
+                     request.resource.contentType.matches('application/msword') ||
+                     request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+                     request.resource.contentType.matches('image/.*')
+                   );
+    }
+
+    // Tolak semua path lainnya secara default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
