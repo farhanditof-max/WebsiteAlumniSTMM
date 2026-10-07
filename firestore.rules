@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Profil Alumni: Publik dapat membaca (untuk showcase talenta & halaman profil),
+    // Profil Alumni: Publik dapat membaca (untuk showcase talenta & direktori),
     // hanya pemilik akun terautentikasi yang dapat menulis profil miliknya.
     match /users/{userId} {
       allow read: if true;
@@ -25,12 +25,24 @@ service cloud.firestore {
     }
 
     // Lamaran Kerja: Bersifat privat antara pelamar dan pemilik lowongan.
-    // Hanya pelamar (applicantUid) atau pemilik lowongan (posterUid) yang dapat mengakses.
+    // Mencegah Privilege Escalation: Hanya pemilik lowongan (posterUid) yang berhak mengubah status lamaran.
+    // Pelamar tidak dapat mengubah status menjadi 'accepted' sendiri.
     match /applications/{applicationId} {
-      allow read: if request.auth != null && (resource.data.applicantUid == request.auth.uid || resource.data.posterUid == request.auth.uid);
-      allow create: if request.auth != null && request.resource.data.applicantUid == request.auth.uid;
-      allow update: if request.auth != null && (resource.data.posterUid == request.auth.uid || resource.data.applicantUid == request.auth.uid);
-      allow delete: if request.auth != null && (resource.data.applicantUid == request.auth.uid || resource.data.posterUid == request.auth.uid);
+      allow read: if request.auth != null && (
+        resource.data.applicantUid == request.auth.uid || 
+        resource.data.posterUid == request.auth.uid
+      );
+      // Pelamar hanya dapat membuat lamaran baru dengan status awal 'pending'
+      allow create: if request.auth != null 
+                    && request.resource.data.applicantUid == request.auth.uid
+                    && request.resource.data.status == 'pending';
+      // HANYA poster/pemilik lowongan yang berhak mengubah status, field ID tidak boleh diganti
+      allow update: if request.auth != null 
+                    && resource.data.posterUid == request.auth.uid
+                    && request.resource.data.applicantUid == resource.data.applicantUid
+                    && request.resource.data.jobId == resource.data.jobId;
+      // Pelamar hanya dapat menarik/menghapus lamarannya sendiri
+      allow delete: if request.auth != null && resource.data.applicantUid == request.auth.uid;
     }
 
     // Tolak semua akses ke koleksi lain secara default

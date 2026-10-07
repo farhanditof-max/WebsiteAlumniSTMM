@@ -144,8 +144,8 @@ export default function ProfilPage() {
     setMsg({ type: '', text: '' });
 
     try {
-      const fileName = `${user.uid}_${Date.now()}_${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      const storageRef = ref(storage, `cv_documents/${fileName}`);
+      const fileName = `${Date.now()}_${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      const storageRef = ref(storage, `cv_documents/${user.uid}/${fileName}`);
       await withTimeout(uploadBytes(storageRef, cvFile), 15000, 'Koneksi timeout saat upload file CV');
       const downloadUrl = await getDownloadURL(storageRef);
 
@@ -181,7 +181,7 @@ export default function ProfilPage() {
 
     try {
       const ext = file.name.split('.').pop() || 'jpg';
-      const storageRef = ref(storage, `avatars/${user.uid}_${Date.now()}.${ext}`);
+      const storageRef = ref(storage, `avatars/${user.uid}/${Date.now()}.${ext}`);
       await withTimeout(uploadBytes(storageRef, file), 15000, 'Koneksi timeout saat upload foto profil');
       const downloadUrl = await getDownloadURL(storageRef);
 

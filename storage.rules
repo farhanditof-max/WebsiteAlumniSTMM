@@ -2,19 +2,21 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Foto profil alumni: Publik dapat membaca, unggah wajib terautentikasi dan berupa file gambar <= 5MB
-    match /avatars/{fileName} {
+    // Foto profil alumni: Publik dapat membaca, tetapi HANYA pemilik akun (UID) yang dapat mengunggah/menghapus
+    match /avatars/{userId}/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
                    && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
     }
 
-    // Dokumen CV: Hanya dapat dibaca dan diunggah oleh pengguna terautentikasi,
-    // dibatasi ke dokumen PDF, Word, atau gambar <= 10MB
-    match /cv_documents/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
+    // Dokumen CV: HANYA dapat dibaca, diunggah, dan dihapus oleh pemilik akun (UID) terkait
+    // Mencegah mass PII download (BOLA) dan arbitrary overwrite/deletion
+    match /cv_documents/{userId}/{fileName} {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null 
+                   && request.auth.uid == userId
                    && request.resource.size < 10 * 1024 * 1024
                    && (
                      request.resource.contentType.matches('application/pdf') ||
@@ -22,6 +24,15 @@ service firebase.storage {
                      request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
                      request.resource.contentType.matches('image/.*')
                    );
+    }
+
+    // Fallback path datar lama (mencegah penulisan file tak terisolasi)
+    match /avatars/{fileName} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /cv_documents/{fileName} {
+      allow read, write: if false;
     }
 
     // Tolak semua path lainnya secara default
