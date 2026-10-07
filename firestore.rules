@@ -45,6 +45,25 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.applicantUid == request.auth.uid;
     }
 
+    // Permintaan Akses Kontak Alumni (Privasi WhatsApp & Nomor Telepon)
+    // Hanya pemohon dan target yang berhak membaca request.
+    // Pemohon hanya dapat membuat request berstatus 'pending'.
+    // Hanya target (pemilik profil) yang berhak mengubah status (menyetujui atau menolak).
+    match /contact_requests/{requestId} {
+      allow read: if request.auth != null && (
+        resource.data.requesterUid == request.auth.uid || 
+        resource.data.targetUid == request.auth.uid
+      );
+      allow create: if request.auth != null 
+                    && request.resource.data.requesterUid == request.auth.uid
+                    && request.resource.data.status == 'pending';
+      allow update: if request.auth != null 
+                    && resource.data.targetUid == request.auth.uid
+                    && request.resource.data.requesterUid == resource.data.requesterUid
+                    && request.resource.data.targetUid == resource.data.targetUid;
+      allow delete: if request.auth != null && resource.data.requesterUid == request.auth.uid;
+    }
+
     // Tolak semua akses ke koleksi lain secara default
     match /{document=**} {
       allow read, write: if false;

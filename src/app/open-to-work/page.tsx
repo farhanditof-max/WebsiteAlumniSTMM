@@ -14,13 +14,16 @@ import {
   ArrowRight, 
   FileText, 
   Loader2,
-  Video
+  Video,
+  Lock
 } from 'lucide-react';
 
 import { fetchOpenToWorkRest } from '@/lib/firestoreRest';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
+import { useAuth } from '@/context/AuthContext';
 
 export default function OpenToWorkPage() {
+  const { user } = useAuth();
   const [alumniList, setAlumniList] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProdi, setSelectedProdi] = useState<string>('ALL');
@@ -77,7 +80,7 @@ export default function OpenToWorkPage() {
       a.namaLengkap?.toLowerCase().includes(q) ||
       a.bio?.toLowerCase().includes(q) ||
       a.prodi?.toLowerCase().includes(q) ||
-      a.nomorAlumni?.toLowerCase().includes(q) ||
+      (user ? a.nomorAlumni?.toLowerCase().includes(q) : false) ||
       a.angkatan?.toLowerCase().includes(q);
     return matchesProdi && matchesSearch;
   });
@@ -212,9 +215,18 @@ export default function OpenToWorkPage() {
 
                 {/* BOTTOM: VIEW PROFILE BUTTON */}
                 <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    {alumni.nomorAlumni}
-                  </span>
+                  {user ? (
+                    <span className="text-[11px] text-slate-500 font-mono font-medium">
+                      {alumni.nomorAlumni}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 font-mono" title="Login untuk melihat Nomor Alumni">
+                      <span>••••••••••</span>
+                      <span className="inline-flex items-center gap-0.5 text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-sans font-medium">
+                        <Lock className="w-2.5 h-2.5" /> Terkunci
+                      </span>
+                    </span>
+                  )}
 
                   <Link
                     href={`/profil/${alumni.uid}`}

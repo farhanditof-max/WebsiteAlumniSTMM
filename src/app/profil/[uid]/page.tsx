@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { UserProfile, PortfolioItem } from '@/types';
 import { parseYouTubeVideoId, formatWhatsAppUrl } from '@/lib/media';
 import { 
@@ -18,7 +18,11 @@ import {
   Loader2, 
   Video,
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  Clock,
+  Send,
+  X,
+  CheckCircle2
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { useAuth } from '@/context/AuthContext';
@@ -27,10 +31,19 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
   const resolvedParams = use(params);
   const rawUid = resolvedParams.uid;
   const cleanUid = rawUid ? decodeURIComponent(rawUid).trim() : '';
-  const { user } = useAuth();
+  const { user, profile: authProfile } = useAuth();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Status Permintaan Kontak WhatsApp (Proteksi PII sesama Alumni)
+  const [contactRequestStatus, setContactRequestStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactPurpose, setContactPurpose] = useState('Peluang Kerja / Proyek');
+  const [contactMessage, setContactMessage] = useState('');
+  const [submittingContact, setSubmittingContact] = useState(false);
+  const [contactError, setContactError] = useState<string | null>(null);
+  const [contactSuccessMsg, setContactSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -90,6 +103,70 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
     }
     loadProfile();
   }, [cleanUid]);
+
+  // Cek apakah user saat ini sudah pernah meminta kontak target
+  useEffect(() => {
+    let isMounted = true;
+    async function checkContactRequest() {
+      if (!user || !profile || user.uid === profile.uid) return;
+      try {
+        const qReq = query(
+          collection(db, 'contact_requests'),
+          where('requesterUid', '==', user.uid),
+          where('targetUid', '==', profile.uid)
+        );
+        const snap = await getDocs(qReq);
+        if (isMounted) {
+          if (!snap.empty) {
+            const reqData = snap.docs[0].data();
+            setContactRequestStatus(reqData.status as 'pending' | 'approved' | 'rejected');
+          } else {
+            setContactRequestStatus('none');
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to check contact request status:', err);
+      }
+    }
+    checkContactRequest();
+    return () => {
+      isMounted = false;
+    };
+  }, [user, profile]);
+
+  const handleSendContactRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !profile) return;
+    if (!contactMessage.trim()) {
+      setContactError('Mohon isi pesan pengantar keperluan Anda.');
+      return;
+    }
+    setSubmittingContact(true);
+    setContactError(null);
+    try {
+      await addDoc(collection(db, 'contact_requests'), {
+        requesterUid: user.uid,
+        requesterName: authProfile?.namaLengkap || user.displayName || user.email?.split('@')[0] || 'Alumni STMM',
+        requesterEmail: user.email || '',
+        requesterProdi: authProfile?.prodi || '',
+        targetUid: profile.uid,
+        targetName: profile.namaLengkap,
+        purpose: contactPurpose,
+        message: contactMessage.trim(),
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      });
+      setContactRequestStatus('pending');
+      setShowContactModal(false);
+      setContactSuccessMsg('Permintaan akses kontak berhasil diajukan kepada pemilik akun.');
+      setTimeout(() => setContactSuccessMsg(null), 5000);
+    } catch (err: unknown) {
+      const e = err as Error;
+      setContactError(e.message || 'Gagal mengirim permintaan kontak.');
+    } finally {
+      setSubmittingContact(false);
+    }
+  };
 
   const PortfolioImagePreview = ({ url, title }: { url: string; title: string }) => {
     const [hasError, setHasError] = useState(false);
@@ -187,6 +264,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
     );
   }
 
+  const isOwner = !!user && !!profile && user.uid === profile.uid;
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
       <Navbar />
@@ -213,9 +292,19 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
               <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-0.5">
                 {profile.prodi} • Angkatan {profile.angkatan}
               </p>
-              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                Nomor Alumni: {profile.nomorAlumni}
-              </p>
+              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5">
+                <span>Nomor Alumni:</span>
+                {user ? (
+                  <span className="text-slate-600 font-semibold">{profile.nomorAlumni}</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-slate-400">
+                    <span>••••••••••</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-sans font-medium">
+                      <Lock className="w-2.5 h-2.5" /> Terkunci
+                    </span>
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -314,10 +403,27 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
                 <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-3.5 text-xs shadow-xs">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Kontak Alumni</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" /> Terbuka
-                    </span>
+                    {isOwner ? (
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-slate-500" /> Profil Anda
+                      </span>
+                    ) : contactRequestStatus === 'approved' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" /> Akses WA Disetujui
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold border border-amber-200 flex items-center gap-1">
+                        <Lock className="w-3 h-3" /> WA Terproteksi
+                      </span>
+                    )}
                   </div>
+
+                  {contactSuccessMsg && (
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                      <span>{contactSuccessMsg}</span>
+                    </div>
+                  )}
                   
                   <div className="flex items-center gap-2.5 text-slate-600">
                     <Mail className="w-4 h-4 text-[#0284c7] shrink-0" />
@@ -327,17 +433,81 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
                   </div>
 
                   {profile.phone && (
-                    <div className="flex items-center gap-2.5 text-slate-600">
-                      <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <a 
-                        href={formatWhatsAppUrl(profile.phone)} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="hover:text-emerald-600 hover:underline"
-                      >
-                        WhatsApp: {profile.phone}
-                      </a>
-                    </div>
+                    <>
+                      {isOwner || contactRequestStatus === 'approved' ? (
+                        <div className="flex items-center justify-between gap-2.5 text-slate-600">
+                          <div className="flex items-center gap-2.5">
+                            <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <a 
+                              href={formatWhatsAppUrl(profile.phone)} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="hover:text-emerald-600 hover:underline font-mono font-medium"
+                            >
+                              WhatsApp: {profile.phone}
+                            </a>
+                          </div>
+                          {isOwner && (
+                            <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-sans font-medium">
+                              Kontak Anda
+                            </span>
+                          )}
+                        </div>
+                      ) : contactRequestStatus === 'pending' ? (
+                        <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-amber-900 flex items-center gap-1.5 text-xs">
+                              <Clock className="w-3.5 h-3.5 text-amber-600" /> Permintaan Terkirim
+                            </span>
+                            <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">Menunggu Respon</span>
+                          </div>
+                          <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                            Permintaan akses kontak Anda sedang menunggu konfirmasi dari {profile.namaLengkap}. Nomor WhatsApp akan terbuka otomatis saat disetujui.
+                          </p>
+                        </div>
+                      ) : contactRequestStatus === 'rejected' ? (
+                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-slate-700 text-xs">Akses WhatsApp Belum Diberikan</span>
+                            <span className="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium">Ditolak</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 leading-relaxed">
+                            Alumni saat ini belum bersedia membagikan nomor WhatsApp pribadi. Anda tetap dapat menghubungi via email resmi di atas.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowContactModal(true)}
+                            className="mt-1 text-[11px] font-semibold text-[#0284c7] hover:underline cursor-pointer"
+                          >
+                            Ajukan Permintaan Ulang
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-slate-700 font-medium">
+                              <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>WhatsApp:</span>
+                              <span className="font-mono text-slate-400">••••••••••••</span>
+                            </div>
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded font-medium">
+                              <Lock className="w-2.5 h-2.5" /> Terproteksi
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 leading-relaxed">
+                            Nomor WhatsApp dilindungi privasi agar tidak disalahgunakan. Ajukan permintaan akses kontak agar {profile.namaLengkap} dapat memverifikasi identitas Anda.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowContactModal(true)}
+                            className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            Minta Akses Kontak WhatsApp
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {profile.linkedinUrl && (
@@ -406,6 +576,107 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
           </div>
         </div>
       </main>
+
+      {/* MODAL MINTA AKSES KONTAK WHATSAPP */}
+      {showContactModal && profile && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Minta Akses Kontak Alumni</h3>
+                  <p className="text-[11px] text-slate-400">Kepada: {profile.namaLengkap}</p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowContactModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-sky-50/70 border border-sky-100 rounded-xl p-3 text-xs text-sky-900 space-y-1">
+              <p className="font-semibold flex items-center gap-1.5 text-sky-950">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
+                Verifikasi Identitas Sesama Alumni
+              </p>
+              <p className="text-slate-600 text-[11px] leading-relaxed">
+                Permintaan ini akan mencantumkan identitas Anda ({authProfile?.namaLengkap || user?.email}) agar pemilik profil tahu siapa yang menghubungi sebelum membagikan nomor WhatsApp.
+              </p>
+            </div>
+
+            <form onSubmit={handleSendContactRequest} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Keperluan Menghubungi <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={contactPurpose}
+                  onChange={(e) => setContactPurpose(e.target.value)}
+                  className="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7]"
+                >
+                  <option value="Peluang Kerja / Proyek">Peluang Kerja / Proyek Freelance</option>
+                  <option value="Kolaborasi Kreatif">Kolaborasi Kreatif / Produksi</option>
+                  <option value="Pertanyaan Karir & Networking">Pertanyaan Karir / Networking Alumni</option>
+                  <option value="Lainnya">Keperluan Lainnya</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Pesan Pengantar <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  placeholder="Jelaskan secara singkat tujuan Anda meminta nomor WhatsApp..."
+                  className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] resize-none"
+                />
+              </div>
+
+              {contactError && (
+                <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
+                  {contactError}
+                </p>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowContactModal(false)}
+                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingContact || !contactMessage.trim()}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-xl transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  {submittingContact ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Mengirim...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      Kirim Permintaan
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

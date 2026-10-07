@@ -75,3 +75,19 @@ export interface JobApplication {
   status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
   appliedAt: string;
 }
+
+export interface ContactRequest {
+  id: string;
+  requesterUid: string;
+  requesterName: string;
+  requesterEmail: string;
+  requesterProdi?: string;
+  targetUid: string;
+  targetName: string;
+  purpose: string;
+  message: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt?: string;
+}
+
