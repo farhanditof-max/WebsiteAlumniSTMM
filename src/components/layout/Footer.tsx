@@ -43,6 +43,7 @@ export default function Footer() {
             <li><Link href="/open-to-work" className="hover:text-[#0284c7] transition">Alumni Open to Work</Link></li>
             <li><Link href="/post-lowongan" className="hover:text-[#0284c7] transition">Pasang Loker Alumni</Link></li>
             <li><Link href="/profil" className="hover:text-[#0284c7] transition">Portofolio Showreel</Link></li>
+            <li><Link href="/admin/alumni" className="text-slate-400 hover:text-purple-600 transition">Admin Portal (Master Alumni)</Link></li>
           </ul>
         </div>
       </div>

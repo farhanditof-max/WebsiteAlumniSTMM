@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { registerAlumni, VERIFIED_ALUMNI_LIST, getRegisteredNomorAlumni } from '@/lib/auth';
+import { registerAlumni, VERIFIED_ALUMNI_LIST, getRegisteredNomorAlumni, verifyNomorAlumni } from '@/lib/auth';
 import { PRODI_LIST, ProdiType } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -33,21 +33,15 @@ export default function RegisterPage() {
     loadRegisteredNumbers();
   }, []);
 
-  // Auto-fill jika user memilih nomor alumni dari whitelist
-  const handleNomorAlumniChange = (value: string) => {
+  // Auto-fill jika user memilih nomor alumni dari whitelist atau mengetik nomor valid
+  const handleNomorAlumniChange = async (value: string) => {
     setNomorAlumni(value);
     const clean = value.trim().replace(/[/._]/g, '-').toUpperCase();
-    const found = VERIFIED_ALUMNI_LIST.find(
-      (a) => a.nomorAlumni.toUpperCase() === clean
-    );
-    if (found) {
-      if (found.nama) setNamaLengkap(found.nama);
-      if (found.prodi) setProdi(found.prodi as ProdiType);
-    }
-    // Auto infer angkatan dari nomor MMTC-YYYY-XXX
-    const parts = clean.split('-');
-    if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
-      setAngkatan(parts[1]);
+    const verified = await verifyNomorAlumni(clean);
+    if (verified && !verified.nameMismatch) {
+      if (verified.nama) setNamaLengkap(verified.nama);
+      if (verified.prodi) setProdi(verified.prodi as ProdiType);
+      if (verified.angkatan) setAngkatan(verified.angkatan);
     }
   };
 
@@ -159,7 +153,7 @@ export default function RegisterPage() {
               })}
             </div>
             <p className="text-[10px] text-slate-500 mt-2">
-              * Tips: Anda juga bisa mengetik nomor alumni kustom dengan format <span className="font-mono font-medium">MMTC-YYYY-XXX</span> (contoh: MMTC-2023-555).
+              * <strong>Catatan Keamanan:</strong> Nomor Alumni dan Nama Lengkap wajib sesuai dengan data akademik terdaftar di basis data resmi STMM MMTC untuk mencegah pendaftaran akun tidak sah.
             </p>
           </div>
 

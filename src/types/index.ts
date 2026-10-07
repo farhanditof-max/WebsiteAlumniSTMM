@@ -38,6 +38,7 @@ export interface UserProfile {
   portfolio: PortfolioItem[];
   phone?: string;
   linkedinUrl?: string;
+  role?: 'admin' | 'alumni';
   createdAt: string;
 }
 
@@ -90,4 +91,17 @@ export interface ContactRequest {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface AlumniRegistryItem {
+  id?: string;
+  nomorAlumni: string;
+  namaLengkap: string;
+  prodi: ProdiType;
+  angkatan: string;
+  isRegistered?: boolean;
+  registeredUid?: string;
+  registeredAt?: string;
+  createdAt?: string;
+}
+
 

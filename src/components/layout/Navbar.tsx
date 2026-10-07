@@ -9,7 +9,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  FileText
+  FileText,
+  ShieldCheck
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 
@@ -63,6 +64,12 @@ export default function Navbar() {
                   <FileText className="w-4 h-4 text-amber-600" />
                   Lamaran Saya
                 </Link>
+                {profile?.role === 'admin' && (
+                  <Link href="/admin/alumni" className="text-xs font-semibold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg border border-purple-200 transition flex items-center gap-1.5 shadow-2xs">
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                    Admin
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -168,6 +175,16 @@ export default function Navbar() {
               >
                 Profil Saya ({profile?.namaLengkap})
               </Link>
+              {profile?.role === 'admin' && (
+                <Link 
+                  href="/admin/alumni" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-purple-700 font-semibold py-2 flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-600" />
+                  Admin Portal (Master Data)
+                </Link>
+              )}
               <button
                 onClick={() => {
                   logout();
