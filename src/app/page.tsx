@@ -558,65 +558,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SPOTLIGHT BANNER: WITH SCROLLREVEAL */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal direction="up" delayMs={80} durationMs={750}>
-            <div className="bg-gradient-to-r from-sky-400 via-[#0284c7] to-[#0369a1] rounded-[36px] p-8 sm:p-12 text-white shadow-xl shadow-sky-500/15 relative overflow-hidden">
-              
-              {/* Background glowing rings */}
-              <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                
-                {/* Left Column: Avatar & Headline */}
-                <div className="lg:col-span-8 space-y-4">
-                  <span className="text-xs font-bold text-sky-100 uppercase tracking-wider block">
-                    Ikatan Alumni STMM MMTC Yogyakarta
-                  </span>
-                  <h3 className="text-2xl sm:text-4xl font-bold leading-snug">
-                    Wadah Kolaborasi Industri Penyiaran &amp; Digital 😊
-                  </h3>
-                  <p className="text-xs sm:text-sm text-sky-100 max-w-xl leading-relaxed">
-                    Dari tugas studio kampus hingga menjadi technical director, 3D artist, animator studio, and broadcast engineer. Hubungkan portofolio showreel-mu dan dapatkan peluang kerja terbaik.
-                  </p>
-                  <div className="pt-2">
-                    <Link
-                      href="/open-to-work"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-[#0284c7] font-bold text-xs sm:text-sm hover:bg-sky-50 transition shadow-sm"
-                    >
-                      Jelajahi Portofolio Alumni
-                      <ArrowRight className="w-4 h-4 text-[#0284c7]" />
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right Column: 4 Stat Bullets */}
-                <div className="lg:col-span-4 space-y-3.5 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20">
-                  <div className="flex items-center gap-3 text-xs">
-                    <Award className="w-5 h-5 text-sky-200 shrink-0" />
-                    <span>6 Program Studi Spesialisasi Multimedia</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <Video className="w-5 h-5 text-sky-200 shrink-0" />
-                    <span>Galeri Showreel 2-Kolom Terverifikasi</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <Briefcase className="w-5 h-5 text-sky-200 shrink-0" />
-                    <span>Koneksi Langsung ke Pembuka Loker</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <Users className="w-5 h-5 text-sky-200 shrink-0" />
-                    <span>Jejaring Kolaboratif Lulusan Nasional</span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
       {/* BOTTOM CTA: WITH SCROLLREVEAL */}
       <section className="py-16 bg-[#f4f9fd] border-t border-sky-100/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
