@@ -37,30 +37,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-18 sm:h-20">
           
-          {/* Brand Logo - Rounded Modern Badge */}
-          <Link href="/" className="flex items-center gap-3 group focus:outline-none rounded-2xl p-1">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400 to-[#0284c7] p-0.5 flex items-center justify-center shrink-0 shadow-sm shadow-sky-200/50 group-hover:scale-105 transition-transform duration-200">
-              <div className="w-full h-full bg-white rounded-[14px] p-1.5 flex items-center justify-center">
-                <img 
-                  src="/logo_stmm.png" 
-                  alt="STMM MMTC Yogyakarta" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 group-hover:text-[#0284c7] transition">
-                  STMM <span className="text-[#0284c7]">MMTC</span>
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 text-[#0284c7] border border-sky-200/80 hidden sm:inline-block">
-                  AlumniHub
-                </span>
-              </div>
-              <span className="block text-[11px] text-slate-500 font-medium tracking-normal -mt-0.5">
-                Portal Karir &amp; Portofolio Kreatif
-              </span>
-            </div>
+          {/* Brand Logo - Official AlumniHub Graphic */}
+          <Link href="/" className="flex items-center group focus:outline-none py-1 shrink-0">
+            <img 
+              src="/logo_alumnihub.webp" 
+              alt="AlumniHub Sekolah Tinggi Multi Media" 
+              className="h-8 sm:h-9 w-auto object-contain group-hover:opacity-90 transition-opacity"
+            />
           </Link>
 
           {/* Desktop Navigation - Clean Rounded Pill Links */}

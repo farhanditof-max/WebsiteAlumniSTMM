@@ -10,22 +10,15 @@ export default function Footer() {
           
           {/* Brand Info */}
           <div className="space-y-4 md:col-span-2">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs">
-                <img 
-                  src="/logo_stmm.png" 
-                  alt="STMM MMTC Yogyakarta" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div>
-                <span className="font-extrabold text-slate-900 text-base tracking-tight block">
-                  STMM &quot;MMTC&quot; YOGYAKARTA
-                </span>
-                <span className="text-[11px] text-[#0284c7] font-semibold block">
-                  Kementerian Komunikasi dan Digital RI
-                </span>
-              </div>
+            <div className="space-y-2">
+              <img 
+                src="/logo_alumnihub.webp" 
+                alt="AlumniHub Sekolah Tinggi Multi Media" 
+                className="h-10 w-auto object-contain"
+              />
+              <span className="text-[11px] text-[#0284c7] font-semibold block">
+                Kementerian Komunikasi dan Digital RI
+              </span>
             </div>
             <p className="text-xs text-slate-600 max-w-md leading-relaxed">
               Platform karir dan jejaring resmi alumni Sekolah Tinggi Multi Media (MMTC) Yogyakarta. Wadah terpadu kolaborasi profesional industri penyiaran, animasi, game, dan teknologi informasi.

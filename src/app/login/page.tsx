@@ -67,13 +67,11 @@ function LoginContent() {
       <div className="flex-1 flex items-center justify-center p-4 py-12 sm:py-16">
         <div className="w-full max-w-md bg-white border border-slate-200/90 p-8 sm:p-9 rounded-3xl shadow-sm space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 p-2 flex items-center justify-center mx-auto shadow-2xs mb-3">
-              <img 
-                src="/logo_stmm.png" 
-                alt="STMM MMTC" 
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <img 
+              src="/logo_alumnihub.webp" 
+              alt="AlumniHub Sekolah Tinggi Multi Media" 
+              className="h-11 w-auto mx-auto object-contain mb-3"
+            />
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk Portal Alumni</h1>
             <p className="text-xs text-slate-500">
               Gunakan Email atau Nomor Alumni MMTC yang sudah terdaftar
