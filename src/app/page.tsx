@@ -26,15 +26,92 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const getProdiIcon = (id: string) => {
+  const getProdiTheme = (id: string) => {
     switch (id) {
-      case 'Animasi': return <Film className="w-5 h-5 text-indigo-600" />;
-      case 'Game Design': return <Gamepad2 className="w-5 h-5 text-purple-600" />;
-      case 'MIK': return <Terminal className="w-5 h-5 text-sky-600" />;
-      case 'Matekstosi': return <Tv className="w-5 h-5 text-blue-600" />;
-      case 'Manarita': return <Radio className="w-5 h-5 text-amber-600" />;
-      case 'Manaprodsi': return <PlaySquare className="w-5 h-5 text-emerald-600" />;
-      default: return <Building2 className="w-5 h-5 text-slate-700" />;
+      case 'Animasi':
+        return {
+          tag: '3D & VFX',
+          borderHover: 'hover:border-indigo-400',
+          shadowHover: 'hover:shadow-indigo-500/15',
+          accentGradient: 'from-indigo-500 to-violet-500',
+          iconBox: 'bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white',
+          badge: 'text-indigo-700 bg-indigo-50/90 border-indigo-100',
+          titleHover: 'group-hover:text-indigo-600',
+          actionText: 'text-indigo-600',
+          icon: <Film className="w-5 h-5 transition-colors" />
+        };
+      case 'Matekstosi':
+        return {
+          tag: 'Studio Tech',
+          borderHover: 'hover:border-blue-400',
+          shadowHover: 'hover:shadow-blue-500/15',
+          accentGradient: 'from-blue-500 to-sky-500',
+          iconBox: 'bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white',
+          badge: 'text-blue-700 bg-blue-50/90 border-blue-100',
+          titleHover: 'group-hover:text-blue-600',
+          actionText: 'text-blue-600',
+          icon: <Tv className="w-5 h-5 transition-colors" />
+        };
+      case 'Manarita':
+        return {
+          tag: 'Journalism',
+          borderHover: 'hover:border-amber-400',
+          shadowHover: 'hover:shadow-amber-500/15',
+          accentGradient: 'from-amber-500 to-orange-500',
+          iconBox: 'bg-amber-50 group-hover:bg-amber-500 text-amber-600 group-hover:text-white',
+          badge: 'text-amber-700 bg-amber-50/90 border-amber-100',
+          titleHover: 'group-hover:text-amber-600',
+          actionText: 'text-amber-600',
+          icon: <Radio className="w-5 h-5 transition-colors" />
+        };
+      case 'Manaprodsi':
+        return {
+          tag: 'TV & Radio',
+          borderHover: 'hover:border-emerald-400',
+          shadowHover: 'hover:shadow-emerald-500/15',
+          accentGradient: 'from-emerald-500 to-teal-500',
+          iconBox: 'bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white',
+          badge: 'text-emerald-700 bg-emerald-50/90 border-emerald-100',
+          titleHover: 'group-hover:text-emerald-600',
+          actionText: 'text-emerald-600',
+          icon: <PlaySquare className="w-5 h-5 transition-colors" />
+        };
+      case 'MIK':
+        return {
+          tag: 'IT Media',
+          borderHover: 'hover:border-cyan-400',
+          shadowHover: 'hover:shadow-cyan-500/15',
+          accentGradient: 'from-cyan-500 to-blue-500',
+          iconBox: 'bg-cyan-50 group-hover:bg-cyan-600 text-cyan-600 group-hover:text-white',
+          badge: 'text-cyan-700 bg-cyan-50/90 border-cyan-100',
+          titleHover: 'group-hover:text-cyan-600',
+          actionText: 'text-cyan-600',
+          icon: <Terminal className="w-5 h-5 transition-colors" />
+        };
+      case 'Game Design':
+        return {
+          tag: 'Game Dev',
+          borderHover: 'hover:border-purple-400',
+          shadowHover: 'hover:shadow-purple-500/15',
+          accentGradient: 'from-purple-500 to-fuchsia-500',
+          iconBox: 'bg-purple-50 group-hover:bg-purple-600 text-purple-600 group-hover:text-white',
+          badge: 'text-purple-700 bg-purple-50/90 border-purple-100',
+          titleHover: 'group-hover:text-purple-600',
+          actionText: 'text-purple-600',
+          icon: <Gamepad2 className="w-5 h-5 transition-colors" />
+        };
+      default:
+        return {
+          tag: 'Multimedia',
+          borderHover: 'hover:border-sky-400',
+          shadowHover: 'hover:shadow-sky-500/15',
+          accentGradient: 'from-sky-500 to-blue-500',
+          iconBox: 'bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white',
+          badge: 'text-sky-700 bg-sky-50/90 border-sky-100',
+          titleHover: 'group-hover:text-sky-600',
+          actionText: 'text-sky-600',
+          icon: <Building2 className="w-5 h-5 transition-colors" />
+        };
     }
   };
 
@@ -200,33 +277,55 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
 
-          {/* 6 Prodi Cards with Staggered Wave Delays */}
+          {/* 6 Prodi Cards with Thematic Industry Accent & Staggered Wave Delays */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {PRODI_LIST.map((prodi, idx) => (
-              <ScrollReveal 
-                key={prodi.id} 
-                direction="up" 
-                delayMs={idx * 80} 
-                durationMs={600}
-                className="h-full"
-              >
-                <Link
-                  href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
-                  className="bg-white border border-slate-200/80 rounded-3xl p-5 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-100 hover:-translate-y-1 transition-all duration-200 flex flex-col items-center text-center group h-full"
+            {PRODI_LIST.map((prodi, idx) => {
+              const theme = getProdiTheme(prodi.id);
+
+              return (
+                <ScrollReveal 
+                  key={prodi.id} 
+                  direction="up" 
+                  delayMs={idx * 75} 
+                  durationMs={600}
+                  className="h-full"
                 >
-                  {/* Circular Pastel Icon Container */}
-                  <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-sky-100/80 transition-all">
-                    {getProdiIcon(prodi.id)}
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#0284c7] transition mb-1">
-                    {prodi.label}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
-                    {prodi.desc}
-                  </p>
-                </Link>
-              </ScrollReveal>
-            ))}
+                  <Link
+                    href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
+                    className={`group relative bg-white border border-slate-200/90 ${theme.borderHover} rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${theme.shadowHover} flex flex-col justify-between h-full overflow-hidden cursor-pointer`}
+                  >
+                    {/* Top Accent Gradient Bar */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.accentGradient} opacity-90 group-hover:h-1.5 transition-all`} />
+
+                    <div>
+                      {/* Icon & Specialization Pill */}
+                      <div className="flex items-center justify-between mb-3.5">
+                        <div className={`w-11 h-11 rounded-2xl ${theme.iconBox} flex items-center justify-center transition-all duration-300 shadow-2xs group-hover:rotate-6 group-hover:scale-105`}>
+                          {theme.icon}
+                        </div>
+                        <span className={`text-[10px] font-bold ${theme.badge} px-2 py-0.5 rounded-full border shadow-2xs`}>
+                          {theme.tag}
+                        </span>
+                      </div>
+
+                      {/* Title & Description */}
+                      <h3 className={`text-xs sm:text-sm font-bold text-slate-900 ${theme.titleHover} transition-colors mb-1 text-left`}>
+                        {prodi.label}
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] text-slate-500 leading-snug line-clamp-2 text-left">
+                        {prodi.desc}
+                      </p>
+                    </div>
+
+                    {/* Bottom Action Footer with Sliding Arrow */}
+                    <div className={`mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold ${theme.actionText}`}>
+                      <span>Lihat Talenta</span>
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
       </section>
