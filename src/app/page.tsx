@@ -8,7 +8,7 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 import { PRODI_LIST } from '@/types';
 import { 
   ArrowRight, 
-  Search, 
+  Compass,
   Building2, 
   Video, 
   Tv, 
@@ -83,11 +83,11 @@ export default function HomePage() {
                 {/* Action Buttons (Pill Shapes) */}
                 <div className="pt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <Link 
-                    href="/lowongan" 
+                    href="/feed" 
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 transition-all duration-200 active:scale-[0.98]"
                   >
-                    <Search className="w-4 h-4 text-white" />
-                    Jelajahi Lowongan
+                    <Compass className="w-4 h-4 text-white" />
+                    Jelajahi Alumni Hub
                   </Link>
                   <Link 
                     href="/open-to-work" 
