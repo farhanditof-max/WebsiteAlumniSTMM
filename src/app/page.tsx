@@ -174,18 +174,18 @@ export default function HomePage() {
       </section>
 
       {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI — STAGGERED SCROLL REVEAL */}
-      <section className="py-16 sm:py-20 bg-slate-50/70 border-b border-slate-100">
+      <section className="py-20 sm:py-28 bg-slate-50/70 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <ScrollReveal direction="up" delayMs={60} durationMs={650}>
-            <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+            <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
+              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 shadow-2xs mb-4">
                 Program Studi Unggulan
               </span>
-              <h2 className="text-2xl sm:text-4xl font-bold text-slate-900">
+              <h2 className="text-2xl sm:text-4xl lg:text-[42px] font-bold text-slate-900 leading-tight">
                 Klasifikasi Keahlian Khusus MMTC
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500">
+              <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto mt-3.5 leading-relaxed">
                 Filter lowongan dan temukan talenta alumni berdasarkan spesialisasi bidang studi
               </p>
             </div>
