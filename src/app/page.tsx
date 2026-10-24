@@ -119,8 +119,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col selection:bg-[#0284c7] selection:text-white font-sans overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION — AIRY, SKY-BLUE LIGHT AESTHETIC PERSIS REFERENSI */}
-      <section className="relative w-full pt-12 pb-20 sm:pt-16 sm:pb-28 overflow-hidden bg-gradient-to-b from-[#eef8ff] via-[#f7fbff] to-white border-b border-sky-100/60">
+      {/* HERO SECTION — AIRY, SKY-BLUE LIGHT AESTHETIC PERSIS REFERENSI (FULL VIEWPORT FIRST SCREEN) */}
+      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-center py-8 sm:py-12 lg:py-14 overflow-hidden bg-gradient-to-b from-[#eef8ff] via-[#f7fbff] to-white border-b border-sky-100/60">
         
         {/* Soft Organic Floating Pastel Accents */}
         <div className="absolute top-12 left-1/3 w-3 h-3 rounded-full bg-amber-300 opacity-80" />
@@ -225,11 +225,11 @@ export default function HomePage() {
             {/* RIGHT CONTENT: Foto Gedung Kampus STMM MMTC dengan ScrollReveal */}
             <div className="lg:col-span-6 relative flex items-center justify-center w-full">
               <ScrollReveal direction="left" delayMs={140} durationMs={800} className="w-full max-w-xl">
-                <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl shadow-sky-900/10 border-2 border-white/90 group">
+                <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl shadow-sky-900/10 border-2 border-white/90 group max-h-[360px] sm:max-h-[400px] lg:max-h-[440px]">
                   <img 
                     src="/kampus_stmm.jpg" 
                     alt="Gedung Transformasi Digital STMM MMTC Yogyakarta" 
-                    className="w-full h-auto object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
+                    className="w-full h-full max-h-[360px] sm:max-h-[400px] lg:max-h-[440px] object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
                   />
                 </div>
               </ScrollReveal>
