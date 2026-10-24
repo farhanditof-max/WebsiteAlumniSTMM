@@ -120,7 +120,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* HERO SECTION — AIRY, SKY-BLUE LIGHT AESTHETIC PERSIS REFERENSI (FULL VIEWPORT FIRST SCREEN) */}
-      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-center py-8 sm:py-12 lg:py-14 overflow-hidden bg-gradient-to-b from-[#eef8ff] via-[#f7fbff] to-white border-b border-sky-100/60">
+      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-between py-8 sm:py-10 lg:py-12 overflow-hidden bg-gradient-to-b from-[#eef8ff] via-[#f7fbff] to-white border-b border-sky-100/60">
         
         {/* Soft Organic Floating Pastel Accents */}
         <div className="absolute top-12 left-1/3 w-3 h-3 rounded-full bg-amber-300 opacity-80" />
@@ -130,7 +130,7 @@ export default function HomePage() {
         <div className="absolute -top-32 right-0 w-[550px] h-[550px] bg-sky-200/35 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -left-32 w-[450px] h-[450px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
             
             {/* LEFT CONTENT: Heading, Copy, Pill Buttons, Social Proof with ScrollReveal */}
@@ -222,25 +222,123 @@ export default function HomePage() {
               </ScrollReveal>
             </div>
 
-            {/* RIGHT CONTENT: Foto Gedung Kampus STMM MMTC dengan ScrollReveal */}
+            {/* RIGHT CONTENT: Foto Gedung Kampus STMM MMTC dengan 2 Floating Badges */}
             <div className="lg:col-span-6 relative flex items-center justify-center w-full">
               <ScrollReveal direction="left" delayMs={140} durationMs={800} className="w-full max-w-xl">
-                <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl shadow-sky-900/10 border-2 border-white/90 group max-h-[360px] sm:max-h-[400px] lg:max-h-[440px]">
-                  <img 
-                    src="/kampus_stmm.jpg" 
-                    alt="Gedung Transformasi Digital STMM MMTC Yogyakarta" 
-                    className="w-full h-full max-h-[360px] sm:max-h-[400px] lg:max-h-[440px] object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
-                  />
+                <div className="relative w-full">
+                  {/* Floating Glass Badge 1 (Pusat Transformasi Digital) */}
+                  <div className="absolute -top-4 -left-3 sm:-top-5 sm:-left-5 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/90 shadow-xl shadow-sky-950/10 flex items-center gap-3 z-20 animate-fade-in hover:scale-105 transition-transform duration-300">
+                    <div className="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center text-[#0284c7] shrink-0">
+                      <Sparkles className="w-4 h-4 text-[#0284c7]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pusat Siaran &amp; Digital</p>
+                      <p className="text-xs font-bold text-slate-900">Transformasi MMTC</p>
+                    </div>
+                  </div>
+
+                  {/* Foto Gedung */}
+                  <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl shadow-sky-900/10 border-2 border-white/90 group max-h-[360px] sm:max-h-[400px] lg:max-h-[440px]">
+                    <img 
+                      src="/kampus_stmm.jpg" 
+                      alt="Gedung Transformasi Digital STMM MMTC Yogyakarta" 
+                      className="w-full h-full max-h-[360px] sm:max-h-[400px] lg:max-h-[440px] object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                  </div>
+
+                  {/* Floating Glass Badge 2 (Talenta Open to Work) */}
+                  <div className="absolute -bottom-4 -right-3 sm:-bottom-5 sm:-right-5 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/90 shadow-xl shadow-sky-950/10 flex items-center gap-3 z-20 animate-fade-in hover:scale-105 transition-transform duration-300">
+                    <div className="relative flex items-center justify-center">
+                      <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping absolute" />
+                      <span className="w-3 h-3 rounded-full bg-emerald-500 relative" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>40+ Alumni Baru</span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">Aktif</span>
+                      </p>
+                      <p className="text-[10px] font-semibold text-slate-500">Siap Kerja di Industri</p>
+                    </div>
+                  </div>
                 </div>
               </ScrollReveal>
             </div>
 
           </div>
         </div>
+
+        {/* BOTTOM HERO SECTION: STATS BAR & SCROLL CUE */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 space-y-4">
+          {/* Quick Metrics Bar (Frosted Glass Pill) */}
+          <ScrollReveal direction="up" delayMs={180} durationMs={700}>
+            <div className="max-w-4xl mx-auto bg-white/85 backdrop-blur-md border border-sky-100/90 rounded-2xl sm:rounded-full p-2.5 sm:px-6 sm:py-3.5 shadow-lg shadow-sky-500/5 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-sky-100">
+              
+              {/* Metric 1 */}
+              <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
+                <div className="w-9 h-9 rounded-xl bg-sky-100/70 flex items-center justify-center text-[#0284c7] shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">2.500+</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Alumni Terkoneksi</p>
+                </div>
+              </div>
+
+              {/* Metric 2 */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <div className="w-9 h-9 rounded-xl bg-indigo-100/70 flex items-center justify-center text-indigo-600 shrink-0">
+                  <Tv className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">6 Prodi</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Spesialisasi Media</p>
+                </div>
+              </div>
+
+              {/* Metric 3 */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100/70 flex items-center justify-center text-emerald-600 shrink-0">
+                  <Video className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">150+</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Showreel Karya</p>
+                </div>
+              </div>
+
+              {/* Metric 4 */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <div className="w-9 h-9 rounded-xl bg-amber-100/70 flex items-center justify-center text-amber-600 shrink-0">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">94%</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Karir Industri Kreatif</p>
+                </div>
+              </div>
+
+            </div>
+          </ScrollReveal>
+
+          {/* Interactive Scroll Down Cue */}
+          <div className="flex justify-center pt-0.5">
+            <a 
+              href="#prodi-section" 
+              className="inline-flex flex-col items-center gap-1 text-slate-400 hover:text-sky-600 transition-colors group cursor-pointer"
+              title="Scroll untuk melihat Program Studi Unggulan"
+            >
+              <span className="text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Eksplorasi Program Studi</span>
+              <div className="w-4 h-7 sm:w-5 sm:h-8 rounded-full border-2 border-slate-300 group-hover:border-sky-500 flex items-start justify-center p-1 transition-colors">
+                <div className="w-1 h-2 rounded-full bg-slate-400 group-hover:bg-sky-500 animate-bounce" />
+              </div>
+            </a>
+          </div>
+        </div>
+
       </section>
 
       {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI — STAGGERED SCROLL REVEAL */}
-      <section className="py-20 sm:py-28 bg-slate-50/70 border-b border-slate-100">
+      <section id="prodi-section" className="py-20 sm:py-28 bg-slate-50/70 border-b border-slate-100 scroll-mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <ScrollReveal direction="up" delayMs={60} durationMs={650}>
