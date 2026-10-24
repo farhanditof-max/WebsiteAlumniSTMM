@@ -529,7 +529,7 @@ export default function HomePage() {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-6 pt-2 select-none scrollbar-none transition-colors ${
+              className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto py-8 px-1 select-none scrollbar-none transition-colors ${
                 isDragging || isRolling ? 'cursor-grabbing' : 'cursor-grab'
               }`}
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -540,12 +540,12 @@ export default function HomePage() {
                 return (
                   <div
                     key={prodi.loopKey}
-                    className="w-[260px] sm:w-[280px] lg:w-[310px] shrink-0 h-full"
+                    className="w-[260px] sm:w-[280px] lg:w-[310px] shrink-0 h-full py-1"
                   >
                     <Link
                       href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
                       onClick={handleCardClick}
-                      className="group relative block bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer select-none"
+                      className="group relative block bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer select-none"
                       draggable={false}
                     >
                       {/* SVG Card Illustration (High-Definition 1080x1350 Poster) */}
@@ -560,9 +560,9 @@ export default function HomePage() {
                         {/* Subtle Ambient Vignette / Hover Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-                        {/* Interactive Floating Action Arrow Button di Ujung Kanan Atas */}
+                        {/* Interactive Floating Action Arrow Button di Ujung Kanan Bawah */}
                         <div 
-                          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-slate-700 group-hover:bg-[#0284c7] group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-sky-500/30 transition-all duration-300 pointer-events-none"
+                          className="absolute bottom-3.5 right-3.5 sm:bottom-4 sm:right-4 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-slate-700 group-hover:bg-[#0284c7] group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-sky-500/30 transition-all duration-300 pointer-events-none"
                           title={`Jelajahi ${prodi.label}`}
                         >
                           <ArrowUpRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
