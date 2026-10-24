@@ -453,22 +453,20 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <ScrollReveal direction="up" delayMs={60} durationMs={650}>
-            {/* Header with Navigation Arrows */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-12">
-              <div>
-                <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 shadow-2xs mb-3">
-                  PILIHAN PROGRAM STUDI
-                </span>
-                <h2 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-slate-900 leading-tight">
-                  Temukan Talenta Sesuai Bidang Studi
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-2 leading-relaxed">
-                  Geser kartu untuk menemukan talenta alumni dan lowongan berdasarkan spesialisasi bidang studi
-                </p>
-              </div>
+            {/* Header with Navigation Arrows — Centered */}
+            <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 shadow-2xs mb-3">
+                PILIHAN PROGRAM STUDI
+              </span>
+              <h2 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-slate-900 leading-tight">
+                Temukan Talenta Sesuai Bidang Studi
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-2.5 leading-relaxed mx-auto">
+                Geser kartu untuk menemukan talenta alumni dan lowongan berdasarkan spesialisasi bidang studi
+              </p>
 
               {/* Carousel Navigation Buttons */}
-              <div className="flex items-center gap-2 shrink-0 self-start sm:self-end">
+              <div className="flex items-center gap-2.5 mt-6">
                 <button
                   type="button"
                   onClick={() => scrollSlider('left')}
