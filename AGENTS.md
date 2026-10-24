@@ -15,26 +15,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ---
 
-## 🛑 ATURAN MUTLAK: JANGAN SENTUH BACKEND (Strict Guardrails)
+## 🛡️ KEAMANAN & INTEGRITAS SISTEM (Security Governance)
 
-Backend (Firebase Auth, Cloud Firestore, Firebase Storage, dan Security Rules) **SUDAH SELESAI, STABIL, DAN SUDAH DI-AUDIT SECARA KETAT**. 
+Perubahan pada kode autentikasi, backend helpers (`src/lib/*`), Firebase Security Rules (`firestore.rules`, `storage.rules`), dan skema data harus mematuhi **Audit Konsolidasi & Deep-Dive Keamanan** (`d:\Download\audit_konsolidasi_deep_dive_dashboard_alumni_stmm_mmtc.md`).
 
-### ❌ File yang DILARANG DIBUBAH / DIHAPUS:
-1. **`src/lib/*`** (`firebase.ts`, `firestoreRest.ts`, `auth.ts`, `jobs.ts`, `media.ts`)  
-   👉 Dilarang mengubah alur data fetching, login/register logic, REST query, atau endpoint API.
-2. **`firestore.rules` & `storage.rules`**  
-   👉 Dilarang mengedit atau merelaksasi security rules.
-3. **`src/context/AuthContext.tsx`**  
-   👉 Dilarang mengubah state management auth, session tracking, atau fallback logic.
-4. **`src/types/index.ts`**  
-   👉 Dilarang menghapus atau mengubah interface inti (`UserProfile`, `JobPosting`, `JobApplication`). Jika butuh interface untuk prop komponen UI murni, definisikan di file komponen masing-masing atau buat file types UI terpisah.
-5. **`.env*` & `.env.local`**  
-   👉 Jangan pernah membuat perubahan yang mengekspos environment variables ke git.
-
-### ❌ Larangan Teknis & Anti-Pattern:
-- **JANGAN** mengubah nama `field` yang dikirim ke form submit (seperti `nomorAlumni`, `prodi`, `angkatan`, `openToWork`, dll.) karena terhubung langsung ke skema Firestore.
-- **JANGAN** menggunakan manipulasi DOM langsung (`document.getElementById`, `parent.appendChild`, atau event handler imperatif) yang melanggar siklus render React 19.
-- **JANGAN** menginstal library UI raksasa yang tidak perlu. Gunakan **Tailwind CSS v4** dan **Lucide React** yang sudah terpasang.
+### ✅ Ketentuan Perubahan Backend & Keamanan:
+1. **Aturan Hak Akses:** Modifikasi rules/auth/skema wajib melalui branch terpisah (`fix/security-F-xx-...`) dan diverifikasi melalui checklist kompilasi serta tes Rules di Firebase Emulator.
+2. **Prinsip Least Privilege & Validasi Ketat:**
+   - Selalu validasi tipe data dan skema di `firestore.rules` untuk mencegah Stored Client-Side DoS (F-20).
+   - Selalu tempatkan Document ID di akhir object spread (`{ ...doc.data(), id: doc.id }`) untuk mencegah spoofing Document ID (F-21).
+   - Lindungi data pribadi (PII): jangan ekspos nomor kontak, email, atau CV alumni tanpa persetujuan eksplisit (UU PDP).
+3. **Kerahasiaan Lingkungan:** Jangan pernah meng-commit environment credentials (`.env.local`) ke repository publik.
 
 ---
 

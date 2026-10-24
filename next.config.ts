@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Allow local origins for testing and HMR
+  // Allow local origins for testing and HMR (F-27: Wildcards removed)
   allowedDevOrigins: [
-    "*.trycloudflare.com",
-    "*.localtunnel.me",
     "localhost:3000",
     "127.0.0.1:3000"
   ],
@@ -17,6 +15,7 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           {
             key: "Content-Security-Policy",
             value: [
@@ -25,6 +24,10 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
               "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
               "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com"
             ].join("; ")

@@ -46,7 +46,7 @@ export default function HomePage() {
             );
             const snap = await Promise.race([getDocs(qTalent), timeoutPromise]).catch(() => null);
             if (snap && !snap.empty) {
-              const talents = snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile));
+              const talents = snap.docs.map(d => ({ ...d.data(), uid: d.id } as UserProfile));
               setOpenTalents(talents);
             }
           }
@@ -209,7 +209,7 @@ export default function HomePage() {
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex flex-wrap gap-1">
-                      {job.prodiTarget?.slice(0, 2).map((p) => (
+                      {(Array.isArray(job.prodiTarget) ? job.prodiTarget : []).slice(0, 2).map((p) => (
                         <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                           {p}
                         </span>

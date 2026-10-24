@@ -33,15 +33,31 @@ function LowonganContent() {
   const [selectedProdi, setSelectedProdi] = useState<string>(initialProdi || 'ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
-  const [nowTimestamp] = useState(() => Date.now());
+  const [selectedDetailJob, setSelectedDetailJob] = useState<JobPosting | null>(null);
   
   // Apply Modal State
   const [applyingJob, setApplyingJob] = useState<JobPosting | null>(null);
   const [coverNote, setCoverNote] = useState('');
   const [customCvLink, setCustomCvLink] = useState('');
+  const [sharePhone, setSharePhone] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
   const [applyError, setApplyError] = useState('');
+  const [nowTimestamp] = useState(() => Date.now());
+
+  // F-26: Pengecekan deadline yang akurat lintas zona waktu
+  const isJobExpired = (deadlineStr?: string): boolean => {
+    if (!deadlineStr) return false;
+    try {
+      const parts = deadlineStr.split('-').map(Number);
+      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        const d = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+        return d.getTime() < nowTimestamp;
+      }
+    } catch {}
+    const parsed = Date.parse(deadlineStr);
+    return !isNaN(parsed) && new Date(deadlineStr).setHours(23, 59, 59, 999) < nowTimestamp;
+  };
 
   // Sync selectedProdi when URL searchParams changes
   const prodiParam = searchParams.get('prodi');
@@ -95,19 +111,24 @@ function LowonganContent() {
     };
   }, [selectedProdi]);
 
+  // F-20: Validasi runtime type-guarding untuk mencegah Stored Client-Side DoS
   const filteredJobs = jobs.filter((job) => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
+    const judulStr = String(job.judul || '').toLowerCase();
+    const perusahaanStr = String(job.perusahaan || '').toLowerCase();
+    const lokasiStr = String(job.lokasi || '').toLowerCase();
+    const prodiList = Array.isArray(job.prodiTarget) ? job.prodiTarget : [];
     const matchesSearch = 
-      job.judul.toLowerCase().includes(q) ||
-      job.perusahaan.toLowerCase().includes(q) ||
-      job.lokasi.toLowerCase().includes(q) ||
-      job.prodiTarget?.some(p => p.toLowerCase().includes(q));
+      judulStr.includes(q) ||
+      perusahaanStr.includes(q) ||
+      lokasiStr.includes(q) ||
+      prodiList.some(p => String(p || '').toLowerCase().includes(q));
     return matchesSearch;
   });
 
   const handleOpenApplyModal = (job: JobPosting) => {
-    if (job.deadline && !isNaN(Date.parse(job.deadline)) && new Date(job.deadline).setHours(23, 59, 59, 999) < nowTimestamp) {
+    if (isJobExpired(job.deadline)) {
       return;
     }
     setApplyingJob(job);
@@ -115,13 +136,14 @@ function LowonganContent() {
     setApplySuccess(false);
     setCoverNote('');
     setCustomCvLink(profile?.cvExternalLink || '');
+    setSharePhone(false);
   };
 
   const handleApplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !applyingJob) return;
 
-    if (applyingJob.deadline && !isNaN(Date.parse(applyingJob.deadline)) && new Date(applyingJob.deadline).setHours(23, 59, 59, 999) < Date.now()) {
+    if (isJobExpired(applyingJob.deadline)) {
       setApplyError('Batas waktu pendaftaran lowongan ini telah berakhir.');
       return;
     }
@@ -150,7 +172,8 @@ function LowonganContent() {
         applicantName,
         applicantEmail,
         applicantProdi,
-        applicantPhone: profile?.phone,
+        // F-02: Kirim nomor telepon pelamar HANYA jika dicentang secara eksplisit
+        applicantPhone: sharePhone ? profile?.phone : undefined,
         posterUid: applyingJob.postedBy,
         pesan: coverNote.trim(),
         cvUrl: profile?.cvFileUrl,
@@ -261,9 +284,7 @@ function LowonganContent() {
             {filteredJobs.map((job) => {
               const isMyJob = Boolean(user && job.postedBy === user.uid);
               const hasApplied = Boolean(user && appliedJobIds.has(job.id));
-              const isDeadlinePassed = Boolean(
-                job.deadline && !isNaN(Date.parse(job.deadline)) && new Date(job.deadline).setHours(23, 59, 59, 999) < nowTimestamp
-              );
+              const isDeadlinePassed = isJobExpired(job.deadline);
               return (
                 <div 
                   key={job.id} 
@@ -288,7 +309,12 @@ function LowonganContent() {
                             </span>
                           )}
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 leading-snug">{job.judul}</h3>
+                        <h3 
+                          onClick={() => setSelectedDetailJob(job)}
+                          className="text-lg font-bold text-slate-900 leading-snug cursor-pointer hover:text-[#0284c7] transition"
+                        >
+                          {job.judul}
+                        </h3>
                         <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                           <Building2 className="w-3.5 h-3.5 text-slate-400" />
                           {job.perusahaan}
@@ -313,7 +339,7 @@ function LowonganContent() {
                     </p>
 
                     {/* KUALIFIKASI PREVIEW */}
-                    {job.kualifikasi && job.kualifikasi.length > 0 && (
+                    {Array.isArray(job.kualifikasi) && job.kualifikasi.length > 0 && (
                       <div className="space-y-1 pt-1">
                         <p className="text-[11px] font-semibold text-slate-500">Persyaratan:</p>
                         <div className="flex flex-wrap gap-1">
@@ -323,9 +349,13 @@ function LowonganContent() {
                             </span>
                           ))}
                           {job.kualifikasi.length > 2 && (
-                            <span className="text-[10px] text-slate-400 py-0.5 px-1">
-                              +{job.kualifikasi.length - 2} lainnya
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedDetailJob(job)}
+                              className="text-[10px] text-[#0284c7] font-semibold py-0.5 px-1 hover:underline cursor-pointer"
+                            >
+                              +{job.kualifikasi.length - 2} lainnya (Lihat Detail)
+                            </button>
                           )}
                         </div>
                       </div>
@@ -333,7 +363,7 @@ function LowonganContent() {
 
                     {/* PRODI TARGET TAGS */}
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                      {job.prodiTarget?.map((prodi) => (
+                      {(Array.isArray(job.prodiTarget) ? job.prodiTarget : []).map((prodi) => (
                         <span key={prodi} className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium">
                           {prodi}
                         </span>
@@ -346,38 +376,147 @@ function LowonganContent() {
                       Oleh {job.posterName}
                     </span>
                     
-                    {isMyJob ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold">
-                        <UserCheck className="w-3.5 h-3.5" /> Lowongan Anda
-                      </span>
-                    ) : hasApplied ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Sudah Dilamar
-                      </span>
-                    ) : isDeadlinePassed ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold border border-slate-200">
-                        Pendaftaran Ditutup
-                      </span>
-                    ) : user ? (
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleOpenApplyModal(job)}
-                        className="px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5"
+                        type="button"
+                        onClick={() => setSelectedDetailJob(job)}
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition cursor-pointer"
                       >
-                        <Send className="w-3 h-3" />
-                        Lamar Posisi
+                        Detail
                       </button>
-                    ) : (
-                      <Link
-                        href="/login?redirect=/lowongan"
-                        className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium border border-slate-200"
-                      >
-                        Login untuk Melamar
-                      </Link>
-                    )}
+                      {isMyJob ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold">
+                          <UserCheck className="w-3.5 h-3.5" /> Lowongan Anda
+                        </span>
+                      ) : hasApplied ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Sudah Dilamar
+                        </span>
+                      ) : isDeadlinePassed ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-semibold border border-slate-200">
+                          Ditutup
+                        </span>
+                      ) : user ? (
+                        <button
+                          onClick={() => handleOpenApplyModal(job)}
+                          className="px-3.5 py-1.5 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Send className="w-3 h-3" />
+                          Lamar
+                        </button>
+                      ) : (
+                        <Link
+                          href="/login?redirect=/lowongan"
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium border border-slate-200"
+                        >
+                          Masuk
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* JOB DETAIL MODAL (GAP 6.3 & 6.8 FIX) */}
+        {selectedDetailJob && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-6 relative shadow-xl">
+              <button 
+                onClick={() => setSelectedDetailJob(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[#0284c7] text-xs font-semibold">
+                    {selectedDetailJob.tipeKerja}
+                  </span>
+                  {selectedDetailJob.deadline && (
+                    <span className="px-2.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
+                      Batas: {new Date(selectedDetailJob.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900">{selectedDetailJob.judul}</h2>
+                <p className="text-sm text-slate-600 flex items-center gap-1.5 font-medium">
+                  <Building2 className="w-4 h-4 text-slate-400" />
+                  {selectedDetailJob.perusahaan} • <MapPin className="w-4 h-4 text-slate-400" /> {selectedDetailJob.lokasi}
+                </p>
+                {selectedDetailJob.gajiRange && (
+                  <p className="text-base font-bold text-emerald-600 mt-1">
+                    {selectedDetailJob.gajiRange}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Deskripsi Pekerjaan</h3>
+                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+                  {selectedDetailJob.deskripsi}
+                </p>
+              </div>
+
+              {Array.isArray(selectedDetailJob.kualifikasi) && selectedDetailJob.kualifikasi.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Persyaratan & Kualifikasi</h3>
+                  <ul className="space-y-1.5 text-xs text-slate-700">
+                    {selectedDetailJob.kualifikasi.map((k, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-[#0284c7] font-bold">•</span>
+                        <span>{k}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {Array.isArray(selectedDetailJob.prodiTarget) && selectedDetailJob.prodiTarget.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Program Studi Target</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedDetailJob.prodiTarget.map((p) => (
+                      <span key={p} className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs text-slate-400">
+                  Diterbitkan oleh {selectedDetailJob.posterName}
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDetailJob(null)}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                  {user && selectedDetailJob.postedBy !== user.uid && !appliedJobIds.has(selectedDetailJob.id) && !isJobExpired(selectedDetailJob.deadline) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const j = selectedDetailJob;
+                        setSelectedDetailJob(null);
+                        handleOpenApplyModal(j);
+                      }}
+                      className="px-5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+                    >
+                      Lamar Pekerjaan Ini
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -453,6 +592,20 @@ function LowonganContent() {
                       placeholder="Ceritakan sedikit ketertarikanmu pada posisi ini dan pengalaman showreel/portofolio kamu..."
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                     />
+                  </div>
+
+                  {/* F-02 & UU PDP Consent: Izin eksplisit berbagi nomor WhatsApp */}
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 text-xs text-slate-700">
+                    <input
+                      type="checkbox"
+                      id="sharePhoneCheck"
+                      checked={sharePhone}
+                      onChange={(e) => setSharePhone(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded text-[#0284c7] border-slate-300 focus:ring-[#0284c7] cursor-pointer"
+                    />
+                    <label htmlFor="sharePhoneCheck" className="text-[11px] leading-relaxed cursor-pointer select-none">
+                      Bagikan nomor WhatsApp saya (<code>{profile?.phone || 'belum diisi'}</code>) kepada poster lowongan ini untuk keperluan komunikasi lanjutan.
+                    </label>
                   </div>
 
                   <div className="flex items-center justify-end gap-3 pt-2">

@@ -33,23 +33,46 @@ export default function PostLowonganPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Helper smart format angka atau rentang ke Rupiah
+  // F-26: Smart format angka, teks, akronim "jt/juta", atau rentang ke Rupiah tanpa merusak input
   const formatRupiahString = (val: string): string => {
     const trimmed = val.trim();
     if (!trimmed) return '';
+
+    const formatPart = (part: string): string => {
+      const p = part.trim();
+      if (!p) return '';
+
+      // Cek apakah mengandung akronim 'jt' atau 'juta' (mis. '5jt', '7.5 juta')
+      const jtMatch = p.match(/^(\d+(?:[.,]\d+)?)\s*(?:jt|juta)$/i);
+      if (jtMatch) {
+        const num = parseFloat(jtMatch[1].replace(',', '.'));
+        return 'Rp ' + Math.round(num * 1_000_000).toLocaleString('id-ID');
+      }
+
+      // Cek apakah mengandung akronim 'rb' atau 'ribu' (mis. '500rb')
+      const rbMatch = p.match(/^(\d+(?:[.,]\d+)?)\s*(?:rb|ribu)$/i);
+      if (rbMatch) {
+        const num = parseFloat(rbMatch[1].replace(',', '.'));
+        return 'Rp ' + Math.round(num * 1_000).toLocaleString('id-ID');
+      }
+
+      // Jika murni berisi angka / titik / format Rp
+      if (/^[\d.\sRp]+$/i.test(p)) {
+        const cleanNumber = p.replace(/\D/g, '');
+        if (cleanNumber) {
+          return 'Rp ' + parseInt(cleanNumber, 10).toLocaleString('id-ID');
+        }
+      }
+
+      // Jika format teks deskriptif (mis. 'Kompetitif', 'Negotiable'), pertahankan
+      return p;
+    };
+
     if (trimmed.includes('-')) {
       const parts = trimmed.split('-');
-      const formattedParts = parts.map(part => {
-        const digits = part.replace(/\D/g, '');
-        return digits ? 'Rp ' + parseInt(digits, 10).toLocaleString('id-ID') : part.trim();
-      });
-      return formattedParts.join(' - ');
+      return parts.map(formatPart).join(' - ');
     }
-    const cleanNumber = trimmed.replace(/\D/g, '');
-    if (cleanNumber) {
-      return 'Rp ' + parseInt(cleanNumber, 10).toLocaleString('id-ID');
-    }
-    return trimmed;
+    return formatPart(trimmed);
   };
 
   const handleGajiBlur = () => {
@@ -259,6 +282,7 @@ export default function PostLowonganPage() {
               <input
                 type="date"
                 value={deadline}
+                min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setDeadline(e.target.value)}
                 className="w-full sm:w-1/2 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
               />

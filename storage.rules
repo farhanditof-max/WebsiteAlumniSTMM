@@ -2,28 +2,27 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Foto profil alumni: Publik dapat membaca, tetapi HANYA pemilik akun (UID) yang dapat mengunggah/menghapus
+    // Foto profil alumni:
+    // F-23 Fix: Pisahkan delete dari create/update agar request.resource null tidak membatalkan delete
+    // Batasi tipe file hanya jpeg/png/webp (tolak SVG aktif untuk cegah Stored XSS)
     match /avatars/{userId}/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null 
+      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null 
                    && request.auth.uid == userId
                    && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
+                   && request.resource.contentType.matches('image/(jpeg|png|webp)');
     }
 
-    // Dokumen CV: HANYA dapat dibaca, diunggah, dan dihapus oleh pemilik akun (UID) terkait
+    // Dokumen CV:
+    // HANYA dapat dibaca, diunggah, dan dihapus oleh pemilik akun (UID) terkait
     // Mencegah mass PII download (BOLA) dan arbitrary overwrite/deletion
     match /cv_documents/{userId}/{fileName} {
       allow read, delete: if request.auth != null && request.auth.uid == userId;
       allow create, update: if request.auth != null 
                    && request.auth.uid == userId
-                   && request.resource.size < 10 * 1024 * 1024
-                   && (
-                     request.resource.contentType.matches('application/pdf') ||
-                     request.resource.contentType.matches('application/msword') ||
-                     request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
-                     request.resource.contentType.matches('image/.*')
-                   );
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('application/pdf');
     }
 
     // Fallback path datar lama (mencegah penulisan file tak terisolasi)

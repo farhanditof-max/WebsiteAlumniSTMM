@@ -8,12 +8,10 @@ import { useAuth } from '@/context/AuthContext';
 import { 
   getAllAlumniRegistry, 
   addAlumniToRegistry, 
-  deleteAlumniFromRegistry, 
-  seedAlumniRegistry 
+  deleteAlumniFromRegistry,
+  normalizeNomorAlumni
 } from '@/lib/auth';
 import { PRODI_LIST, ProdiType, AlumniRegistryItem } from '@/types';
-import { db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
 import { 
   ShieldCheck, 
   UserPlus, 
@@ -26,11 +24,12 @@ import {
   Database,
   ArrowLeft,
   X,
-  Plus
+  Plus,
+  Lock
 } from 'lucide-react';
 
 export default function AdminAlumniRegistryPage() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile } = useAuth();
   const [alumniList, setAlumniList] = useState<AlumniRegistryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,8 +45,6 @@ export default function AdminAlumniRegistryPage() {
 
   // Status notifications
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [seeding, setSeeding] = useState(false);
-  const [activatingAdmin, setActivatingAdmin] = useState(false);
 
   const fetchRegistry = async () => {
     setLoading(true);
@@ -87,7 +84,7 @@ export default function AdminAlumniRegistryPage() {
 
   const handleNomorChange = (val: string) => {
     setNomorAlumni(val);
-    const clean = val.trim().toUpperCase();
+    const clean = normalizeNomorAlumni(val);
     const parts = clean.split('-');
     if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
       setAngkatan(parts[1]);
@@ -143,50 +140,52 @@ export default function AdminAlumniRegistryPage() {
     }
   };
 
-  const handleSeed = async () => {
-    if (!confirm('Inisialisasi database master dengan 12 data dummy awal STMM MMTC?')) return;
-    setSeeding(true);
-    setStatusMsg(null);
-    try {
-      const count = await seedAlumniRegistry();
-      setStatusMsg({ type: 'success', text: `Berhasil menyimpan ${count} data alumni resmi ke Firestore alumni_registry.` });
-      await fetchRegistry();
-    } catch (err: unknown) {
-      const e = err as Error;
-      setStatusMsg({ type: 'error', text: e.message || 'Gagal melakukan seeding data.' });
-    } finally {
-      setSeeding(false);
-    }
-  };
-
-  const handleActivateSelfAdmin = async () => {
-    if (!user) return;
-    setActivatingAdmin(true);
-    try {
-      await setDoc(doc(db, 'users', user.uid), { role: 'admin' }, { merge: true });
-      await refreshProfile();
-      setStatusMsg({ type: 'success', text: 'Selamat! Akun Anda berhasil diangkat sebagai Administrator Portal STMM MMTC.' });
-    } catch (err: unknown) {
-      const e = err as Error;
-      setStatusMsg({ type: 'error', text: e.message || 'Gagal mengaktifkan role admin.' });
-    } finally {
-      setActivatingAdmin(false);
-    }
-  };
-
   const filteredList = alumniList.filter(item => {
     const matchesProdi = selectedProdi === 'ALL' || item.prodi === selectedProdi;
     const q = searchQuery.toLowerCase().trim();
+    const noAlumniStr = String(item.nomorAlumni || '').toLowerCase();
+    const namaStr = String(item.namaLengkap || '').toLowerCase();
+    const angkatanStr = String(item.angkatan || '');
     const matchesSearch = 
       !q || 
-      item.nomorAlumni.toLowerCase().includes(q) ||
-      item.namaLengkap.toLowerCase().includes(q) ||
-      item.angkatan.includes(q);
+      noAlumniStr.includes(q) ||
+      namaStr.includes(q) ||
+      angkatanStr.includes(q);
     return matchesProdi && matchesSearch;
   });
 
   const registeredCount = alumniList.filter(a => a.isRegistered).length;
   const unclaimedCount = alumniList.length - registeredCount;
+
+  // F-01 Server/Client Access Guard: Cegah akses tidak sah ke data master
+  if (!loading && (!user || profile?.role !== 'admin')) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center mx-auto">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900">Akses Terbatas Administrator</h1>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Halaman Master Data Alumni STMM MMTC hanya dapat diakses oleh akun dengan peran Administrator resmi kampus.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition shadow-xs"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Kembali ke Beranda
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
@@ -219,13 +218,13 @@ export default function AdminAlumniRegistryPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={handleSeed}
-              disabled={seeding}
+              onClick={fetchRegistry}
+              disabled={loading}
               className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold inline-flex items-center gap-1.5 shadow-2xs transition disabled:opacity-50 cursor-pointer"
-              title="Masukkan 12 data dummy ke Firestore jika koleksi masih kosong"
+              title="Segarkan data dari database Firestore"
             >
-              {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5 text-purple-600" />}
-              Seed 12 Data Awal
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 text-slate-500" />}
+              Segarkan Data
             </button>
             <button
               type="button"
@@ -237,28 +236,6 @@ export default function AdminAlumniRegistryPage() {
             </button>
           </div>
         </div>
-
-        {/* ADMIN ROLE STATUS NOTICE */}
-        {user && profile?.role !== 'admin' && (
-          <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-              <div>
-                <p className="font-semibold">Akun Anda saat ini belum berstatus Administrator.</p>
-                <p className="text-amber-700 text-[11px]">Sebagai pengembang atau pemilik sistem, Anda dapat mengaktifkan status admin akun Anda secara instan.</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleActivateSelfAdmin}
-              disabled={activatingAdmin}
-              className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition inline-flex items-center gap-1.5 shadow-2xs cursor-pointer shrink-0"
-            >
-              {activatingAdmin ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-              Aktifkan Role Admin Akun Ini
-            </button>
-          </div>
-        )}
 
         {/* STATUS MESSAGES */}
         {statusMsg && (

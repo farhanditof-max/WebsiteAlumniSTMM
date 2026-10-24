@@ -70,3 +70,32 @@ export function ensureAbsoluteUrl(url: string): string {
   }
   return `https://${trimmed}`;
 }
+
+/**
+ * Validates and sanitizes HTTP/HTTPS URLs (F-07).
+ * Prevents javascript:, data:, and vbscript: XSS injection vectors.
+ */
+export function safeHttpUrl(url: string | null | undefined, allowedHosts?: string[]): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  try {
+    const fullUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') 
+      ? trimmed 
+      : `https://${trimmed}`;
+    const parsed = new URL(fullUrl);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return null;
+    }
+    if (allowedHosts && allowedHosts.length > 0) {
+      const isAllowed = allowedHosts.some(host => 
+        parsed.hostname === host || parsed.hostname.endsWith(`.${host}`)
+      );
+      if (!isAllowed) return null;
+    }
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+

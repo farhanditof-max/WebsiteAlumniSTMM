@@ -34,12 +34,14 @@ function parseFirestoreValue(val: unknown): unknown {
 
 export function parseFirestoreDoc<T = Record<string, unknown>>(doc: { name?: string; fields?: Record<string, unknown> } | null): T | null {
   if (!doc) return null;
-  const id = doc.name ? doc.name.split('/').pop() : '';
-  const data: Record<string, unknown> = { id };
   const fields = doc.fields || {};
+  const data: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(fields)) {
     data[key] = parseFirestoreValue(val);
   }
+  // F-21 Fix: True Firestore Document ID always wins over any internal body field
+  const id = doc.name ? doc.name.split('/').pop() : '';
+  data.id = id;
   return data as unknown as T;
 }
 
@@ -82,9 +84,11 @@ export async function fetchOpenToWorkRest(): Promise<UserProfile[]> {
 
     return docs.map(d => {
       const parsed = parseFirestoreDoc<Record<string, unknown>>(d) || {};
+      const realId = (d.name ? d.name.split('/').pop() : '') || (parsed.id as string);
       return {
-        uid: (parsed.id as string) || (d.name ? d.name.split('/').pop() : ''),
-        ...parsed
+        ...parsed,
+        uid: realId,
+        id: realId
       } as unknown as UserProfile;
     });
   } catch (err) {
@@ -125,9 +129,11 @@ export async function fetchUserProfileRest(uid: string): Promise<UserProfile | n
     const json = await res.json() as { name: string; fields?: Record<string, unknown> };
     const parsed = parseFirestoreDoc<Record<string, unknown>>(json);
     if (!parsed) return null;
+    const realId = json.name ? json.name.split('/').pop() || uid : uid;
     return {
-      uid: json.name.split('/').pop() || uid,
-      ...parsed
+      ...parsed,
+      uid: realId,
+      id: realId
     } as unknown as UserProfile;
   } catch (err) {
     console.error('Error in fetchUserProfileRest:', err);
@@ -140,7 +146,7 @@ export async function fetchUserProfileRest(uid: string): Promise<UserProfile | n
  * daripada mengunduh seluruh isi database users ke memori client.
  */
 export async function fetchUserByNomorAlumniRest(nomorAlumni: string): Promise<UserProfile | null> {
-  const clean = nomorAlumni.trim().toUpperCase();
+  const clean = nomorAlumni.trim().replace(/\s+/g, '').replace(/[/._]/g, '-').toUpperCase();
   const docs = await runFirestoreQuery({
     structuredQuery: {
       from: [{ collectionId: 'users' }],
@@ -159,9 +165,11 @@ export async function fetchUserByNomorAlumniRest(nomorAlumni: string): Promise<U
   const doc = docs[0];
   const parsed = parseFirestoreDoc<Record<string, unknown>>(doc);
   if (!parsed) return null;
+  const realId = doc.name ? doc.name.split('/').pop() || '' : '';
   return {
-    uid: (parsed.id as string) || (doc.name ? doc.name.split('/').pop() : ''),
-    ...parsed
+    ...parsed,
+    uid: realId,
+    id: realId
   } as unknown as UserProfile;
 }
 

@@ -55,7 +55,7 @@ export default function OpenToWorkPage() {
         );
         const snap = await Promise.race([fetchPromise, timeoutPromise]);
         if (isMounted) {
-          const list = snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile));
+          const list = snap.docs.map(d => ({ ...d.data(), uid: d.id } as UserProfile));
           setAlumniList(list);
         }
       } catch (err) {
@@ -75,13 +75,19 @@ export default function OpenToWorkPage() {
   const filteredAlumni = alumniList.filter((a) => {
     const matchesProdi = selectedProdi === 'ALL' || a.prodi === selectedProdi;
     const q = searchQuery.toLowerCase().trim();
+    const namaStr = String(a.namaLengkap || '').toLowerCase();
+    const bioStr = String(a.bio || '').toLowerCase();
+    const prodiStr = String(a.prodi || '').toLowerCase();
+    const nomorStr = user ? String(a.nomorAlumni || '').toLowerCase() : '';
+    const angkatanStr = String(a.angkatan || '').toLowerCase();
+
     const matchesSearch = 
       !q ||
-      a.namaLengkap?.toLowerCase().includes(q) ||
-      a.bio?.toLowerCase().includes(q) ||
-      a.prodi?.toLowerCase().includes(q) ||
-      (user ? a.nomorAlumni?.toLowerCase().includes(q) : false) ||
-      a.angkatan?.toLowerCase().includes(q);
+      namaStr.includes(q) ||
+      bioStr.includes(q) ||
+      prodiStr.includes(q) ||
+      (user && nomorStr.includes(q)) ||
+      angkatanStr.includes(q);
     return matchesProdi && matchesSearch;
   });
 

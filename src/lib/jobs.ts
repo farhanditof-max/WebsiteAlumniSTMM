@@ -3,6 +3,7 @@ import {
   addDoc, 
   getDocs, 
   doc, 
+  setDoc,
   query, 
   where, 
   orderBy, 
@@ -54,7 +55,7 @@ export async function getJobs(filterProdi?: ProdiType): Promise<JobPosting[]> {
       }
     }
 
-    let jobs = snap.docs.map(d => ({ id: d.id, ...d.data() } as JobPosting));
+    let jobs = snap.docs.map(d => ({ ...d.data(), id: d.id } as JobPosting));
 
     // Ensure strict chronological sort even if fallback plain query was used
     jobs.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
@@ -84,28 +85,12 @@ export async function createJob(jobData: Omit<JobPosting, 'id' | 'createdAt' | '
 
   const docPromise = addDoc(collection(db, 'jobs'), newJob);
   const docRef = await withTimeout(docPromise, 7000, 'Koneksi timeout saat mempublikasikan lowongan');
-  return { id: docRef.id, ...newJob } as unknown as JobPosting;
+  return { ...newJob, id: docRef.id } as unknown as JobPosting;
 }
 
-// Kirim lamaran kerja
+// Kirim lamaran kerja (F-06: Menggunakan Deterministic ID jobId_applicantUid untuk mencegah duplikasi & race condition)
 export async function applyJob(applicationData: Omit<JobApplication, 'id' | 'appliedAt' | 'status'>): Promise<JobApplication> {
-  // Cek apakah pelamar sudah pernah mendaftar posisi ini
-  try {
-    const qCheck = query(
-      collection(db, 'applications'),
-      where('jobId', '==', applicationData.jobId),
-      where('applicantUid', '==', applicationData.applicantUid)
-    );
-    const existingSnap = await withTimeout(getDocs(qCheck), 3000, 'Check duplicate timeout');
-    if (!existingSnap.empty) {
-      throw new Error('Anda sudah pernah mengirimkan lamaran untuk lowongan ini. Silakan pantau status di menu Lamaran Saya.');
-    }
-  } catch (checkErr: unknown) {
-    if (checkErr instanceof Error && checkErr.message.includes('sudah pernah')) {
-      throw checkErr;
-    }
-    // Jika timeout check, lanjutkan pengiriman secara non-blocking
-  }
+  const deterministicId = `${applicationData.jobId}_${applicationData.applicantUid}`;
 
   const rawApp: Record<string, unknown> = {
     ...applicationData,
@@ -117,9 +102,9 @@ export async function applyJob(applicationData: Omit<JobApplication, 'id' | 'app
     Object.entries(rawApp).filter(([, v]) => v !== undefined)
   );
 
-  const docPromise = addDoc(collection(db, 'applications'), newApp);
-  const docRef = await withTimeout(docPromise, 7000, 'Koneksi timeout saat mengirim lamaran');
-  return { id: docRef.id, ...newApp } as unknown as JobApplication;
+  const docRef = doc(db, 'applications', deterministicId);
+  await withTimeout(setDoc(docRef, newApp), 7000, 'Koneksi timeout saat mengirim lamaran');
+  return { ...newApp, id: deterministicId } as unknown as JobApplication;
 }
 
 // Ambil lamaran yang masuk untuk lowongan user
@@ -127,7 +112,7 @@ export async function getReceivedApplications(posterUid: string): Promise<JobApp
   try {
     const q = query(collection(db, 'applications'), where('posterUid', '==', posterUid));
     const snap = await withTimeout(getDocs(q), 5000, 'Received applications timeout');
-    const apps = snap.docs.map(d => ({ id: d.id, ...d.data() } as JobApplication));
+    const apps = snap.docs.map(d => ({ ...d.data(), id: d.id } as JobApplication));
     apps.sort((a, b) => (b.appliedAt || '').localeCompare(a.appliedAt || ''));
     return apps;
   } catch (err) {
@@ -141,7 +126,7 @@ export async function getMyApplications(applicantUid: string): Promise<JobApplic
   try {
     const q = query(collection(db, 'applications'), where('applicantUid', '==', applicantUid));
     const snap = await withTimeout(getDocs(q), 5000, 'My applications timeout');
-    const apps = snap.docs.map(d => ({ id: d.id, ...d.data() } as JobApplication));
+    const apps = snap.docs.map(d => ({ ...d.data(), id: d.id } as JobApplication));
     apps.sort((a, b) => (b.appliedAt || '').localeCompare(a.appliedAt || ''));
     return apps;
   } catch (err) {

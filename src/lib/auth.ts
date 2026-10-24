@@ -33,43 +33,32 @@ export const VERIFIED_ALUMNI_LIST = [
   { nomorAlumni: 'MMTC-2024-055', nama: 'Salsabila Rahma', prodi: 'Manaprodsi' },
 ];
 
-/**
- * Mencari data master alumni di Firestore (koleksi alumni_registry) dengan fallback whitelist.
- */
-export async function getAlumniRegistryRecord(nomor: string): Promise<AlumniRegistryItem | null> {
-  const cleanNomor = nomor
+// Normalisasi format Nomor Alumni secara tunggal dan seragam di seluruh aplikasi (F-24)
+export function normalizeNomorAlumni(input: string): string {
+  if (!input) return '';
+  return input
     .trim()
     .replace(/\s+/g, '')
     .replace(/[/._]/g, '-')
     .toUpperCase();
+}
 
+/**
+ * Mencari data master alumni di Firestore (koleksi alumni_registry).
+ */
+export async function getAlumniRegistryRecord(nomor: string): Promise<AlumniRegistryItem | null> {
+  const cleanNomor = normalizeNomorAlumni(nomor);
   if (!cleanNomor) return null;
 
-  // 1. Coba lookup langsung di Firestore koleksi alumni_registry (O(1) Document Read)
+  // Lookup langsung di Firestore koleksi alumni_registry (O(1) Document Read)
   try {
     const docRef = doc(db, 'alumni_registry', cleanNomor);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
-      return snap.data() as AlumniRegistryItem;
+      return { ...snap.data(), nomorAlumni: snap.id } as AlumniRegistryItem;
     }
   } catch (err) {
     console.warn('Error reading alumni_registry from Firestore:', err);
-  }
-
-  // 2. Fallback: jika koleksi di Firestore belum di-seed, gunakan daftar bawaan
-  const fallback = VERIFIED_ALUMNI_LIST.find(
-    (a) => a.nomorAlumni.toUpperCase() === cleanNomor
-  );
-  if (fallback) {
-    const parts = fallback.nomorAlumni.split('-');
-    const angkatan = parts.length >= 2 ? parts[1] : '2020';
-    return {
-      nomorAlumni: fallback.nomorAlumni,
-      namaLengkap: fallback.nama,
-      prodi: fallback.prodi as ProdiType,
-      angkatan,
-      isRegistered: fallback.status === 'terdaftar'
-    };
   }
 
   return null;
@@ -87,12 +76,7 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
   isRegistered?: boolean;
   nameMismatch?: boolean;
 } | null> {
-  const cleanNomor = nomor
-    .trim()
-    .replace(/\s+/g, '')
-    .replace(/[/._]/g, '-')
-    .toUpperCase();
-
+  const cleanNomor = normalizeNomorAlumni(nomor);
   if (!cleanNomor) return null;
 
   const record = await getAlumniRegistryRecord(cleanNomor);
@@ -104,7 +88,7 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
   // Jika nama lengkap diberikan (saat registrasi), verifikasi kecocokan nama resmi!
   if (namaLengkap !== undefined && namaLengkap !== null && namaLengkap.trim() !== '') {
     const normInput = namaLengkap.trim().toLowerCase().replace(/\s+/g, ' ');
-    const normOfficial = record.namaLengkap.trim().toLowerCase().replace(/\s+/g, ' ');
+    const normOfficial = String(record.namaLengkap || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
     if (normInput !== normOfficial) {
       return {
@@ -254,14 +238,18 @@ export async function registerAlumni(params: {
 
   const uid = userCredential.user.uid;
 
+  // F-24 & F-04: Ambil prodi & angkatan resmi dari database master alumni_registry
+  const officialProdi = verified.prodi || params.prodi;
+  const officialAngkatan = verified.angkatan || params.angkatan.trim();
+
   const profileData: UserProfile = {
     uid,
     email: cleanEmail,
     nomorAlumni: cleanNomor,
-    namaLengkap: params.namaLengkap.trim(),
-    prodi: params.prodi,
-    angkatan: params.angkatan.trim(),
-    openToWork: true,
+    namaLengkap: verified.nama || params.namaLengkap.trim(),
+    prodi: officialProdi,
+    angkatan: officialAngkatan,
+    openToWork: false, // F-25: Default mati untuk melindungi privasi alumni baru
     portfolio: [],
     createdAt: new Date().toISOString()
   };
@@ -291,14 +279,11 @@ export async function registerAlumni(params: {
     throw new Error(`Pendaftaran tidak berhasil: ${errMsg}. Akun dibatalkan untuk menghindari akun tanpa data profil, silakan coba mendaftar kembali.`);
   }
 
-  // Tandai di database alumni_registry bahwa nomor ini sudah berhasil diklaim
+  // F-24: Tandai di database alumni_registry bahwa nomor ini sudah diklaim
+  // PENTING: DILARANG menimpa namaLengkap, prodi, atau angkatan di alumni_registry dengan input form!
   try {
     const regRef = doc(db, 'alumni_registry', cleanNomor);
     await setDoc(regRef, {
-      nomorAlumni: cleanNomor,
-      namaLengkap: params.namaLengkap.trim(),
-      prodi: params.prodi,
-      angkatan: params.angkatan.trim(),
       isRegistered: true,
       registeredUid: uid,
       registeredAt: new Date().toISOString()
@@ -393,32 +378,33 @@ export async function loginAlumni(identifier: string, password: string): Promise
 
 /**
  * Mengambil semua data master alumni dari Firestore untuk Admin Panel.
+ * F-20 & F-21: Type-guarded dan ID terisolasi.
  */
 export async function getAllAlumniRegistry(): Promise<AlumniRegistryItem[]> {
   try {
     const q = query(collection(db, 'alumni_registry'));
     const snap = await getDocs(q);
     if (!snap.empty) {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as AlumniRegistryItem));
-      items.sort((a, b) => a.nomorAlumni.localeCompare(b.nomorAlumni));
+      const items = snap.docs.map(d => {
+        const raw = d.data();
+        return {
+          ...raw,
+          id: d.id,
+          nomorAlumni: String(raw.nomorAlumni || d.id),
+          namaLengkap: String(raw.namaLengkap || ''),
+          prodi: (raw.prodi as ProdiType) || 'Animasi',
+          angkatan: String(raw.angkatan || ''),
+          isRegistered: Boolean(raw.isRegistered)
+        } as AlumniRegistryItem;
+      });
+      items.sort((a, b) => String(a.nomorAlumni || '').localeCompare(String(b.nomorAlumni || '')));
       return items;
     }
+    return [];
   } catch (err) {
     console.warn('getAllAlumniRegistry Firestore error:', err);
+    return [];
   }
-
-  // Fallback ke daftar bawaan jika belum di-seed
-  return VERIFIED_ALUMNI_LIST.map(a => {
-    const parts = a.nomorAlumni.split('-');
-    return {
-      id: a.nomorAlumni,
-      nomorAlumni: a.nomorAlumni,
-      namaLengkap: a.nama,
-      prodi: a.prodi as ProdiType,
-      angkatan: parts[1] || '2020',
-      isRegistered: a.status === 'terdaftar'
-    };
-  });
 }
 
 /**
@@ -430,11 +416,7 @@ export async function addAlumniToRegistry(data: {
   prodi: ProdiType;
   angkatan: string;
 }): Promise<void> {
-  const cleanNomor = data.nomorAlumni
-    .trim()
-    .replace(/\s+/g, '')
-    .replace(/[/._]/g, '-')
-    .toUpperCase();
+  const cleanNomor = normalizeNomorAlumni(data.nomorAlumni);
 
   const regRef = doc(db, 'alumni_registry', cleanNomor);
   await setDoc(regRef, {
@@ -451,7 +433,7 @@ export async function addAlumniToRegistry(data: {
  * Menghapus data alumni dari database master oleh Admin.
  */
 export async function deleteAlumniFromRegistry(nomorAlumni: string): Promise<void> {
-  const cleanNomor = nomorAlumni.trim().toUpperCase();
+  const cleanNomor = normalizeNomorAlumni(nomorAlumni);
   await deleteDoc(doc(db, 'alumni_registry', cleanNomor));
 }
 

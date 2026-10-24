@@ -16,7 +16,7 @@ export default function Footer() {
             </div>
             <div>
               <span className="font-bold text-slate-900 text-base tracking-tight block">STMM &quot;MMTC&quot; YOGYAKARTA</span>
-              <span className="text-[11px] text-[#0284c7] font-semibold block">Kementerian Komunikasi dan Informatika RI</span>
+              <span className="text-[11px] text-[#0284c7] font-semibold block">Kementerian Komunikasi dan Digital RI</span>
             </div>
           </div>
           <p className="text-xs text-slate-500 max-w-md leading-relaxed">
@@ -43,7 +43,6 @@ export default function Footer() {
             <li><Link href="/open-to-work" className="hover:text-[#0284c7] transition">Alumni Open to Work</Link></li>
             <li><Link href="/post-lowongan" className="hover:text-[#0284c7] transition">Pasang Loker Alumni</Link></li>
             <li><Link href="/profil" className="hover:text-[#0284c7] transition">Portofolio Showreel</Link></li>
-            <li><Link href="/admin/alumni" className="text-slate-400 hover:text-purple-600 transition">Admin Portal (Master Alumni)</Link></li>
           </ul>
         </div>
       </div>
@@ -51,7 +50,7 @@ export default function Footer() {
       <div className="w-full px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400">
         <p>© 2026 Ikatan Alumni STMM MMTC Yogyakarta. Hak Cipta Dilindungi.</p>
         <p className="flex items-center gap-1 mt-2 md:mt-0">
-          Kementerian Komunikasi dan Informatika Republik Indonesia
+          Kementerian Komunikasi dan Digital Republik Indonesia
         </p>
       </div>
     </footer>

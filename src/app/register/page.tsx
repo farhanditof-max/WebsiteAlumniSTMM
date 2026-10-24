@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { registerAlumni, VERIFIED_ALUMNI_LIST, getRegisteredNomorAlumni, verifyNomorAlumni } from '@/lib/auth';
+import { registerAlumni, normalizeNomorAlumni } from '@/lib/auth';
 import { PRODI_LIST, ProdiType } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -23,25 +23,14 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [registeredNumbers, setRegisteredNumbers] = useState<string[]>(['MMTC-2018-001']);
 
-  useEffect(() => {
-    async function loadRegisteredNumbers() {
-      const list = await getRegisteredNomorAlumni();
-      setRegisteredNumbers(list);
-    }
-    loadRegisteredNumbers();
-  }, []);
-
-  // Auto-fill jika user memilih nomor alumni dari whitelist atau mengetik nomor valid
-  const handleNomorAlumniChange = async (value: string) => {
+  // F-04 & F-24: Hindari oracle enumerasi dan kebocoran nama resmi sebelum verifikasi form
+  const handleNomorAlumniChange = (value: string) => {
     setNomorAlumni(value);
-    const clean = value.trim().replace(/[/._]/g, '-').toUpperCase();
-    const verified = await verifyNomorAlumni(clean);
-    if (verified && !verified.nameMismatch) {
-      if (verified.nama) setNamaLengkap(verified.nama);
-      if (verified.prodi) setProdi(verified.prodi as ProdiType);
-      if (verified.angkatan) setAngkatan(verified.angkatan);
+    const clean = normalizeNomorAlumni(value);
+    const parts = clean.split('-');
+    if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
+      setAngkatan(parts[1]);
     }
   };
 
@@ -49,6 +38,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
+
+    if (user) {
+      setError('Anda saat ini sudah dalam keadaan masuk. Silakan keluar akun terlebih dahulu sebelum membuat akun baru.');
+      return;
+    }
 
     if (!email.trim() || !password || !nomorAlumni.trim() || !namaLengkap.trim()) {
       setError('Mohon lengkapi semua kolom yang wajib diisi.');
@@ -119,41 +113,14 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* HINT MVP NOMOR ALUMNI */}
+          {/* INFO VERIFIKASI RESMI (F-04: Tombol dummy dihilangkan untuk mencegah identity squatting) */}
           <div className="mb-5 p-3.5 rounded-xl bg-sky-50 border border-sky-100 text-xs text-[#0284c7]">
-            <div className="flex items-center gap-1.5 font-semibold mb-1.5">
+            <div className="flex items-center gap-1.5 font-semibold mb-1">
               <Info className="w-4 h-4 text-[#0284c7] shrink-0" />
-              <span>Pilih / Klik Nomor Alumni Terverifikasi (Database MVP):</span>
+              <span>Verifikasi Identitas Terdaftar STMM MMTC</span>
             </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {VERIFIED_ALUMNI_LIST.map((item) => {
-                const cleanItemNo = item.nomorAlumni.toUpperCase();
-                const isSelected = nomorAlumni.toUpperCase() === cleanItemNo;
-                const isTaken = item.status === 'terdaftar' || registeredNumbers.includes(cleanItemNo);
-                return (
-                  <button
-                    type="button"
-                    key={item.nomorAlumni}
-                    disabled={isTaken}
-                    onClick={() => handleNomorAlumniChange(item.nomorAlumni)}
-                    className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition flex items-center gap-1 ${
-                      isSelected
-                        ? 'bg-[#0284c7] text-white border-[#0284c7] font-bold shadow-xs'
-                        : isTaken
-                        ? 'bg-slate-100 text-slate-400 border-slate-200 line-through cursor-not-allowed opacity-60'
-                        : 'bg-white hover:bg-sky-100/70 border-sky-200 text-sky-900'
-                    }`}
-                    title={isTaken ? `${item.nomorAlumni} (${item.nama}) - Sudah terdaftar` : `Gunakan ${item.nomorAlumni}`}
-                  >
-                    <span>{item.nomorAlumni}</span>
-                    <span className="text-[10px] opacity-80">({item.nama})</span>
-                    {isTaken && <span className="text-[9px] bg-red-100 text-red-600 px-1 rounded no-underline">Terpakai</span>}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-[10px] text-slate-500 mt-2">
-              * <strong>Catatan Keamanan:</strong> Nomor Alumni dan Nama Lengkap wajib sesuai dengan data akademik terdaftar di basis data resmi STMM MMTC untuk mencegah pendaftaran akun tidak sah.
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              Masukkan <strong>Nomor Alumni</strong> resmi Anda (format: <code>MMTC-YYYY-XXX</code>) dan <strong>Nama Lengkap</strong> sesuai data kelulusan akademik. Sistem mencocokkan keabsahan data saat form dikirimkan.
             </p>
           </div>
 

@@ -144,8 +144,8 @@ export default function ProfilPage() {
     setMsg({ type: '', text: '' });
 
     try {
-      const fileName = `${Date.now()}_${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      const storageRef = ref(storage, `cv_documents/${user.uid}/${fileName}`);
+      // F-23: Satu file tetap cv.pdf per pengguna untuk mencegah storage flooding & sinkron dengan storage.rules
+      const storageRef = ref(storage, `cv_documents/${user.uid}/cv.pdf`);
       await withTimeout(uploadBytes(storageRef, cvFile), 15000, 'Koneksi timeout saat upload file CV');
       const downloadUrl = await getDownloadURL(storageRef);
 
@@ -180,8 +180,10 @@ export default function ProfilPage() {
     setMsg({ type: '', text: '' });
 
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const storageRef = ref(storage, `avatars/${user.uid}/${Date.now()}.${ext}`);
+      // F-23: Ekstensi divalidasi dan nama file tetap avatar.* per pengguna
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const safeExt = ['jpg', 'jpeg', 'png', 'webp'].includes(rawExt) ? rawExt : 'jpg';
+      const storageRef = ref(storage, `avatars/${user.uid}/avatar.${safeExt}`);
       await withTimeout(uploadBytes(storageRef, file), 15000, 'Koneksi timeout saat upload foto profil');
       const downloadUrl = await getDownloadURL(storageRef);
 
