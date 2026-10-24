@@ -39,13 +39,18 @@ const InstagramIcon = ({ className = "w-4 h-4 text-pink-600" }: { className?: st
   </svg>
 );
 
+export interface CustomLinkItem {
+  id: string;
+  title: string;
+  url: string;
+}
+
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
   pekerjaan?: string;
   domisili?: string;
   instagramUrl?: string;
-  youtubeUrl?: string;
-  websiteUrl?: string;
+  customLinks?: CustomLinkItem[];
 }
 
 export default function PublicProfilePage({ params }: { params: Promise<{ uid: string }> }) {
@@ -426,33 +431,19 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
                   </div>
                 )}
 
-                {(profile as ExtendedUserProfile).youtubeUrl && (
-                  <div className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
-                    <Video className="w-4 h-4 text-red-600 shrink-0" />
+                {(profile as ExtendedUserProfile).customLinks?.map((link) => (
+                  <div key={link.id} className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <ExternalLink className="w-4 h-4 text-sky-600 shrink-0" />
                     <a 
-                      href={(profile as ExtendedUserProfile).youtubeUrl!.startsWith('http') ? (profile as ExtendedUserProfile).youtubeUrl : `https://${(profile as ExtendedUserProfile).youtubeUrl}`} 
+                      href={link.url.startsWith('http') ? link.url : `https://${link.url}`} 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="hover:text-red-600 hover:underline truncate font-medium"
+                      className="hover:text-[#0284c7] hover:underline truncate font-medium flex-1"
                     >
-                      Kanal YouTube / Showreel
+                      {link.title || 'Tautan Eksternal'}
                     </a>
                   </div>
-                )}
-
-                {(profile as ExtendedUserProfile).websiteUrl && (
-                  <div className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
-                    <ExternalLink className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <a 
-                      href={(profile as ExtendedUserProfile).websiteUrl!.startsWith('http') ? (profile as ExtendedUserProfile).websiteUrl : `https://${(profile as ExtendedUserProfile).websiteUrl}`} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className="hover:text-indigo-600 hover:underline truncate font-medium"
-                    >
-                      Portofolio / Web Eksternal
-                    </a>
-                  </div>
-                )}
+                ))}
               </div>
             </div>
           </div>

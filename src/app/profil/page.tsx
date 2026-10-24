@@ -44,12 +44,17 @@ const InstagramIcon = ({ className = "w-3.5 h-3.5 text-pink-600" }: { className?
   </svg>
 );
 
+export interface CustomLinkItem {
+  id: string;
+  title: string;
+  url: string;
+}
+
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
   domisili?: string;
   instagramUrl?: string;
-  youtubeUrl?: string;
-  websiteUrl?: string;
+  customLinks?: CustomLinkItem[];
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
@@ -75,8 +80,18 @@ const DEMO_PROFILE = {
   phone: '081234567890',
   linkedinUrl: 'https://linkedin.com/in/budi-santoso-mmtc',
   instagramUrl: 'https://instagram.com/budisantoso.art',
-  youtubeUrl: 'https://youtube.com/@budisantosoanim',
-  websiteUrl: 'https://behance.net/budisantoso',
+  customLinks: [
+    {
+      id: 'demo-link-1',
+      title: 'Channel YouTube / Vimeo Showreel',
+      url: 'https://youtube.com/@budisantosoanim'
+    },
+    {
+      id: 'demo-link-2',
+      title: 'Website / Behance / ArtStation',
+      url: 'https://behance.net/budisantoso'
+    }
+  ],
   cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',
   cvFileUrl: '',
   portfolio: [
@@ -111,9 +126,29 @@ export default function ProfilPage() {
   const [phone, setPhone] = useState(currentProfile?.phone ?? DEMO_PROFILE.phone);
   const [linkedinUrl, setLinkedinUrl] = useState(currentProfile?.linkedinUrl ?? DEMO_PROFILE.linkedinUrl);
   const [instagramUrl, setInstagramUrl] = useState((currentProfile as ExtendedUserProfile | null)?.instagramUrl ?? DEMO_PROFILE.instagramUrl);
-  const [youtubeUrl, setYoutubeUrl] = useState((currentProfile as ExtendedUserProfile | null)?.youtubeUrl ?? DEMO_PROFILE.youtubeUrl);
-  const [websiteUrl, setWebsiteUrl] = useState((currentProfile as ExtendedUserProfile | null)?.websiteUrl ?? DEMO_PROFILE.websiteUrl);
+  const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>(
+    (currentProfile as ExtendedUserProfile | null)?.customLinks ?? DEMO_PROFILE.customLinks
+  );
   const [cvExternalLink, setCvExternalLink] = useState(currentProfile?.cvExternalLink ?? DEMO_PROFILE.cvExternalLink);
+
+  const handleAddCustomLink = () => {
+    const newLink: CustomLinkItem = {
+      id: Date.now().toString(),
+      title: '',
+      url: ''
+    };
+    setCustomLinks((prev) => [...prev, newLink]);
+  };
+
+  const handleUpdateCustomLink = (id: string, field: 'title' | 'url', value: string) => {
+    setCustomLinks((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleRemoveCustomLink = (id: string) => {
+    setCustomLinks((prev) => prev.filter((item) => item.id !== id));
+  };
 
   // Upload file state
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -147,8 +182,7 @@ export default function ProfilPage() {
       setPhone(profile.phone || '');
       setLinkedinUrl(profile.linkedinUrl || '');
       setInstagramUrl(ext.instagramUrl || '');
-      setYoutubeUrl(ext.youtubeUrl || '');
-      setWebsiteUrl(ext.websiteUrl || '');
+      setCustomLinks(ext.customLinks || []);
       setCvExternalLink(profile.cvExternalLink || '');
       setPortfolioList(profile.portfolio || []);
     }
@@ -334,8 +368,7 @@ export default function ProfilPage() {
         pekerjaanSaatIni: pekerjaanSaatIni.trim(),
         domisili: domisili.trim(),
         instagramUrl: instagramUrl.trim(),
-        youtubeUrl: youtubeUrl.trim(),
-        websiteUrl: websiteUrl.trim(),
+        customLinks: customLinks.filter((l) => l.title.trim() !== '' || l.url.trim() !== ''),
         bio: bio.trim(),
         phone: phone.trim(),
         linkedinUrl: linkedinUrl.trim(),
@@ -705,34 +738,59 @@ export default function ProfilPage() {
                 />
               </div>
 
-              {/* YOUTUBE CHANNEL */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <Video className="w-3.5 h-3.5 text-red-600" />
-                  Channel YouTube / Vimeo Showreel
-                </label>
-                <input
-                  type="url"
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="https://youtube.com/@channel"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-                />
-              </div>
+              {/* TAUTAN KUSTOM TAMBAHAN */}
+              <div className="pt-3 border-t border-slate-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <ExternalLink className="w-3.5 h-3.5 text-sky-600" />
+                    Tautan Tambahan ({customLinks.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAddCustomLink}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0284c7] font-bold text-[11px] transition cursor-pointer border border-sky-100"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Tambah Link</span>
+                  </button>
+                </div>
 
-              {/* WEBSITE / BEHANCE */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
-                  Website / Behance / ArtStation
-                </label>
-                <input
-                  type="url"
-                  value={websiteUrl}
-                  onChange={(e) => setWebsiteUrl(e.target.value)}
-                  placeholder="https://behance.net/username atau web pribadi"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-                />
+                {customLinks.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic bg-slate-50 p-2.5 rounded-xl border border-dashed border-slate-200 text-center">
+                    Belum ada tautan tambahan. Klik &quot;Tambah Link&quot; di atas untuk menambahkan judul dan tautan.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {customLinks.map((link, idx) => (
+                      <div key={link.id || idx} className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-2 relative group">
+                        <div className="flex items-center justify-between gap-2">
+                          <input
+                            type="text"
+                            value={link.title}
+                            onChange={(e) => handleUpdateCustomLink(link.id, 'title', e.target.value)}
+                            placeholder="Judul Link (cth: ArtStation, YouTube, GitHub)"
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 font-bold placeholder-slate-400 focus:outline-none focus:border-[#0284c7] transition"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomLink(link.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition shrink-0 cursor-pointer"
+                            title="Hapus Link"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <input
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => handleUpdateCustomLink(link.id, 'url', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] transition"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
