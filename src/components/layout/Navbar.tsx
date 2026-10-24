@@ -16,7 +16,11 @@ import {
   Users,
   ChevronDown,
   Settings,
-  Sparkles
+  Sparkles,
+  Bell,
+  Heart,
+  MessageSquare,
+  CheckCheck
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 
@@ -28,19 +32,99 @@ interface ExtendedProfile {
   pekerjaanSaatIni?: string;
 }
 
+interface NotificationItem {
+  id: string;
+  type: 'like' | 'comment' | 'job' | 'application';
+  title: string;
+  description: string;
+  time: string;
+  link: string;
+  read: boolean;
+  name?: string;
+}
+
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'notif-1',
+    type: 'like',
+    title: 'Farhan Dito menyukai postingan showreel kamu',
+    description: '"Showreel 3D Character Rigging & Animation 2024"',
+    time: '5 menit lalu',
+    link: '/feed',
+    read: false,
+    name: 'Farhan Dito'
+  },
+  {
+    id: 'notif-2',
+    type: 'job',
+    title: 'Lowongan baru relevan: TRANS7',
+    description: 'PT Duta Visual Nusantara Tivi Tujuh membuka posisi "Video Editor Program Magazine"',
+    time: '2 jam lalu',
+    link: '/lowongan',
+    read: false,
+    name: 'TRANS7'
+  },
+  {
+    id: 'notif-3',
+    type: 'comment',
+    title: 'Anindya Larasati mengomentari postingan kamu',
+    description: '"Keren banget breakdown lighting & render-nya mas!"',
+    time: '4 jam lalu',
+    link: '/feed',
+    read: false,
+    name: 'Anindya Larasati'
+  },
+  {
+    id: 'notif-4',
+    type: 'application',
+    title: 'Update Status Lamaran Kerja',
+    description: 'Lamaran di PT Net Mediatama masuk ke tahap "Review Portofolio"',
+    time: '1 hari lalu',
+    link: '/lamaran',
+    read: true,
+    name: 'NET TV'
+  }
+];
+
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, profile, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
 
-  // Close dropdown on click outside
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const mobileNotificationRef = useRef<HTMLDivElement>(null);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const handleNotificationClick = (item: NotificationItem) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === item.id ? { ...n, read: true } : n))
+    );
+    setNotificationOpen(false);
+    router.push(item.link);
+  };
+
+  // Close dropdowns on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setProfileDropdownOpen(false);
+      }
+      if (
+        notificationRef.current && !notificationRef.current.contains(target) &&
+        (!mobileNotificationRef.current || !mobileNotificationRef.current.contains(target))
+      ) {
+        setNotificationOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -64,6 +148,100 @@ export default function Navbar() {
     if (path === '/') return pathname === '/';
     return pathname.startsWith(path);
   };
+
+  const renderNotificationDropdownContent = () => (
+    <>
+      {/* Notification Header */}
+      <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-bold text-slate-900">Notifikasi</h4>
+          {unreadCount > 0 ? (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-[#0284c7]">
+              {unreadCount} Baru
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500">
+              Semua dibaca
+            </span>
+          )}
+        </div>
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            onClick={markAllAsRead}
+            className="text-[11px] font-bold text-[#0284c7] hover:text-[#0369a1] hover:underline flex items-center gap-1 transition cursor-pointer"
+          >
+            <CheckCheck className="w-3.5 h-3.5" />
+            <span>Tandai dibaca</span>
+          </button>
+        )}
+      </div>
+
+      {/* Notification Items List */}
+      <div className="max-h-[350px] overflow-y-auto divide-y divide-slate-50">
+        {notifications.length === 0 ? (
+          <div className="p-8 text-center text-xs text-slate-500">
+            Belum ada notifikasi baru untukmu.
+          </div>
+        ) : (
+          notifications.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => handleNotificationClick(item)}
+              className={`p-3.5 flex items-start gap-3 hover:bg-slate-50 cursor-pointer transition select-none ${
+                !item.read ? 'bg-sky-50/40' : 'bg-white'
+              }`}
+            >
+              {/* Notification Category Icon */}
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                item.type === 'like' ? 'bg-rose-50 border-rose-100 text-rose-500' :
+                item.type === 'comment' ? 'bg-sky-50 border-sky-100 text-sky-600' :
+                item.type === 'job' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                'bg-emerald-50 border-emerald-100 text-emerald-600'
+              }`}>
+                {item.type === 'like' && <Heart className="w-4 h-4 fill-rose-500" />}
+                {item.type === 'comment' && <MessageSquare className="w-4 h-4" />}
+                {item.type === 'job' && <Briefcase className="w-4 h-4" />}
+                {item.type === 'application' && <FileText className="w-4 h-4" />}
+              </div>
+
+              {/* Notification Text */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-1">
+                  <p className={`text-xs leading-snug ${!item.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                    {item.title}
+                  </p>
+                  {!item.read && (
+                    <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0 mt-1" />
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-600 line-clamp-2 mt-0.5 leading-relaxed">
+                  {item.description}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium mt-1">
+                  {item.time}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Notification Footer Link */}
+      <div className="p-2 border-t border-slate-100 bg-slate-50/60">
+        <button
+          type="button"
+          onClick={() => {
+            setNotificationOpen(false);
+            router.push('/feed');
+          }}
+          className="w-full py-1.5 text-center text-xs font-bold text-[#0284c7] hover:text-[#0369a1] hover:underline cursor-pointer"
+        >
+          Lihat Semua Aktivitas di Linimasa &rarr;
+        </button>
+      </div>
+    </>
+  );
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-sky-100 text-slate-800 transition-all">
@@ -134,6 +312,38 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2.5">
             {effectiveUser ? (
               <div className="flex items-center gap-2">
+                {/* Notification Bell Trigger & Dropdown Popover */}
+                <div className="relative" ref={notificationRef}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNotificationOpen(!notificationOpen);
+                      setProfileDropdownOpen(false);
+                    }}
+                    className={`relative p-2.5 rounded-full border transition cursor-pointer select-none flex items-center justify-center ${
+                      notificationOpen
+                        ? 'bg-sky-50 border-sky-300 text-[#0284c7] shadow-xs'
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900'
+                    }`}
+                    aria-label="Lihat Notifikasi"
+                    aria-expanded={notificationOpen}
+                  >
+                    <Bell className="w-4 h-4" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-xs animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Desktop Notification Popover */}
+                  {notificationOpen && (
+                    <div className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 py-1 z-50 animate-fade-in overflow-hidden">
+                      {renderNotificationDropdownContent()}
+                    </div>
+                  )}
+                </div>
+
                 {/* Profile Trigger Button & Dropdown Popover */}
                 <div className="relative" ref={dropdownRef}>
                   <button
@@ -296,10 +506,46 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Toggle Button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Actions: Notification Bell + Menu Toggle */}
+          <div className="md:hidden flex items-center gap-2">
+            {effectiveUser && (
+              <div className="relative" ref={mobileNotificationRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotificationOpen(!notificationOpen);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`relative p-2 rounded-xl border transition flex items-center justify-center cursor-pointer ${
+                    notificationOpen
+                      ? 'bg-sky-50 border-sky-300 text-[#0284c7]'
+                      : 'bg-white border-slate-200 text-slate-700'
+                  }`}
+                  aria-label="Notifikasi"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Mobile Notification Popover */}
+                {notificationOpen && (
+                  <div className="fixed inset-x-3 top-[76px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 py-1 z-50 animate-fade-in overflow-hidden max-h-[75vh] flex flex-col">
+                    {renderNotificationDropdownContent()}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Mobile Menu Toggle Button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen);
+                setNotificationOpen(false);
+              }}
               className="p-2.5 rounded-2xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
               aria-label="Buka Menu"
             >
