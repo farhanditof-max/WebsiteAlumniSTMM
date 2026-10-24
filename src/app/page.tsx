@@ -23,7 +23,13 @@ import {
   PlaySquare,
   Sparkles,
   Users,
-  Briefcase
+  Briefcase,
+  Star,
+  TrendingUp,
+  Heart,
+  Play,
+  CheckCircle2,
+  Award
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { fetchOpenToWorkRest } from '@/lib/firestoreRest';
@@ -77,8 +83,8 @@ export default function HomePage() {
     switch (id) {
       case 'Animasi': return <Film className="w-5 h-5 text-indigo-600" />;
       case 'Game Design': return <Gamepad2 className="w-5 h-5 text-purple-600" />;
-      case 'MIK': return <Terminal className="w-5 h-5 text-blue-600" />;
-      case 'Matekstosi': return <Tv className="w-5 h-5 text-sky-600" />;
+      case 'MIK': return <Terminal className="w-5 h-5 text-sky-600" />;
+      case 'Matekstosi': return <Tv className="w-5 h-5 text-blue-600" />;
       case 'Manarita': return <Radio className="w-5 h-5 text-amber-600" />;
       case 'Manaprodsi': return <PlaySquare className="w-5 h-5 text-emerald-600" />;
       default: return <Building2 className="w-5 h-5 text-slate-700" />;
@@ -86,178 +92,344 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-[#0284c7] selection:text-white font-sans">
+    <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col selection:bg-[#0284c7] selection:text-white font-sans overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION — FULL WIDTH MMTC BLUE IDENTITY */}
-      <section className="relative w-full bg-gradient-to-br from-[#0232a8] via-[#0240d6] to-[#0284c7] text-white py-16 sm:py-24 border-b border-blue-700 overflow-hidden">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 -mt-16 -mr-16 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-16 -ml-16 w-96 h-96 bg-blue-300/10 rounded-full blur-3xl pointer-events-none" />
+      {/* HERO SECTION — AIRY, SKY-BLUE LIGHT AESTHETIC PERSIS REFERENSI */}
+      <section className="relative w-full pt-12 pb-20 sm:pt-16 sm:pb-28 overflow-hidden bg-gradient-to-b from-[#eef8ff] via-[#f7fbff] to-white border-b border-sky-100/60">
+        
+        {/* Soft Organic Floating Pastel Accents */}
+        <div className="absolute top-12 left-1/3 w-3 h-3 rounded-full bg-amber-300 opacity-80" />
+        <div className="absolute top-28 left-1/4 w-2 h-2 rounded-full bg-sky-400 opacity-60" />
+        <div className="absolute top-20 right-1/4 w-3.5 h-3.5 rounded-full bg-amber-400 opacity-70" />
+        <div className="absolute top-44 right-1/3 w-2.5 h-2.5 rounded-full bg-sky-300 opacity-50" />
+        <div className="absolute -top-32 right-0 w-[550px] h-[550px] bg-sky-200/35 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 -left-32 w-[450px] h-[450px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
-            {/* Pill Tag */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-xs text-white shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold text-white">Kementerian Komunikasi dan Digital RI</span>
-              <span className="text-blue-200">/</span>
-              <span className="text-blue-100">STMM MMTC Yogyakarta</span>
-            </div>
+            {/* LEFT CONTENT: Heading, Copy, Pill Buttons, Social Proof */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              
+              {/* Top Tag Pill */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-100/80 border border-sky-200 text-xs font-bold text-[#0284c7]">
+                <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
+                <span>Portal Karir &amp; Portofolio Resmi MMTC</span>
+              </div>
 
-            {/* Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-              Portal Karir, Portofolio &amp; Jejaring Alumni MMTC
-            </h1>
+              {/* Big Bold Headline */}
+              <h1 className="text-4xl sm:text-6xl lg:text-[64px] font-black tracking-tight text-slate-900 leading-[1.08]">
+                Portal Karir &amp; <br />
+                Karya Alumni <span className="inline-flex items-center gap-2 text-[#0284c7]">
+                  MMTC
+                  <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-amber-400 inline-block shadow-sm" />
+                </span>
+              </h1>
 
-            {/* Description */}
-            <p className="text-sm sm:text-base lg:text-lg text-blue-100 font-normal leading-relaxed">
-              Jembatan profesional resmi alumni Sekolah Tinggi Multi Media Yogyakarta. Temukan talenta kreatif penyiaran, animator, game developer, hingga peluang karir di industri multimedia nasional.
-            </p>
+              {/* Copywriting */}
+              <p className="text-base sm:text-lg text-slate-600 max-w-xl font-normal leading-relaxed">
+                Wadah terpadu menghubungkan alumni Sekolah Tinggi Multi Media Yogyakarta dengan industri penyiaran, animasi, game studio, dan teknologi kreatif nasional.
+              </p>
 
-            {/* CTA Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <Link 
-                href="/lowongan" 
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-[#0240d6] font-bold text-sm hover:bg-blue-50 transition active:scale-[0.98] shadow-md"
-              >
-                <Search className="w-4 h-4 text-[#0284c7]" />
-                Jelajahi Lowongan Kerja
-              </Link>
-              <Link 
-                href="/open-to-work" 
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 text-sm font-semibold transition active:scale-[0.98] backdrop-blur-xs"
-              >
-                Katalog Open to Work
-                <ArrowRight className="w-4 h-4 text-white" />
-              </Link>
-              <Link 
-                href="/register" 
-                className="inline-flex items-center justify-center px-4 py-3 rounded-xl text-blue-100 hover:text-white text-xs sm:text-sm transition font-medium"
-              >
-                Daftar Akun Alumni →
-              </Link>
-            </div>
-          </div>
-        </div>
+              {/* Action Buttons (Pill Shapes) */}
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+                <Link 
+                  href="/lowongan" 
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <Search className="w-4 h-4 text-white" />
+                  Jelajahi Lowongan
+                </Link>
+                <Link 
+                  href="/open-to-work" 
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm sm:text-base border border-slate-200/90 shadow-xs transition-all active:scale-[0.98]"
+                >
+                  <div className="w-6 h-6 rounded-full bg-sky-100 flex items-center justify-center text-[#0284c7]">
+                    <Play className="w-3 h-3 fill-current ml-0.5" />
+                  </div>
+                  Katalog Open to Work
+                </Link>
+              </div>
 
-        {/* Quick Highlights / Stats Strip */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-white/15">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-white">
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs p-3.5 rounded-xl border border-white/10">
-              <Users className="w-5 h-5 text-sky-300 shrink-0" />
-              <div>
-                <p className="text-xs text-blue-200">Jejaring Alumni</p>
-                <p className="text-sm font-bold">Lulusan Siap Kerja</p>
+              {/* Social Proof Strip with Avatars & Stars */}
+              <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-3.5">
+                <div className="flex -space-x-2.5 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                    FA
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-amber-400 to-amber-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                    RD
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-indigo-400 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                    AN
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-emerald-400 to-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                    ST
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                    +2k
+                  </div>
+                </div>
+
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1 text-amber-400">
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-700">
+                    Bergabung dengan <strong className="text-slate-900 font-bold">2.500+ alumni MMTC</strong> di industri kreatif
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs p-3.5 rounded-xl border border-white/10">
-              <Briefcase className="w-5 h-5 text-emerald-300 shrink-0" />
-              <div>
-                <p className="text-xs text-blue-200">Bursa Karir</p>
-                <p className="text-sm font-bold">Loker Terverifikasi</p>
+
+            {/* RIGHT CONTENT: Hero Showcase with Floating Glass Cards */}
+            <div className="lg:col-span-5 relative flex items-center justify-center">
+              
+              {/* Center Portrait / Graphic Container */}
+              <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[4/5] rounded-[40px] bg-gradient-to-tr from-sky-200 via-sky-100 to-blue-50 border-4 border-white shadow-xl shadow-sky-500/10 flex flex-col items-center justify-end overflow-hidden p-6">
+                
+                {/* Official Logo Watermark in background */}
+                <div className="absolute top-8 w-28 h-28 opacity-25">
+                  <img src="/logo_stmm.png" alt="STMM MMTC" className="w-full h-full object-contain" />
+                </div>
+
+                <div className="relative z-10 text-center space-y-3 pb-8">
+                  <div className="w-24 h-24 rounded-full bg-white p-2 mx-auto shadow-md shadow-sky-100 flex items-center justify-center">
+                    <img src="/logo_stmm.png" alt="STMM MMTC" className="w-full h-full object-contain" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-xl text-slate-900">STMM MMTC</h3>
+                    <p className="text-xs font-bold text-[#0284c7]">Yogyakarta</p>
+                    <p className="text-[11px] text-slate-500 max-w-[220px] mx-auto mt-1 leading-relaxed">
+                      Kementerian Komunikasi dan Digital Republik Indonesia
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bottom decorative curve */}
+                <div className="w-full h-2 bg-gradient-to-r from-sky-400 to-[#0284c7] rounded-full" />
+              </div>
+
+              {/* Floating Card 1: Top Right */}
+              <div className="absolute -top-4 -right-2 sm:right-0 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-3.5 shadow-lg shadow-slate-200/50 flex items-center gap-2.5 animate-bounce [animation-duration:6s]">
+                <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-[#0284c7]">
+                  <Heart className="w-4 h-4 fill-[#0284c7]" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-900">Karir Kreatif Impian</p>
+                  <p className="text-[10px] text-slate-500">Koneksi langsung ke studio</p>
+                </div>
+              </div>
+
+              {/* Floating Card 2: Left Mid */}
+              <div className="absolute top-1/3 -left-4 sm:-left-6 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-lg shadow-slate-200/50 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lulusan Terserap</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-black text-slate-900">94.8%</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                    <TrendingUp className="w-3 h-3" /> +18%
+                  </span>
+                </div>
+                <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                  <div className="w-4/5 h-full bg-gradient-to-r from-sky-400 to-[#0284c7] rounded-full" />
+                </div>
+              </div>
+
+              {/* Floating Card 3: Bottom Right */}
+              <div className="absolute -bottom-4 right-2 sm:right-4 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-lg shadow-slate-200/50 max-w-[210px] space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-[10px]">
+                    DN
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-900 leading-tight">Dito N.</p>
+                    <p className="text-[9px] text-[#0284c7] font-semibold">Alumni Animasi &apos;20</p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-600 leading-relaxed italic">
+                  &ldquo;Dapat job studio dan portofolio showreel di-review langsung lewat portal ini!&rdquo;
+                </p>
+                <div className="flex text-amber-400 text-[10px]">
+                  ★★★★★
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs p-3.5 rounded-xl border border-white/10">
-              <Video className="w-5 h-5 text-amber-300 shrink-0" />
-              <div>
-                <p className="text-xs text-blue-200">Showreel Media</p>
-                <p className="text-sm font-bold">Embed Portfolio 2-Kolom</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xs p-3.5 rounded-xl border border-white/10">
-              <Sparkles className="w-5 h-5 text-pink-300 shrink-0" />
-              <div>
-                <p className="text-xs text-blue-200">Program Studi</p>
-                <p className="text-sm font-bold">6 Jurusan Spesialis</p>
-              </div>
-            </div>
+
           </div>
         </div>
       </section>
 
-      {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI */}
-      <section className="py-14 bg-white border-b border-slate-200/80">
+      {/* TRUSTED BY / PARTNER LOGO STRIP (CLEAN MONOCHROME) */}
+      <section className="py-10 bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            Alumni MMTC Berkarir di Berbagai Stasiun TV, Studio Animasi &amp; Industri Kreatif
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-slate-400 font-extrabold text-sm sm:text-base tracking-tight opacity-75">
+            <span className="hover:text-slate-700 transition">TVRI NASIONAL</span>
+            <span className="hover:text-slate-700 transition">TRANS MEDIA</span>
+            <span className="hover:text-slate-700 transition">NET TV</span>
+            <span className="hover:text-slate-700 transition">MD ANIMATION</span>
+            <span className="hover:text-slate-700 transition">MNC GROUP</span>
+            <span className="hover:text-slate-700 transition">GAMELOFT</span>
+            <span className="hover:text-slate-700 transition">KOMPAS TV</span>
+          </div>
+        </div>
+      </section>
+
+      {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI — 6 CLEAN ROUNDED VERTICAL CARDS */}
+      <section className="py-16 sm:py-20 bg-slate-50/70 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-2">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#0284c7]">Program Studi</p>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Klasifikasi Bidang Keahlian MMTC</h2>
-            </div>
-            <p className="text-xs text-slate-500">Filter lowongan instan berdasarkan peminatan jurusan</p>
+          
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+              Program Studi Unggulan
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Klasifikasi Keahlian Khusus MMTC
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Filter lowongan dan temukan talenta alumni berdasarkan spesialisasi bidang studi
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {PRODI_LIST.map((prodi) => (
               <Link
                 key={prodi.id}
                 href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
-                className="p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-[#0284c7]/60 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col justify-between group shadow-2xs"
+                className="bg-white border border-slate-200/80 rounded-3xl p-5 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-100 hover:-translate-y-1 transition-all duration-200 flex flex-col items-center text-center group"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-center mb-3 group-hover:bg-sky-50 group-hover:border-sky-200 transition">
+                {/* Circular Pastel Icon Container */}
+                <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-sky-100/80 transition-all">
                   {getProdiIcon(prodi.id)}
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#0284c7] transition">{prodi.label}</h3>
-                  <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 leading-snug">{prodi.desc}</p>
-                </div>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#0284c7] transition mb-1">
+                  {prodi.label}
+                </h3>
+                <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                  {prodi.desc}
+                </p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* LIVE LOWONGAN TERBARU */}
-      <section className="py-14 bg-slate-50/60 border-b border-slate-200/80">
+      {/* SPOTLIGHT BANNER: PERSIS ROUNDED SKY BLUE CARD DI REFERENSI */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-sky-400 via-[#0284c7] to-[#0369a1] rounded-[36px] p-8 sm:p-12 text-white shadow-xl shadow-sky-500/15 relative overflow-hidden">
+            
+            {/* Background glowing rings */}
+            <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              
+              {/* Left Column: Avatar & Headline */}
+              <div className="lg:col-span-8 space-y-4">
+                <span className="text-xs font-bold text-sky-100 uppercase tracking-wider block">
+                  Ikatan Alumni STMM MMTC Yogyakarta
+                </span>
+                <h3 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-snug">
+                  Wadah Kolaborasi Industri Penyiaran &amp; Digital 😊
+                </h3>
+                <p className="text-xs sm:text-sm text-sky-100 max-w-xl leading-relaxed">
+                  Dari tugas studio kampus hingga menjadi technical director, 3D artist, animator studio, and broadcast engineer. Hubungkan portofolio showreel-mu dan dapatkan peluang kerja terbaik.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/open-to-work"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-[#0284c7] font-bold text-xs sm:text-sm hover:bg-sky-50 transition shadow-sm"
+                  >
+                    Jelajahi Portofolio Alumni
+                    <ArrowRight className="w-4 h-4 text-[#0284c7]" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right Column: 4 Stat Bullets */}
+              <div className="lg:col-span-4 space-y-3.5 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20">
+                <div className="flex items-center gap-3 text-xs">
+                  <Award className="w-5 h-5 text-sky-200 shrink-0" />
+                  <span>6 Program Studi Spesialisasi Multimedia</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <Video className="w-5 h-5 text-sky-200 shrink-0" />
+                  <span>Galeri Showreel 2-Kolom Terverifikasi</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <Briefcase className="w-5 h-5 text-sky-200 shrink-0" />
+                  <span>Koneksi Langsung ke Pembuka Loker</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <Users className="w-5 h-5 text-sky-200 shrink-0" />
+                  <span>Jejaring Kolaboratif Lulusan Nasional</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* REAL CONTENT: LIVE LOWONGAN TERBARU */}
+      <section className="py-16 bg-[#fafcff] border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#0284c7]">Bursa Karir</p>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Lowongan Kerja Terkini</h2>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7]">Bursa Karir</span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                Lowongan Kerja Terkini
+              </h2>
             </div>
             <Link 
               href="/lowongan" 
-              className="text-xs font-semibold text-[#0284c7] hover:text-[#0369a1] hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-[#0284c7] hover:underline flex items-center gap-1"
             >
               Lihat Semua Loker <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {loadingJobs ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <JobCardSkeleton />
               <JobCardSkeleton />
             </div>
           ) : recentJobs.length === 0 ? (
-            <div className="p-10 rounded-2xl border border-dashed border-slate-300 bg-white text-center text-slate-500 text-xs space-y-2">
+            <div className="p-10 rounded-3xl border border-dashed border-slate-200 bg-white text-center text-slate-500 text-xs space-y-2">
               <Briefcase className="w-8 h-8 text-slate-400 mx-auto" />
-              <p className="font-semibold text-slate-700">Belum ada lowongan kerja aktif saat ini.</p>
-              <p className="text-slate-400">Jadilah yang pertama mempublikasikan lowongan untuk alumni MMTC.</p>
+              <p className="font-bold text-slate-700">Belum ada lowongan kerja aktif saat ini.</p>
+              <p className="text-slate-400">Jadilah alumni pertama yang mempublikasikan lowongan.</p>
               <Link href="/post-lowongan" className="inline-block mt-2 text-xs font-bold text-[#0284c7] hover:underline">
                 + Pasang Lowongan Baru
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {recentJobs.map((job) => (
                 <div 
                   key={job.id} 
-                  className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4 shadow-2xs group"
+                  className="p-6 rounded-3xl bg-white border border-slate-200/80 hover:border-sky-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
                 >
-                  <div className="space-y-2.5">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
+                      <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-50 border border-sky-100 text-[#0284c7]">
                         {job.tipeKerja}
                       </span>
                       {job.gajiRange && (
-                        <span className="text-xs font-bold text-[#0284c7]">
+                        <span className="text-xs font-extrabold text-emerald-600">
                           {job.gajiRange}
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-[#0284c7] transition leading-snug">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#0284c7] transition leading-snug">
                       {job.judul}
                     </h3>
                     <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
@@ -269,7 +441,7 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex flex-wrap gap-1.5">
                       {job.prodiTarget?.slice(0, 2).map((p) => (
                         <ProdiBadge key={p} prodi={p} />
@@ -277,9 +449,9 @@ export default function HomePage() {
                     </div>
                     <Link
                       href="/lowongan"
-                      className="text-xs font-bold text-[#0284c7] hover:text-[#0369a1] transition flex items-center gap-1 group-hover:translate-x-0.5"
+                      className="px-4 py-2 rounded-full bg-slate-50 hover:bg-[#0284c7] hover:text-white text-slate-800 text-xs font-bold transition flex items-center gap-1.5 border border-slate-200/80"
                     >
-                      Lamar Sekarang <ArrowRight className="w-3.5 h-3.5" />
+                      Lamar Sekarang <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
@@ -289,45 +461,47 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TALENTA OPEN TO WORK */}
-      <section className="py-14 bg-white border-b border-slate-200/80">
+      {/* REAL CONTENT: TALENTA OPEN TO WORK */}
+      <section className="py-16 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Talenta Siap Kerja</p>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Alumni Open to Work</h2>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Talenta Siap Kerja</span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                Alumni Open to Work
+              </h2>
             </div>
             <Link 
               href="/open-to-work" 
-              className="text-xs font-semibold text-emerald-700 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
             >
               Lihat Semua Talenta <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {loadingTalents ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               <TalentCardSkeleton />
               <TalentCardSkeleton />
               <TalentCardSkeleton />
               <TalentCardSkeleton />
             </div>
           ) : openTalents.length === 0 ? (
-            <div className="p-10 rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-center text-slate-500 text-xs space-y-2">
-              <p className="font-semibold text-slate-700">Belum ada alumni yang memasang status Open to Work.</p>
+            <div className="p-10 rounded-3xl border border-dashed border-slate-200 bg-slate-50 text-center text-slate-500 text-xs space-y-2">
+              <p className="font-bold text-slate-700">Belum ada alumni yang memasang status Open to Work.</p>
               <p className="text-slate-400">Aktifkan toggle status Open to Work di menu profil Anda untuk tampil di sini.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {openTalents.map((alumni) => (
                 <Link
                   key={alumni.uid}
                   href={`/profil/${alumni.uid}`}
-                  className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between group shadow-2xs"
+                  className="p-5 rounded-3xl bg-white border border-slate-200/80 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-100 hover:-translate-y-1 transition-all flex flex-col justify-between group"
                 >
                   <div className="space-y-3.5">
                     <div className="flex items-start justify-between">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold text-sm overflow-hidden shadow-2xs border-2 border-white">
+                      <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-sm overflow-hidden shadow-xs border-2 border-white">
                         <AlumniAvatar src={alumni.fotoProfil} name={alumni.namaLengkap} />
                       </div>
                       <OpenToWorkBadge pulse={false} />
@@ -362,23 +536,67 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* BOTTOM BANNER SECTION */}
-      <section className="w-full bg-[#0240d6] text-white py-14 sm:py-16 border-t border-blue-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 max-w-xl text-center md:text-left">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Punya Lowongan Proyek atau Posisi Full-Time?
-            </h2>
-            <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
-              Pasang lowongan gratis khusus untuk talenta penyiaran, animator, technical artist, dan software engineer lulusan STMM MMTC Yogyakarta.
-            </p>
+      {/* BOTTOM CTA: PERSIS DUAL-CARD DI GAMBAR REFERENSI */}
+      <section className="py-16 bg-[#f4f9fd] border-t border-sky-100/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Card: Value Proposition */}
+            <div className="md:col-span-7 space-y-4">
+              <span className="text-xs font-bold text-[#0284c7] uppercase tracking-wider block">
+                Bergabung Sekarang
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Kembangkan Karir &amp; Portofoliomu
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
+                Akses terpusat ke jejaring alumni multimedia terbesar di Indonesia. Pasang lowongan untuk studio Anda atau temukan rekan proyek kreatif berikutnya.
+              </p>
+              <div className="space-y-2 pt-2 text-xs text-slate-700 font-medium">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Akses gratis seumur hidup khusus seluruh alumni resmi STMM MMTC</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Showreel galeri YouTube 2-kolom terintegrasi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Pasang lowongan gratis untuk studio &amp; rumah produksi</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Card: Action Box */}
+            <div className="md:col-span-5 bg-white border border-sky-200/80 rounded-3xl p-8 text-center space-y-5 shadow-lg shadow-sky-500/5">
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Registrasi Akun</span>
+                <p className="text-3xl font-black text-[#0284c7]">100% Gratis</p>
+                <p className="text-xs text-slate-500">Khusus alumni &amp; lulusan STMM MMTC Yogyakarta</p>
+              </div>
+
+              <div className="pt-2 flex flex-col gap-3">
+                <Link
+                  href="/register"
+                  className="w-full py-3.5 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm shadow-md shadow-sky-500/25 transition active:scale-[0.98]"
+                >
+                  Daftar Akun Alumni Baru
+                </Link>
+                <Link
+                  href="/post-lowongan"
+                  className="w-full py-3 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 transition"
+                >
+                  Pasang Lowongan Studio / Proyek
+                </Link>
+              </div>
+
+              <p className="text-[11px] text-slate-400">
+                ✓ Verifikasi instan menggunakan Nomor Alumni terdaftar
+              </p>
+            </div>
+
           </div>
-          <Link
-            href="/post-lowongan"
-            className="px-7 py-3.5 rounded-xl bg-white text-[#0240d6] hover:bg-blue-50 font-bold text-sm transition shrink-0 shadow-md active:scale-[0.98]"
-          >
-            Pasang Lowongan Sekarang
-          </Link>
         </div>
       </section>
 
