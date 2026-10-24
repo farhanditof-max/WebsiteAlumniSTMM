@@ -42,7 +42,7 @@ export default function Navbar() {
             <img 
               src="/logo_alumnihub.webp" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
-              className="h-8 sm:h-9 w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-[35px] sm:h-[40px] w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </Link>
 
