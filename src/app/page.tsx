@@ -568,31 +568,25 @@ export default function HomePage() {
               </div>
 
               {/* Carousel Navigation Buttons */}
-              <div className="flex items-center gap-3 shrink-0 self-start sm:self-end">
-                <span className="text-[11px] font-bold text-slate-500 hidden sm:inline-flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-2xs">
-                  <Sparkles className="w-3.5 h-3.5 text-sky-500 animate-pulse" />
-                  Drag &amp; Lempar untuk Rolling Bebas
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => scrollSlider('left')}
-                    className="w-11 h-11 rounded-2xl bg-white hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200/90 hover:border-sky-300 shadow-sm flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer"
-                    title="Geser ke kiri"
-                    aria-label="Geser ke kiri"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollSlider('right')}
-                    className="w-11 h-11 rounded-2xl bg-white hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200/90 hover:border-sky-300 shadow-sm flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer"
-                    title="Geser ke kanan"
-                    aria-label="Geser ke kanan"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-end">
+                <button
+                  type="button"
+                  onClick={() => scrollSlider('left')}
+                  className="w-11 h-11 rounded-2xl bg-white hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200/90 hover:border-sky-300 shadow-sm flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer"
+                  title="Geser ke kiri"
+                  aria-label="Geser ke kiri"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollSlider('right')}
+                  className="w-11 h-11 rounded-2xl bg-white hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200/90 hover:border-sky-300 shadow-sm flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer"
+                  title="Geser ke kanan"
+                  aria-label="Geser ke kanan"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </ScrollReveal>
