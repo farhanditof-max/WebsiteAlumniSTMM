@@ -133,30 +133,6 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2.5">
             {effectiveUser ? (
               <div className="flex items-center gap-2">
-                <Link 
-                  href="/lamaran" 
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 border shadow-2xs whitespace-nowrap ${
-                    isActive('/lamaran')
-                      ? 'bg-amber-500 text-white border-amber-500 font-bold'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Lamaran</span>
-                </Link>
-
-                <Link 
-                  href="/post-lowongan" 
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 border shadow-2xs whitespace-nowrap ${
-                    isActive('/post-lowongan')
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200/80'
-                  }`}
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span>Pasang Loker</span>
-                </Link>
-
                 {/* Profile Trigger Button & Dropdown Popover */}
                 <div className="relative" ref={dropdownRef}>
                   <button
