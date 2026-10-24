@@ -34,6 +34,8 @@ function LowonganContent() {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProdi, setSelectedProdi] = useState<string>(initialProdi || 'ALL');
+  const [selectedTipeKerja, setSelectedTipeKerja] = useState<string>('ALL');
+  const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const [nowTimestamp] = useState(() => Date.now());
@@ -100,13 +102,17 @@ function LowonganContent() {
 
   const filteredJobs = jobs.filter((job) => {
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return true;
     const matchesSearch = 
+      !q ||
       job.judul.toLowerCase().includes(q) ||
       job.perusahaan.toLowerCase().includes(q) ||
       job.lokasi.toLowerCase().includes(q) ||
       job.prodiTarget?.some(p => p.toLowerCase().includes(q));
-    return matchesSearch;
+
+    const matchesTipe = selectedTipeKerja === 'ALL' || job.tipeKerja === selectedTipeKerja;
+    const matchesSalary = !onlyWithSalary || Boolean(job.gajiRange && job.gajiRange.trim().length > 0);
+
+    return matchesSearch && matchesTipe && matchesSalary;
   });
 
   const handleOpenApplyModal = (job: JobPosting) => {
@@ -249,6 +255,40 @@ function LowonganContent() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* SECONDARY FILTER BAR: TIPE KERJA & GAJI TOGGLE */}
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+              <span className="text-slate-400 font-semibold mr-1">Tipe:</span>
+              {['ALL', 'Full-time', 'Freelance', 'Magang', 'Part-time'].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setSelectedTipeKerja(type)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                    selectedTipeKerja === type
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {type === 'ALL' ? 'Semua Tipe' : type}
+                </button>
+              ))}
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer select-none text-slate-700 font-semibold">
+              <input
+                type="checkbox"
+                checked={onlyWithSalary}
+                onChange={(e) => setOnlyWithSalary(e.target.checked)}
+                className="w-4 h-4 text-[#0284c7] rounded bg-white border-slate-300 focus:ring-[#0284c7]"
+              />
+              <span className="text-emerald-700 font-bold flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                Cantumkan Gaji
+              </span>
+            </label>
           </div>
         </div>
 

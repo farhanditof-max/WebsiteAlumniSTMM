@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { loginAlumni } from '@/lib/auth';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { LogIn, AlertCircle, Loader2, Mail, Lock } from 'lucide-react';
+import { LogIn, AlertCircle, Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 function getSafeRedirect(target: string | null, fallback = '/lowongan'): string {
@@ -33,6 +33,7 @@ function LoginContent() {
   const { user, profile, logout } = useAuth();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -130,14 +131,24 @@ function LoginContent() {
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
                 Kata Sandi
               </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition"
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button

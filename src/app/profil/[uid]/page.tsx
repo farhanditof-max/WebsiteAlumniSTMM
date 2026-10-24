@@ -18,11 +18,15 @@ import {
   Video,
   User,
   Share2,
-  Check
+  Maximize2,
+  Sparkles
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
 import { OpenToWorkBadge } from '@/components/ui/Badge';
+import { CinemaLightbox } from '@/components/ui/Modal';
+import { ShareModal } from '@/components/ui/ShareModal';
+import { extractSkills } from '@/components/profile/skills';
 
 export default function PublicProfilePage({ params }: { params: Promise<{ uid: string }> }) {
   const resolvedParams = use(params);
@@ -30,7 +34,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -92,14 +97,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
     loadProfile();
   }, [rawUid]);
 
-  const handleCopyLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
-  };
-
   const PortfolioImagePreview = ({ url, title }: { url: string; title: string }) => {
     const [hasError, setHasError] = useState(false);
 
@@ -124,15 +121,28 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
       const videoId = parseYouTubeVideoId(item.url);
 
       return videoId ? (
-        <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black shadow-xs">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}`}
-            className="w-full h-full border-0"
-            title={item.title || 'YouTube video player'}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
+        <div className="space-y-2">
+          <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black shadow-xs">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              className="w-full h-full border-0"
+              title={item.title || 'YouTube video player'}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+          <div className="flex items-center justify-between pt-0.5">
+            <span className="text-[10px] text-slate-400 font-medium">YouTube Video</span>
+            <button
+              type="button"
+              onClick={() => setCinemaVideo({ videoId, title: item.title || 'Showreel Alumni' })}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200 hover:border-sky-200 text-[11px] font-semibold transition cursor-pointer"
+            >
+              <Maximize2 className="w-3 h-3 text-[#0284c7]" />
+              <span>Mode Bioskop</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="p-3 bg-red-50 rounded-xl text-xs text-red-600 border border-red-100">
@@ -223,20 +233,11 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
           </Link>
 
           <button
-            onClick={handleCopyLink}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition shadow-2xs"
+            onClick={() => setIsShareOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition shadow-2xs cursor-pointer"
           >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-emerald-700">Link Tersalin!</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-3.5 h-3.5 text-slate-500" />
-                <span>Bagikan Profil</span>
-              </>
-            )}
+            <Share2 className="w-3.5 h-3.5 text-[#0284c7]" />
+            <span>Bagikan Profil</span>
           </button>
         </div>
 
@@ -256,6 +257,19 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
               <p className="text-[11px] text-slate-400 font-mono mt-1">
                 Nomor Alumni: {profile.nomorAlumni}
               </p>
+
+              {/* TECHNICAL SKILL BADGES */}
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {extractSkills(profile.bio || '', profile.prodi || '').map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[11px] font-medium text-[#0284c7]"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 opacity-70" />
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -413,6 +427,23 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
             </div>
           </div>
         </div>
+
+        {/* CINEMA LIGHTBOX MODAL */}
+        <CinemaLightbox
+          isOpen={Boolean(cinemaVideo)}
+          onClose={() => setCinemaVideo(null)}
+          title={cinemaVideo?.title || 'Showreel Alumni STMM MMTC'}
+          videoId={cinemaVideo?.videoId || ''}
+        />
+
+        {/* SHARE MODAL */}
+        <ShareModal
+          isOpen={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+          title={profile.namaLengkap}
+          subtitle={`${profile.prodi} • Angkatan ${profile.angkatan}`}
+          shareUrl={typeof window !== 'undefined' ? window.location.href : ''}
+        />
       </main>
 
       <Footer />

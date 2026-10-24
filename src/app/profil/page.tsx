@@ -25,10 +25,13 @@ import {
   Globe,
   Phone,
   Eye,
-  Sparkles
+  Sparkles,
+  Maximize2
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
+import { CinemaLightbox } from '@/components/ui/Modal';
+import { extractSkills } from '@/components/profile/skills';
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) =>
@@ -96,6 +99,7 @@ export default function ProfilPage() {
 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
 
   // Guard against overwriting local uncommitted form inputs when background profile refreshes for same user
   const initializedUidRef = React.useRef<string | null>(null);
@@ -341,15 +345,28 @@ export default function ProfilPage() {
       const videoId = parseYouTubeVideoId(item.url);
 
       return videoId ? (
-        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-xs">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}`}
-            className="w-full h-full border-0"
-            title={item.title || 'YouTube video player'}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
+        <div className="space-y-2">
+          <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-xs">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              className="w-full h-full border-0"
+              title={item.title || 'YouTube video player'}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+          <div className="flex items-center justify-between pt-0.5">
+            <span className="text-[10px] text-slate-400 font-medium">YouTube Video</span>
+            <button
+              type="button"
+              onClick={() => setCinemaVideo({ videoId, title: item.title || 'Showreel Alumni' })}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200 hover:border-sky-200 text-[11px] font-semibold transition cursor-pointer"
+            >
+              <Maximize2 className="w-3 h-3 text-[#0284c7]" />
+              <span>Preview Mode Bioskop</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="p-3 bg-red-50 rounded-xl text-xs text-red-600 border border-red-100">
@@ -660,6 +677,27 @@ export default function ProfilPage() {
                   placeholder="Ceritakan keahlianmu, software yang dikuasai (Blender, Premiere, Unity, Maya), dan tipe proyek yang dicari..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition leading-relaxed"
                 />
+
+                {/* DETECTED SKILLS CHIPS PREVIEW */}
+                <div className="mt-2.5 p-3 rounded-2xl bg-sky-50/50 border border-sky-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
+                      Skill &amp; Software Otomatis Terdeteksi:
+                    </span>
+                    <span className="text-[10px] text-slate-400">Tampil di katalog Open to Work</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {extractSkills(bio, prodi).map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white border border-sky-200/80 text-[11px] font-semibold text-[#0284c7] shadow-2xs"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -786,6 +824,14 @@ export default function ProfilPage() {
             </div>
           </div>
         </div>
+
+        {/* CINEMA LIGHTBOX PREVIEW */}
+        <CinemaLightbox
+          isOpen={Boolean(cinemaVideo)}
+          onClose={() => setCinemaVideo(null)}
+          title={cinemaVideo?.title || 'Preview Showreel'}
+          videoId={cinemaVideo?.videoId || ''}
+        />
       </main>
 
       <Footer />

@@ -20,6 +20,7 @@ import { fetchOpenToWorkRest } from '@/lib/firestoreRest';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { TalentCardSkeleton } from '@/components/ui/Skeleton';
 import { OpenToWorkBadge } from '@/components/ui/Badge';
+import { extractSkills } from '@/components/profile/skills';
 
 export default function OpenToWorkPage() {
   const [alumniList, setAlumniList] = useState<UserProfile[]>([]);
@@ -221,9 +222,21 @@ export default function OpenToWorkPage() {
                   </div>
 
                   {/* BIO */}
-                  <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
-                    {alumni.bio || 'Alumni belum menambahkan bio singkat.'}
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                    {alumni.bio || 'Alumni aktif Sekolah Tinggi Multi Media Yogyakarta.'}
                   </p>
+
+                  {/* SOFTWARE & SKILL CHIPS */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {extractSkills(alumni.bio, alumni.prodi).map((skill) => (
+                      <span 
+                        key={skill} 
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/60"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
 
                   {/* PORTFOLIO SNAPSHOT BADGES */}
                   <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500">

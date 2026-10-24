@@ -7,7 +7,7 @@ import { registerAlumni, VERIFIED_ALUMNI_LIST, getRegisteredNomorAlumni } from '
 import { PRODI_LIST, ProdiType } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { UserPlus, AlertCircle, Loader2, Info, CheckCircle2, Lock, Mail, User, Hash, Calendar } from 'lucide-react';
+import { UserPlus, AlertCircle, Loader2, Info, CheckCircle2, Lock, Mail, User, Hash, Calendar, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterPage() {
@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const { user, profile, setProfileData, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [nomorAlumni, setNomorAlumni] = useState('');
   const [namaLengkap, setNamaLengkap] = useState('');
   const [prodi, setProdi] = useState<ProdiType>('Animasi');
@@ -269,15 +270,25 @@ export default function RegisterPage() {
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
                 Kata Sandi (min 6 karakter) *
               </label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition"
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button
