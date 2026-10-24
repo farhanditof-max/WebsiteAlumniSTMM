@@ -1,57 +1,105 @@
 import React from 'react';
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-200 text-slate-500 py-14">
-      <div className="w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div className="space-y-3.5 md:col-span-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center shrink-0">
-              <img 
-                src="/logo_stmm.png" 
-                alt="STMM MMTC Yogyakarta" 
-                className="w-full h-full object-contain"
-              />
+    <footer className="bg-white border-t border-slate-200/80 text-slate-500 pt-16 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-10">
+          
+          {/* Brand Info */}
+          <div className="space-y-4 md:col-span-2">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                <img 
+                  src="/logo_stmm.png" 
+                  alt="STMM MMTC Yogyakarta" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div>
+                <span className="font-extrabold text-slate-900 text-base tracking-tight block">
+                  STMM &quot;MMTC&quot; YOGYAKARTA
+                </span>
+                <span className="text-[11px] text-[#0284c7] font-semibold block">
+                  Kementerian Komunikasi dan Digital RI
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="font-bold text-slate-900 text-base tracking-tight block">STMM &quot;MMTC&quot; YOGYAKARTA</span>
-              <span className="text-[11px] text-[#0284c7] font-semibold block">Kementerian Komunikasi dan Informatika RI</span>
+            <p className="text-xs text-slate-600 max-w-md leading-relaxed">
+              Platform karir dan jejaring resmi alumni Sekolah Tinggi Multi Media (MMTC) Yogyakarta. Wadah terpadu kolaborasi profesional industri penyiaran, animasi, game, dan teknologi informasi.
+            </p>
+            <div className="pt-1 flex items-center gap-2 text-[11px] text-slate-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Portal Terintegrasi Alumni & Industri Kreatif</span>
             </div>
           </div>
-          <p className="text-xs text-slate-500 max-w-md leading-relaxed">
-            Portal karir dan jejaring resmi alumni Sekolah Tinggi Multi Media (MMTC) Yogyakarta. Wadah terpadu kolaborasi profesional industri penyiaran, animasi, game, dan teknologi informasi.
+
+          {/* Program Studi */}
+          <div className="lg:col-span-2">
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
+              Program Studi & Keahlian
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
+              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> Animasi
+              </span>
+              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> Game Design
+              </span>
+              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Manajemen Informasi & Komunikasi (MIK)
+              </span>
+              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> Manajemen Teknik Studio (Matekstosi)
+              </span>
+              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Manajemen Pemberitaan (Manarita)
+              </span>
+              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Manajemen Produksi Siaran (Manaprodsi)
+              </span>
+            </div>
+          </div>
+
+          {/* Tautan Navigasi */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
+              Tautan Navigasi
+            </h4>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/lowongan" className="text-slate-600 hover:text-[#0284c7] transition inline-flex items-center gap-1">
+                  Cari Lowongan <ArrowUpRight className="w-3 h-3 text-slate-400" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/open-to-work" className="text-slate-600 hover:text-[#0284c7] transition inline-flex items-center gap-1">
+                  Alumni Open to Work <ArrowUpRight className="w-3 h-3 text-slate-400" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/post-lowongan" className="text-slate-600 hover:text-[#0284c7] transition inline-flex items-center gap-1">
+                  Pasang Lowongan Alumni <ArrowUpRight className="w-3 h-3 text-slate-400" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/profil" className="text-slate-600 hover:text-[#0284c7] transition inline-flex items-center gap-1">
+                  Portofolio & Showreel <ArrowUpRight className="w-3 h-3 text-slate-400" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Credits */}
+        <div className="mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+          <p>© 2026 Ikatan Alumni STMM MMTC Yogyakarta. Hak Cipta Dilindungi.</p>
+          <p className="flex items-center gap-1">
+            Dikelola bersama Ikatan Alumni MMTC Yogyakarta
           </p>
         </div>
-
-        <div>
-          <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-3">Program Studi</h4>
-          <ul className="space-y-1.5 text-xs text-slate-500">
-            <li>Animasi</li>
-            <li>Game Design</li>
-            <li>Manajemen Informasi & Komunikasi (MIK)</li>
-            <li>Manajemen Teknik Studio (Matekstosi)</li>
-            <li>Manajemen Pemberitaan (Manarita)</li>
-            <li>Manajemen Produksi Siaran (Manaprodsi)</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-3">Tautan Karir</h4>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/lowongan" className="hover:text-[#0284c7] transition">Cari Lowongan</Link></li>
-            <li><Link href="/open-to-work" className="hover:text-[#0284c7] transition">Alumni Open to Work</Link></li>
-            <li><Link href="/post-lowongan" className="hover:text-[#0284c7] transition">Pasang Loker Alumni</Link></li>
-            <li><Link href="/profil" className="hover:text-[#0284c7] transition">Portofolio Showreel</Link></li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="w-full px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400">
-        <p>© 2026 Ikatan Alumni STMM MMTC Yogyakarta. Hak Cipta Dilindungi.</p>
-        <p className="flex items-center gap-1 mt-2 md:mt-0">
-          Kementerian Komunikasi dan Informatika Republik Indonesia
-        </p>
       </div>
     </footer>
   );

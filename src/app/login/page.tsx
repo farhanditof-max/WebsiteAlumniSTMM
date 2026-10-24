@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { loginAlumni } from '@/lib/auth';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import { LogIn, AlertCircle, Loader2, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 function getSafeRedirect(target: string | null, fallback = '/lowongan'): string {
@@ -60,34 +60,41 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
-      <div className="flex-1 flex items-center justify-center p-4 py-12">
-        <div className="w-full max-w-md bg-white border border-slate-200 p-8 rounded-2xl shadow-sm">
-          <div className="text-center mb-6 space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900">Masuk Portal Alumni</h1>
+      <div className="flex-1 flex items-center justify-center p-4 py-12 sm:py-16">
+        <div className="w-full max-w-md bg-white border border-slate-200/90 p-8 sm:p-9 rounded-3xl shadow-sm space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 p-2 flex items-center justify-center mx-auto shadow-2xs mb-3">
+              <img 
+                src="/logo_stmm.png" 
+                alt="STMM MMTC" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk Portal Alumni</h1>
             <p className="text-xs text-slate-500">
               Gunakan Email atau Nomor Alumni MMTC yang sudah terdaftar
             </p>
           </div>
 
           {user && (
-            <div className="mb-5 p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-800 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-800 space-y-2">
               <p>
-                Anda sudah masuk sebagai <strong>{profile?.namaLengkap || user.email}</strong>.
+                Anda saat ini sudah masuk sebagai <strong>{profile?.namaLengkap || user.email}</strong>.
               </p>
               <div className="flex items-center gap-3 pt-1">
                 <Link
                   href={redirectTarget}
-                  className="px-3 py-1.5 rounded-lg bg-[#0284c7] text-white font-medium hover:bg-[#0369a1] transition"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#0284c7] text-white font-bold hover:bg-[#0369a1] transition shadow-2xs"
                 >
-                  Lanjutkan
+                  Lanjutkan ke Dashboard
                 </Link>
                 <button
                   type="button"
                   onClick={() => logout()}
-                  className="text-xs text-red-600 hover:underline"
+                  className="text-xs text-red-600 hover:underline font-semibold"
                 >
                   Ganti Akun (Keluar)
                 </button>
@@ -96,7 +103,7 @@ function LoginContent() {
           )}
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 animate-fade-in">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -104,7 +111,8 @@ function LoginContent() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-slate-400" />
                 Email atau Nomor Alumni
               </label>
               <input
@@ -118,8 +126,9 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Password
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-slate-400" />
+                Kata Sandi
               </label>
               <input
                 type="password"
@@ -134,26 +143,26 @@ function LoginContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold text-sm shadow-xs transition flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm shadow-xs transition flex items-center justify-center gap-2 mt-2 disabled:opacity-50 active:scale-[0.98]"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Memproses...
+                  Memproses Masuk...
                 </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  Masuk ke Akun
+                  Masuk ke Portal
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-slate-500">
+          <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
             Belum punya akun alumni?{' '}
-            <Link href="/register" className="text-[#0284c7] font-semibold hover:underline">
-              Daftar di sini
+            <Link href="/register" className="text-[#0284c7] font-bold hover:underline">
+              Daftar Alumni di sini
             </Link>
           </div>
         </div>
