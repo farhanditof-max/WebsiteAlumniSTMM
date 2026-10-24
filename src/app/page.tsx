@@ -22,7 +22,9 @@ import {
   Briefcase,
   Star,
   CheckCircle2,
-  Award
+  Award,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -500,32 +502,74 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Right Card: Action Box */}
-              <div className="md:col-span-5 bg-white border border-sky-200/80 rounded-3xl p-8 text-center space-y-5 shadow-lg shadow-sky-500/5">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Registrasi Akun</span>
-                  <p className="text-3xl font-black text-[#0284c7]">100% Gratis</p>
-                  <p className="text-xs text-slate-500">Khusus alumni &amp; lulusan STMM MMTC Yogyakarta</p>
-                </div>
+              {/* Right Card: Interactive Action Box with Glow & Glassmorphism */}
+              <div className="md:col-span-5 relative group">
+                {/* Ambient Glow Aura */}
+                <div className="absolute -inset-1 rounded-[36px] bg-gradient-to-tr from-sky-400 via-indigo-400 to-sky-300 opacity-25 group-hover:opacity-50 blur-xl transition-all duration-500 -z-10" />
 
-                <div className="pt-2 flex flex-col gap-3">
-                  <Link
-                    href="/register"
-                    className="w-full py-3.5 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm shadow-md shadow-sky-500/25 transition active:scale-[0.98]"
-                  >
-                    Daftar Akun Alumni Baru
-                  </Link>
-                  <Link
-                    href="/post-lowongan"
-                    className="w-full py-3 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 transition"
-                  >
-                    Pasang Lowongan Studio / Proyek
-                  </Link>
-                </div>
+                <div className="relative bg-white/95 backdrop-blur-xl border border-sky-200/90 rounded-[32px] p-7 sm:p-9 text-center space-y-6 shadow-xl shadow-sky-500/10 transition-all duration-300 hover:-translate-y-1">
+                  
+                  {/* Top Badge */}
+                  <div className="flex justify-center">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700 shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      Akses Komunitas Resmi MMTC
+                    </span>
+                  </div>
 
-                <p className="text-[11px] text-slate-400">
-                  ✓ Verifikasi instan menggunakan Nomor Alumni terdaftar
-                </p>
+                  {/* Pricing / Headline */}
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">
+                      Registrasi Akun
+                    </span>
+                    <p className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-sky-600 via-[#0284c7] to-indigo-600 bg-clip-text text-transparent tracking-tight">
+                      100% Gratis
+                    </p>
+                    <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto">
+                      Khusus alumni, wisudawan &amp; lulusan STMM MMTC Yogyakarta
+                    </p>
+                  </div>
+
+                  {/* Interactive Action Buttons */}
+                  <div className="space-y-3 pt-1">
+                    {/* Primary Button with Shimmer & Sliding Arrow */}
+                    <Link
+                      href="/register"
+                      className="group/btn relative w-full py-4 px-6 rounded-full bg-gradient-to-r from-sky-500 via-[#0284c7] to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden"
+                    >
+                      {/* Shimmer light sweep */}
+                      <span 
+                        aria-hidden="true" 
+                        className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none animate-shimmer" 
+                      />
+                      <span>Daftar Akun Alumni Baru</span>
+                      <ArrowRight className="w-4 h-4 text-white/90 group-hover/btn:translate-x-1.5 transition-transform duration-200" />
+                    </Link>
+
+                    {/* Secondary Button */}
+                    <Link
+                      href="/post-lowongan"
+                      className="group/btn2 w-full py-3.5 px-6 rounded-full bg-slate-50/90 hover:bg-sky-50/80 text-slate-800 hover:text-[#0284c7] font-bold text-xs sm:text-sm border border-slate-200 hover:border-sky-300 shadow-2xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <Briefcase className="w-4 h-4 text-slate-500 group-hover/btn2:text-[#0284c7] group-hover/btn2:-rotate-6 transition-transform" />
+                      <span>Pasang Lowongan Studio / Proyek</span>
+                    </Link>
+                  </div>
+
+                  {/* Verification & Perks Strip */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-4 text-[11px] text-slate-500 font-medium">
+                    <span className="flex items-center gap-1.5 text-slate-600">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      Verifikasi No. Alumni
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="flex items-center gap-1.5 text-slate-600">
+                      <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      Akses Instan
+                    </span>
+                  </div>
+
+                </div>
               </div>
 
             </div>
