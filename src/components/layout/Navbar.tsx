@@ -184,17 +184,6 @@ export default function Navbar() {
                             </div>
                           </div>
                         </div>
-
-                        {/* BUTTON: SETTING PROFIL */}
-                        <div className="pt-0.5">
-                          <Link
-                            href="/profil"
-                            onClick={() => setProfileDropdownOpen(false)}
-                            className="w-full block py-2.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold text-center transition shadow-2xs hover:shadow-xs active:scale-[0.99]"
-                          >
-                            Setting Profil
-                          </Link>
-                        </div>
                       </div>
 
                       {/* SECTION: AKUN */}
