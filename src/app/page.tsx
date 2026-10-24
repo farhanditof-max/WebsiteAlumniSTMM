@@ -119,43 +119,210 @@ export default function HomePage() {
     }
   };
 
-  // Carousel & Horizontal Drag State for 6 Prodi Cards
+  // Infinite looping prodi list (4 sets of 6 prodis)
+  const LOOP_PRODI_LIST = React.useMemo(() => [
+    ...PRODI_LIST.map((p) => ({ ...p, loopKey: `set-0-${p.id}` })),
+    ...PRODI_LIST.map((p) => ({ ...p, loopKey: `set-1-${p.id}` })),
+    ...PRODI_LIST.map((p) => ({ ...p, loopKey: `set-2-${p.id}` })),
+    ...PRODI_LIST.map((p) => ({ ...p, loopKey: `set-3-${p.id}` })),
+  ], []);
+
+  // Carousel, Infinite Loop & Momentum Physics State
   const sliderRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
-  const [startX, setStartX] = React.useState(0);
-  const [scrollLeftState, setScrollLeftState] = React.useState(0);
+  const [isRolling, setIsRolling] = React.useState(false);
+  const isDraggingRef = React.useRef(false);
   const dragDistanceRef = React.useRef(0);
+  const velocityRef = React.useRef(0);
+  const lastXRef = React.useRef(0);
+  const lastTimeRef = React.useRef(0);
+  const animFrameIdRef = React.useRef<number | null>(null);
+
+  // Wrap check: Seamlessly shift scrollLeft by 1 set width when crossing boundaries
+  const checkWrap = React.useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const singleWidth = el.scrollWidth / 4;
+    if (singleWidth <= 10) return;
+
+    if (el.scrollLeft >= singleWidth * 2.5) {
+      el.scrollLeft -= singleWidth;
+    } else if (el.scrollLeft <= singleWidth * 0.5) {
+      el.scrollLeft += singleWidth;
+    }
+  }, []);
+
+  // Stop active inertia animation
+  const stopInertia = React.useCallback(() => {
+    if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+    }
+    setIsRolling(false);
+  }, []);
+
+  // Center to set 1 (out of 4) on initial mount
+  React.useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const singleWidth = el.scrollWidth / 4;
+    if (singleWidth > 0) {
+      el.scrollLeft = singleWidth;
+    }
+    return () => {
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+  }, []);
+
+  // Start inertia rolling ("lempar jauh kayak rolling")
+  const startFling = (initialVelocity: number) => {
+    if (Math.abs(initialVelocity) < 0.12 || !sliderRef.current) return;
+
+    stopInertia();
+    setIsRolling(true);
+
+    let currentVel = initialVelocity;
+    // Cap max velocity to prevent disorienting runaway speed
+    if (currentVel > 3.8) currentVel = 3.8;
+    if (currentVel < -3.8) currentVel = -3.8;
+
+    const friction = 0.958; // Silky deceleration
+    let lastFrameTime = performance.now();
+
+    const step = (now: number) => {
+      const dt = Math.min(32, now - lastFrameTime);
+      lastFrameTime = now;
+
+      if (!sliderRef.current || Math.abs(currentVel) < 0.03) {
+        stopInertia();
+        return;
+      }
+
+      const frameRatio = dt / 16.6;
+      sliderRef.current.scrollLeft -= currentVel * 16 * frameRatio;
+      checkWrap();
+
+      currentVel *= Math.pow(friction, frameRatio);
+      animFrameIdRef.current = requestAnimationFrame(step);
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(step);
+  };
 
   const scrollSlider = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
-      const scrollAmount = direction === 'left' ? -330 : 330;
+      stopInertia();
+      const scrollAmount = direction === 'left' ? -340 : 340;
       sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(checkWrap, 450);
     }
   };
 
+  // Mouse Drag & Fling Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!sliderRef.current) return;
+    stopInertia();
+    isDraggingRef.current = true;
     setIsDragging(true);
-    setStartX(e.pageX - sliderRef.current.offsetLeft);
-    setScrollLeftState(sliderRef.current.scrollLeft);
+    lastXRef.current = e.pageX;
+    lastTimeRef.current = performance.now();
+    velocityRef.current = 0;
     dragDistanceRef.current = 0;
   };
 
-  const handleMouseLeave = () => setIsDragging(false);
-  const handleMouseUp = () => setIsDragging(false);
-
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !sliderRef.current) return;
+    if (!isDraggingRef.current || !sliderRef.current) return;
     e.preventDefault();
-    const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    dragDistanceRef.current = Math.abs(walk);
-    sliderRef.current.scrollLeft = scrollLeftState - walk;
+
+    const currentX = e.pageX;
+    const currentTime = performance.now();
+    const deltaX = currentX - lastXRef.current;
+    const deltaTime = Math.max(1, currentTime - lastTimeRef.current);
+
+    dragDistanceRef.current += Math.abs(deltaX);
+
+    // Track instantaneous release velocity with exponential smoothing
+    const instVel = deltaX / deltaTime;
+    velocityRef.current = velocityRef.current * 0.3 + instVel * 0.7;
+
+    sliderRef.current.scrollLeft -= deltaX;
+    checkWrap();
+
+    lastXRef.current = currentX;
+    lastTimeRef.current = currentTime;
+  };
+
+  const handleMouseUp = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+
+    // If held still before release, cancel velocity
+    if (performance.now() - lastTimeRef.current > 80) {
+      velocityRef.current = 0;
+      return;
+    }
+
+    startFling(velocityRef.current);
+  };
+
+  const handleMouseLeave = () => {
+    if (isDraggingRef.current) {
+      handleMouseUp();
+    }
+  };
+
+  // Touch Drag & Fling Handlers for Mobile & Tablets
+  const handleTouchStart = (e: React.TouchEvent) => {
+    stopInertia();
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    const touch = e.touches[0];
+    lastXRef.current = touch.pageX;
+    lastTimeRef.current = performance.now();
+    velocityRef.current = 0;
+    dragDistanceRef.current = 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current || !sliderRef.current) return;
+    const touch = e.touches[0];
+    const currentX = touch.pageX;
+    const currentTime = performance.now();
+    const deltaX = currentX - lastXRef.current;
+    const deltaTime = Math.max(1, currentTime - lastTimeRef.current);
+
+    dragDistanceRef.current += Math.abs(deltaX);
+
+    const instVel = deltaX / deltaTime;
+    velocityRef.current = velocityRef.current * 0.3 + instVel * 0.7;
+
+    sliderRef.current.scrollLeft -= deltaX;
+    checkWrap();
+
+    lastXRef.current = currentX;
+    lastTimeRef.current = currentTime;
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+
+    if (performance.now() - lastTimeRef.current > 80) {
+      velocityRef.current = 0;
+      return;
+    }
+
+    startFling(velocityRef.current);
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if (dragDistanceRef.current > 6) {
+    // Prevent accidental navigation when dragging or inertia rolling
+    if (dragDistanceRef.current > 8 || isRolling) {
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -402,8 +569,9 @@ export default function HomePage() {
 
               {/* Carousel Navigation Buttons */}
               <div className="flex items-center gap-3 shrink-0 self-start sm:self-end">
-                <span className="text-[11px] font-bold text-slate-400 hidden sm:inline-block">
-                  Geser 6 Prodi
+                <span className="text-[11px] font-bold text-slate-500 hidden sm:inline-flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 text-sky-500 animate-pulse" />
+                  Drag &amp; Lempar untuk Rolling Bebas
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -433,25 +601,31 @@ export default function HomePage() {
           <div className="relative -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
             <div
               ref={sliderRef}
+              onScroll={checkWrap}
               onMouseDown={handleMouseDown}
               onMouseLeave={handleMouseLeave}
               onMouseUp={handleMouseUp}
               onMouseMove={handleMouseMove}
-              className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-6 pt-2 select-none scrollbar-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-6 pt-2 select-none scrollbar-none transition-colors ${
+                isDragging || isRolling ? 'cursor-grabbing' : 'cursor-grab'
+              }`}
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {PRODI_LIST.map((prodi) => {
+              {LOOP_PRODI_LIST.map((prodi) => {
                 const theme = getProdiTheme(prodi.id);
 
                 return (
                   <div
-                    key={prodi.id}
-                    className="w-[260px] sm:w-[280px] lg:w-[310px] shrink-0 snap-start h-full"
+                    key={prodi.loopKey}
+                    className="w-[260px] sm:w-[280px] lg:w-[310px] shrink-0 h-full"
                   >
                     <Link
                       href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
                       onClick={handleCardClick}
-                      className={`group relative bg-white border border-slate-200/90 ${theme.borderHover} rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${theme.shadowHover} flex flex-col justify-between h-full overflow-hidden cursor-pointer`}
+                      className={`group relative bg-white border border-slate-200/90 ${theme.borderHover} rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${theme.shadowHover} flex flex-col justify-between h-full overflow-hidden cursor-pointer select-none`}
                       draggable={false}
                     >
                       {/* Top Accent Gradient Bar */}
