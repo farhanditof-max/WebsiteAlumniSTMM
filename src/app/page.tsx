@@ -359,21 +359,10 @@ export default function HomePage() {
               </ScrollReveal>
             </div>
 
-            {/* RIGHT CONTENT: Foto Gedung Kampus STMM MMTC dengan 2 Floating Badges */}
+            {/* RIGHT CONTENT: Foto Gedung Kampus STMM MMTC */}
             <div className="lg:col-span-6 relative flex items-center justify-center w-full">
               <ScrollReveal direction="left" delayMs={140} durationMs={800} className="w-full max-w-xl">
                 <div className="relative w-full">
-                  {/* Floating Glass Badge 1 (Pusat Transformasi Digital) */}
-                  <div className="absolute -top-4 -left-3 sm:-top-5 sm:-left-5 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/90 shadow-xl shadow-sky-950/10 flex items-center gap-3 z-20 animate-fade-in hover:scale-105 transition-transform duration-300">
-                    <div className="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center text-[#0284c7] shrink-0">
-                      <Sparkles className="w-4 h-4 text-[#0284c7]" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pusat Siaran &amp; Digital</p>
-                      <p className="text-xs font-bold text-slate-900">Transformasi MMTC</p>
-                    </div>
-                  </div>
-
                   {/* Foto Gedung */}
                   <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl shadow-sky-900/10 border-2 border-white/90 group max-h-[360px] sm:max-h-[400px] lg:max-h-[440px]">
                     <img 
@@ -381,21 +370,6 @@ export default function HomePage() {
                       alt="Gedung Transformasi Digital STMM MMTC Yogyakarta" 
                       className="w-full h-full max-h-[360px] sm:max-h-[400px] lg:max-h-[440px] object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
                     />
-                  </div>
-
-                  {/* Floating Glass Badge 2 (Talenta Open to Work) */}
-                  <div className="absolute -bottom-4 -right-3 sm:-bottom-5 sm:-right-5 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/90 shadow-xl shadow-sky-950/10 flex items-center gap-3 z-20 animate-fade-in hover:scale-105 transition-transform duration-300">
-                    <div className="relative flex items-center justify-center">
-                      <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping absolute" />
-                      <span className="w-3 h-3 rounded-full bg-emerald-500 relative" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                        <span>40+ Alumni Baru</span>
-                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">Aktif</span>
-                      </p>
-                      <p className="text-[10px] font-semibold text-slate-500">Siap Kerja di Industri</p>
-                    </div>
                   </div>
                 </div>
               </ScrollReveal>
