@@ -21,7 +21,6 @@ import {
   Users,
   Briefcase,
   Star,
-  Play,
   CheckCircle2,
   Award
 } from 'lucide-react';
@@ -88,15 +87,6 @@ export default function HomePage() {
                   >
                     <Compass className="w-4 h-4 text-white" />
                     Jelajahi Alumni Hub
-                  </Link>
-                  <Link 
-                    href="/open-to-work" 
-                    className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm sm:text-base border border-slate-200/90 shadow-xs transition-all active:scale-[0.98]"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-sky-100 flex items-center justify-center text-[#0284c7]">
-                      <Play className="w-3 h-3 fill-current ml-0.5" />
-                    </div>
-                    Katalog Open to Work
                   </Link>
                 </div>
 
