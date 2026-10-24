@@ -1,20 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { PRODI_LIST, JobPosting, UserProfile } from '@/types';
-import { getJobs } from '@/lib/jobs';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { PRODI_LIST } from '@/types';
 import { 
   ArrowRight, 
   Search, 
   Building2, 
-  MapPin, 
   Video, 
-  ChevronRight,
   Tv, 
   Gamepad2, 
   Film, 
@@ -29,54 +24,8 @@ import {
   CheckCircle2,
   Award
 } from 'lucide-react';
-import AlumniAvatar from '@/components/profile/AlumniAvatar';
-import { fetchOpenToWorkRest } from '@/lib/firestoreRest';
-import { JobCardSkeleton, TalentCardSkeleton } from '@/components/ui/Skeleton';
-import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
 
 export default function HomePage() {
-  const [recentJobs, setRecentJobs] = useState<JobPosting[]>([]);
-  const [openTalents, setOpenTalents] = useState<UserProfile[]>([]);
-  const [loadingJobs, setLoadingJobs] = useState(true);
-  const [loadingTalents, setLoadingTalents] = useState(true);
-
-  useEffect(() => {
-    async function loadLiveContent() {
-      // 1. Load Recent Jobs
-      try {
-        const jobs = await getJobs();
-        setRecentJobs(jobs.slice(0, 4));
-      } catch (err) {
-        console.warn('loadLiveContent jobs error:', err);
-      } finally {
-        setLoadingJobs(false);
-      }
-
-      // 2. Load Open to Work Talents
-      try {
-        const restTalents = await fetchOpenToWorkRest();
-        if (restTalents && restTalents.length > 0) {
-          setOpenTalents(restTalents.slice(0, 4));
-        } else {
-          const qTalent = query(collection(db, 'users'), where('openToWork', '==', true), limit(4));
-          const timeoutPromise = new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Home talents timeout')), 4000)
-          );
-          const snap = await Promise.race([getDocs(qTalent), timeoutPromise]).catch(() => null);
-          if (snap && !snap.empty) {
-            const talents = snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile));
-            setOpenTalents(talents);
-          }
-        }
-      } catch (talentErr) {
-        console.warn('Talents fetch error:', talentErr);
-      } finally {
-        setLoadingTalents(false);
-      }
-    }
-    loadLiveContent();
-  }, []);
-
   const getProdiIcon = (id: string) => {
     switch (id) {
       case 'Animasi': return <Film className="w-5 h-5 text-indigo-600" />;
@@ -311,164 +260,6 @@ export default function HomePage() {
 
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* REAL CONTENT: LIVE LOWONGAN TERBARU */}
-      <section className="py-16 bg-[#fafcff] border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7]">Bursa Karir</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-                Lowongan Kerja Terkini
-              </h2>
-            </div>
-            <Link 
-              href="/lowongan" 
-              className="text-xs font-bold text-[#0284c7] hover:underline flex items-center gap-1"
-            >
-              Lihat Semua Loker <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {loadingJobs ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <JobCardSkeleton />
-              <JobCardSkeleton />
-            </div>
-          ) : recentJobs.length === 0 ? (
-            <div className="p-10 rounded-3xl border border-dashed border-slate-200 bg-white text-center text-slate-500 text-xs space-y-2">
-              <Briefcase className="w-8 h-8 text-slate-400 mx-auto" />
-              <p className="font-bold text-slate-700">Belum ada lowongan kerja aktif saat ini.</p>
-              <p className="text-slate-400">Jadilah alumni pertama yang mempublikasikan lowongan.</p>
-              <Link href="/post-lowongan" className="inline-block mt-2 text-xs font-bold text-[#0284c7] hover:underline">
-                + Pasang Lowongan Baru
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {recentJobs.map((job) => (
-                <div 
-                  key={job.id} 
-                  className="p-6 rounded-3xl bg-white border border-slate-200/80 hover:border-sky-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-50 border border-sky-100 text-[#0284c7]">
-                        {job.tipeKerja}
-                      </span>
-                      {job.gajiRange && (
-                        <span className="text-xs font-extrabold text-emerald-600">
-                          {job.gajiRange}
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#0284c7] transition leading-snug">
-                      {job.judul}
-                    </h3>
-                    <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                      {job.perusahaan} • <MapPin className="w-3.5 h-3.5 text-slate-400" /> {job.lokasi}
-                    </p>
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {job.deskripsi}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1.5">
-                      {job.prodiTarget?.slice(0, 2).map((p) => (
-                        <ProdiBadge key={p} prodi={p} />
-                      ))}
-                    </div>
-                    <Link
-                      href="/lowongan"
-                      className="px-4 py-2 rounded-full bg-slate-50 hover:bg-[#0284c7] hover:text-white text-slate-800 text-xs font-bold transition flex items-center gap-1.5 border border-slate-200/80"
-                    >
-                      Lamar Sekarang <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* REAL CONTENT: TALENTA OPEN TO WORK */}
-      <section className="py-16 bg-white border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Talenta Siap Kerja</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-                Alumni Open to Work
-              </h2>
-            </div>
-            <Link 
-              href="/open-to-work" 
-              className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
-            >
-              Lihat Semua Talenta <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {loadingTalents ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <TalentCardSkeleton />
-              <TalentCardSkeleton />
-              <TalentCardSkeleton />
-              <TalentCardSkeleton />
-            </div>
-          ) : openTalents.length === 0 ? (
-            <div className="p-10 rounded-3xl border border-dashed border-slate-200 bg-slate-50 text-center text-slate-500 text-xs space-y-2">
-              <p className="font-bold text-slate-700">Belum ada alumni yang memasang status Open to Work.</p>
-              <p className="text-slate-400">Aktifkan toggle status Open to Work di menu profil Anda untuk tampil di sini.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {openTalents.map((alumni) => (
-                <Link
-                  key={alumni.uid}
-                  href={`/profil/${alumni.uid}`}
-                  className="p-5 rounded-3xl bg-white border border-slate-200/80 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-100 hover:-translate-y-1 transition-all flex flex-col justify-between group"
-                >
-                  <div className="space-y-3.5">
-                    <div className="flex items-start justify-between">
-                      <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-sm overflow-hidden shadow-xs border-2 border-white">
-                        <AlumniAvatar src={alumni.fotoProfil} name={alumni.namaLengkap} />
-                      </div>
-                      <OpenToWorkBadge pulse={false} />
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#0284c7] transition truncate">
-                        {alumni.namaLengkap}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {alumni.prodi} • Angkatan {alumni.angkatan}
-                      </p>
-                      <p className="text-xs text-slate-600 line-clamp-2 mt-2 leading-relaxed">
-                        {alumni.bio || 'Alumni aktif Sekolah Tinggi Multi Media MMTC Yogyakarta.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-3.5 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                    <span className="flex items-center gap-1.5 text-[11px] font-medium">
-                      <Video className="w-3.5 h-3.5 text-[#0284c7]" />
-                      {alumni.portfolio?.length || 0} Karya Showreel
-                    </span>
-                    <span className="text-[#0284c7] font-bold text-xs flex items-center gap-0.5 group-hover:translate-x-0.5 transition">
-                      Profil <ArrowRight className="w-3 h-3" />
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
