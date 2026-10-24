@@ -57,6 +57,19 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-200%) skewX(-20deg);
+  }
+  35%, 100% {
+    transform: translateX(300%) skewX(-20deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Glassmorphism utility */
 .glass-header {
   background: rgba(255, 255, 255, 0.92);

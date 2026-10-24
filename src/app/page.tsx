@@ -81,13 +81,32 @@ export default function HomePage() {
 
                 {/* Action Buttons (Pill Shapes) */}
                 <div className="pt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
-                  <Link 
-                    href="/feed" 
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 transition-all duration-200 active:scale-[0.98]"
-                  >
-                    <Compass className="w-4 h-4 text-white" />
-                    Jelajahi Alumni Hub
-                  </Link>
+                  <div className="relative inline-flex group">
+                    {/* Ambient Glow Aura on Hover */}
+                    <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-sky-400 to-blue-600 opacity-30 group-hover:opacity-75 blur-md transition-all duration-500 group-hover:duration-200" />
+                    
+                    <Link 
+                      href="/feed" 
+                      className="relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-sky-600 via-[#0284c7] to-sky-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/30 group-hover:shadow-sky-500/50 group-hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 overflow-hidden"
+                    >
+                      {/* Shimmer Light Beam Effect */}
+                      <span 
+                        aria-hidden="true" 
+                        className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none animate-shimmer" 
+                      />
+
+                      {/* Interactive Rotating Compass Badge */}
+                      <span className="w-6 h-6 rounded-full bg-white/15 group-hover:bg-white/25 flex items-center justify-center transition-all duration-300">
+                        <Compass className="w-4 h-4 text-white transition-transform duration-700 ease-out group-hover:rotate-[360deg]" />
+                      </span>
+
+                      {/* Label */}
+                      <span className="tracking-wide">Jelajahi Alumni Hub</span>
+
+                      {/* Smooth Sliding Arrow */}
+                      <ArrowRight className="w-4 h-4 text-white/80 group-hover:text-white transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                    </Link>
+                  </div>
                 </div>
 
                 {/* Social Proof Strip with Avatars & Stars */}
