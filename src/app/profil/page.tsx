@@ -94,6 +94,8 @@ const DEMO_PROFILE = {
   ],
   cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',
   cvFileUrl: '',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   portfolio: [
     {
       id: 'demo-1',
@@ -110,26 +112,55 @@ const DEMO_PROFILE = {
   ]
 };
 
+const getLocalProfile = (uid?: string): ExtendedUserProfile | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const key = uid ? `mmtc_profile_${uid}` : 'mmtc_demo_profile';
+    const raw = localStorage.getItem(key) || localStorage.getItem('mmtc_demo_profile');
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // ignore
+  }
+  return null;
+};
+
 export default function ProfilPage() {
-  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
+  const { user, profile, loading: authLoading, refreshProfile, setProfileData } = useAuth();
   const isDemo = !user;
 
-  const currentProfile = profile || (isDemo ? DEMO_PROFILE : null);
+  // Local state for profile persistence across preview/demo and offline saves
+  const [savedProfile, setSavedProfile] = useState<ExtendedUserProfile | null>(() => getLocalProfile(user?.uid));
 
-  const [namaLengkap, setNamaLengkap] = useState(currentProfile?.namaLengkap ?? DEMO_PROFILE.namaLengkap);
-  const [prodi, setProdi] = useState<ProdiType>(currentProfile?.prodi ?? 'Animasi');
-  const [angkatan, setAngkatan] = useState(currentProfile?.angkatan ?? DEMO_PROFILE.angkatan);
-  const [openToWork, setOpenToWork] = useState(currentProfile?.openToWork ?? true);
-  const [pekerjaanSaatIni, setPekerjaanSaatIni] = useState((currentProfile as ExtendedUserProfile | null)?.pekerjaanSaatIni ?? DEMO_PROFILE.pekerjaanSaatIni);
-  const [domisili, setDomisili] = useState((currentProfile as ExtendedUserProfile | null)?.domisili ?? DEMO_PROFILE.domisili);
-  const [bio, setBio] = useState(currentProfile?.bio ?? DEMO_PROFILE.bio);
-  const [phone, setPhone] = useState(currentProfile?.phone ?? DEMO_PROFILE.phone);
-  const [linkedinUrl, setLinkedinUrl] = useState(currentProfile?.linkedinUrl ?? DEMO_PROFILE.linkedinUrl);
-  const [instagramUrl, setInstagramUrl] = useState((currentProfile as ExtendedUserProfile | null)?.instagramUrl ?? DEMO_PROFILE.instagramUrl);
-  const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>(
-    (currentProfile as ExtendedUserProfile | null)?.customLinks ?? DEMO_PROFILE.customLinks
-  );
-  const [cvExternalLink, setCvExternalLink] = useState(currentProfile?.cvExternalLink ?? DEMO_PROFILE.cvExternalLink);
+  const currentProfile: ExtendedUserProfile = 
+    savedProfile || (profile as ExtendedUserProfile | null) || DEMO_PROFILE;
+
+  const [namaLengkap, setNamaLengkap] = useState(() => currentProfile.namaLengkap || DEMO_PROFILE.namaLengkap);
+  const [prodi, setProdi] = useState<ProdiType>(() => (currentProfile.prodi as ProdiType) || 'Animasi');
+  const [angkatan, setAngkatan] = useState(() => currentProfile.angkatan || DEMO_PROFILE.angkatan);
+  const [openToWork, setOpenToWork] = useState(() => currentProfile.openToWork ?? true);
+  const [pekerjaanSaatIni, setPekerjaanSaatIni] = useState(() => currentProfile.pekerjaanSaatIni || DEMO_PROFILE.pekerjaanSaatIni);
+  const [domisili, setDomisili] = useState(() => currentProfile.domisili || DEMO_PROFILE.domisili);
+  const [bio, setBio] = useState(() => currentProfile.bio || DEMO_PROFILE.bio);
+  const [phone, setPhone] = useState(() => currentProfile.phone || DEMO_PROFILE.phone);
+  const [linkedinUrl, setLinkedinUrl] = useState(() => currentProfile.linkedinUrl || DEMO_PROFILE.linkedinUrl);
+  const [instagramUrl, setInstagramUrl] = useState(() => currentProfile.instagramUrl || DEMO_PROFILE.instagramUrl);
+  const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>(() => currentProfile.customLinks || DEMO_PROFILE.customLinks);
+  const [cvExternalLink, setCvExternalLink] = useState(() => currentProfile.cvExternalLink || DEMO_PROFILE.cvExternalLink);
+
+  // Portfolio State
+  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(() => currentProfile.portfolio || DEMO_PROFILE.portfolio);
+  const [portType, setPortType] = useState<'youtube' | 'pinterest' | 'behance' | 'image' | 'link'>('youtube');
+  const [portTitle, setPortTitle] = useState('');
+  const [portUrl, setPortUrl] = useState('');
+
+  // Upload file state
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [uploadingCV, setUploadingCV] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState({ type: '', text: '' });
+  const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
 
   const handleAddCustomLink = () => {
     const newLink: CustomLinkItem = {
@@ -149,21 +180,6 @@ export default function ProfilPage() {
   const handleRemoveCustomLink = (id: string) => {
     setCustomLinks((prev) => prev.filter((item) => item.id !== id));
   };
-
-  // Upload file state
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [uploadingCV, setUploadingCV] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-
-  // Portfolio State
-  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(currentProfile?.portfolio ?? DEMO_PROFILE.portfolio);
-  const [portType, setPortType] = useState<'youtube' | 'pinterest' | 'behance' | 'image' | 'link'>('youtube');
-  const [portTitle, setPortTitle] = useState('');
-  const [portUrl, setPortUrl] = useState('');
-
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState({ type: '', text: '' });
-  const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
 
   // Guard against overwriting local uncommitted form inputs when background profile refreshes for same user
   const initializedUidRef = React.useRef<string | null>(null);
@@ -201,8 +217,22 @@ export default function ProfilPage() {
     setPortTitle('');
     setPortUrl('');
 
+    // Update local cache & state
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
+        const currentData = savedProfile || currentProfile || DEMO_PROFILE;
+        const updated = { ...currentData, portfolio: updatedList };
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        setSavedProfile(updated as ExtendedUserProfile);
+      } catch (err) {
+        console.warn('LocalStorage error:', err);
+      }
+    }
+
     if (isDemo || !user) {
-      setMsg({ type: 'success', text: `[Preview] Berhasil menambahkan "${newItem.title}" ke galeri showreel!` });
+      setMsg({ type: 'success', text: `Berhasil menambahkan "${newItem.title}" ke galeri showreel!` });
       setTimeout(() => setMsg({ type: '', text: '' }), 4000);
       return;
     }
@@ -230,8 +260,22 @@ export default function ProfilPage() {
     const updatedList = portfolioList.filter(p => p.id !== id);
     setPortfolioList(updatedList);
 
+    // Update local cache & state
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
+        const currentData = savedProfile || currentProfile || DEMO_PROFILE;
+        const updated = { ...currentData, portfolio: updatedList };
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        setSavedProfile(updated as ExtendedUserProfile);
+      } catch (err) {
+        console.warn('LocalStorage error:', err);
+      }
+    }
+
     if (isDemo || !user) {
-      setMsg({ type: 'success', text: '[Preview] Item portofolio berhasil dihapus dari simulasi.' });
+      setMsg({ type: 'success', text: 'Item portofolio berhasil dihapus.' });
       setTimeout(() => setMsg({ type: '', text: '' }), 3000);
       return;
     }
@@ -269,9 +313,18 @@ export default function ProfilPage() {
     if (isDemo || !user) {
       setTimeout(() => {
         setUploadingCV(false);
-        setMsg({ type: 'success', text: '[Preview] File CV PDF berhasil disimulasikan terunggah!' });
+        const objectUrl = URL.createObjectURL(cvFile);
+        setSavedProfile((prev) => {
+          const updated = { ...(prev || currentProfile || DEMO_PROFILE), cvFileUrl: objectUrl };
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+          }
+          return updated as ExtendedUserProfile;
+        });
+        setMsg({ type: 'success', text: 'File CV PDF berhasil disimpan!' });
         setCvFile(null);
-      }, 800);
+        setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      }, 600);
       return;
     }
 
@@ -289,6 +342,16 @@ export default function ProfilPage() {
         6000,
         'Koneksi timeout saat memperbarui data CV di profil'
       );
+      
+      setSavedProfile((prev) => {
+        const updated = { ...(prev || currentProfile || DEMO_PROFILE), cvFileUrl: downloadUrl };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
+          localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        }
+        return updated as ExtendedUserProfile;
+      });
+
       await refreshProfile();
       setMsg({ type: 'success', text: 'File CV berhasil diunggah ke cloud storage!' });
       setCvFile(null);
@@ -312,10 +375,24 @@ export default function ProfilPage() {
     setMsg({ type: '', text: '' });
 
     if (isDemo || !user) {
-      setTimeout(() => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setSavedProfile((prev) => {
+          const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: dataUrl };
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+          }
+          if (setProfileData) {
+            setProfileData(updated as UserProfile);
+          }
+          return updated as ExtendedUserProfile;
+        });
         setUploadingAvatar(false);
-        setMsg({ type: 'success', text: '[Preview] Foto profil berhasil disimulasikan!' });
-      }, 700);
+        setMsg({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
+        setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      };
+      reader.readAsDataURL(file);
       return;
     }
 
@@ -333,6 +410,19 @@ export default function ProfilPage() {
         6000,
         'Koneksi timeout saat menyimpan URL foto profil'
       );
+
+      setSavedProfile((prev) => {
+        const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: downloadUrl };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
+          localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        }
+        if (setProfileData) {
+          setProfileData(updated as UserProfile);
+        }
+        return updated as ExtendedUserProfile;
+      });
+
       await refreshProfile();
       setMsg({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
     } catch (err: unknown) {
@@ -348,48 +438,85 @@ export default function ProfilPage() {
     setSaving(true);
     setMsg({ type: '', text: '' });
 
-    if (isDemo || !user) {
-      setTimeout(() => {
-        setSaving(false);
-        setMsg({ type: 'success', text: '✨ [Preview Mode] Seluruh perubahan profil & showreel berhasil disimulasikan!' });
-        setTimeout(() => setMsg({ type: '', text: '' }), 4000);
-      }, 600);
-      return;
+    const trimmedCustomLinks = (customLinks || [])
+      .filter((l) => (l.title || '').trim() !== '' || (l.url || '').trim() !== '')
+      .map((l) => ({
+        id: l.id || Date.now().toString(),
+        title: (l.title || '').trim(),
+        url: (l.url || '').trim()
+      }));
+
+    const updateData: Record<string, unknown> = {
+      namaLengkap: (namaLengkap || '').trim() || profile?.namaLengkap || user?.displayName || 'Alumni MMTC',
+      nomorAlumni: profile?.nomorAlumni || currentProfile?.nomorAlumni || 'MMTC-2020-103',
+      prodi: prodi || profile?.prodi || 'Animasi',
+      angkatan: (angkatan || '').trim() || profile?.angkatan || '2020',
+      email: profile?.email || user?.email || 'alumni@mmtc.ac.id',
+      openToWork: Boolean(openToWork),
+      pekerjaanSaatIni: (pekerjaanSaatIni || '').trim(),
+      domisili: (domisili || '').trim(),
+      instagramUrl: (instagramUrl || '').trim(),
+      customLinks: trimmedCustomLinks,
+      bio: (bio || '').trim(),
+      phone: (phone || '').trim(),
+      linkedinUrl: (linkedinUrl || '').trim(),
+      cvExternalLink: (cvExternalLink || '').trim(),
+      portfolio: portfolioList,
+      updatedAt: new Date().toISOString()
+    };
+
+    const fullProfile: ExtendedUserProfile = {
+      uid: user ? user.uid : 'demo-alumni-001',
+      fotoProfil: profile?.fotoProfil || currentProfile?.fotoProfil || '',
+      cvFileUrl: profile?.cvFileUrl || currentProfile?.cvFileUrl || '',
+      ...updateData
+    } as ExtendedUserProfile;
+
+    // 1. Simpan segera ke localStorage agar tersimpan di browser
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
+        localStorage.setItem(storageKey, JSON.stringify(fullProfile));
+        localStorage.setItem('mmtc_demo_profile', JSON.stringify(fullProfile));
+        window.dispatchEvent(new Event('alumnihub_profile_updated'));
+      } catch (err) {
+        console.warn('LocalStorage save error:', err);
+      }
     }
 
-    try {
-      const updateData: Record<string, unknown> = {
-        namaLengkap: namaLengkap.trim() || profile?.namaLengkap || user.displayName || user.email?.split('@')[0] || 'Alumni MMTC',
-        nomorAlumni: profile?.nomorAlumni || '',
-        prodi: prodi || profile?.prodi || 'Animasi',
-        angkatan: angkatan.trim() || profile?.angkatan || '',
-        email: profile?.email || user.email || '',
-        openToWork: Boolean(openToWork),
-        pekerjaanSaatIni: pekerjaanSaatIni.trim(),
-        domisili: domisili.trim(),
-        instagramUrl: instagramUrl.trim(),
-        customLinks: customLinks.filter((l) => l.title.trim() !== '' || l.url.trim() !== ''),
-        bio: bio.trim(),
-        phone: phone.trim(),
-        linkedinUrl: linkedinUrl.trim(),
-        cvExternalLink: cvExternalLink.trim(),
-        portfolio: portfolioList,
-        updatedAt: new Date().toISOString()
-      };
+    // 2. Update React State & AuthContext profile data segera
+    setSavedProfile(fullProfile);
+    if (setProfileData) {
+      setProfileData(fullProfile as UserProfile);
+    }
 
-      await withTimeout(
-        setDoc(doc(db, 'users', user.uid), updateData, { merge: true }),
-        7000,
-        'Koneksi timeout saat menyimpan data profil'
-      );
-      await refreshProfile();
-      setMsg({ type: 'success', text: 'Profil alumni berhasil diperbarui!' });
-      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
-    } catch (err: unknown) {
-      const errorObj = err as Error;
-      setMsg({ type: 'error', text: errorObj.message || 'Gagal menyimpan profil.' });
-    } finally {
-      setSaving(false);
+    // 3. Jika user login ke Firebase, simpan ke Cloud Firestore
+    if (user) {
+      try {
+        await withTimeout(
+          setDoc(doc(db, 'users', user.uid), updateData, { merge: true }),
+          7000,
+          'Koneksi timeout saat menyimpan ke cloud database'
+        );
+        try {
+          await refreshProfile();
+        } catch {
+          // Abaikan latency refresh REST
+        }
+        setMsg({ type: 'success', text: '✅ Profil alumni berhasil diperbarui dan tersimpan!' });
+      } catch (err: unknown) {
+        console.warn('Cloud save error:', err);
+        setMsg({ type: 'success', text: '✅ Profil berhasil disimpan di browser Anda!' });
+      } finally {
+        setSaving(false);
+        setTimeout(() => setMsg({ type: '', text: '' }), 5000);
+      }
+    } else {
+      setTimeout(() => {
+        setSaving(false);
+        setMsg({ type: 'success', text: '✅ Perubahan profil, kontak & portofolio berhasil disimpan!' });
+        setTimeout(() => setMsg({ type: '', text: '' }), 5000);
+      }, 400);
     }
   };
 
@@ -990,13 +1117,29 @@ export default function ProfilPage() {
               )}
             </div>
 
-            {/* SAVE BUTTON */}
-            <div className="flex justify-end pt-2">
+            {/* SAVE BUTTON & BOTTOM FEEDBACK */}
+            <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                {msg.text && (
+                  <div className={`p-3 rounded-2xl text-xs flex items-center gap-2.5 border animate-fade-in ${
+                    msg.type === 'success' 
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                      : 'bg-red-50 border-red-200 text-red-800'
+                  }`}>
+                    {msg.type === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                    )}
+                    <span className="font-bold">{msg.text}</span>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="px-8 py-3.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white text-xs font-bold shadow-md shadow-sky-500/20 flex items-center gap-2 disabled:opacity-50 transition active:scale-[0.98] cursor-pointer"
+                className="px-8 py-3.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white text-xs font-bold shadow-md shadow-sky-500/20 flex items-center justify-center gap-2 disabled:opacity-50 transition active:scale-[0.98] cursor-pointer shrink-0"
               >
                 {saving ? (
                   <>

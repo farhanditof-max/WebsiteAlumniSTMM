@@ -111,6 +111,21 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
           }
         }
 
+        // 4. Fallback lookup demo atau cache lokal jika sedang mode demo / offline preview
+        if (typeof window !== 'undefined') {
+          try {
+            const localCached = localStorage.getItem(`mmtc_profile_${cleanUid}`) || 
+              (cleanUid === 'demo-alumni-001' || cleanUid.startsWith('demo') ? localStorage.getItem('mmtc_demo_profile') : null);
+            if (localCached) {
+              const parsed = JSON.parse(localCached);
+              setProfile({ uid: cleanUid, ...parsed } as UserProfile);
+              return;
+            }
+          } catch {
+            // ignore
+          }
+        }
+
         setProfile(null);
       } catch (err) {
         console.error('Error loadProfile:', err);

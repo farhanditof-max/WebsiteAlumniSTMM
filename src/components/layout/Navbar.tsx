@@ -131,11 +131,36 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const demoStorageRaw = React.useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === 'undefined') return () => {};
+      window.addEventListener('storage', onStoreChange);
+      window.addEventListener('alumnihub_profile_updated', onStoreChange);
+      return () => {
+        window.removeEventListener('storage', onStoreChange);
+        window.removeEventListener('alumnihub_profile_updated', onStoreChange);
+      };
+    },
+    () => (typeof window !== 'undefined' ? localStorage.getItem('mmtc_demo_profile') : null),
+    () => null
+  );
+
+  const demoStorageProfile = React.useMemo<ExtendedProfile | null>(() => {
+    if (!demoStorageRaw) return null;
+    try {
+      return JSON.parse(demoStorageRaw) as ExtendedProfile;
+    } catch {
+      return null;
+    }
+  }, [demoStorageRaw]);
+
   // Simulasi tampilan user login untuk seluruh halaman (kecuali halaman login/register)
   const isAuthPage = pathname === '/login' || pathname === '/register';
   const effectiveUser = user || (!isAuthPage ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
   const displayProfile: ExtendedProfile | null = profile 
     ? (profile as unknown as ExtendedProfile)
+    : demoStorageProfile
+    ? demoStorageProfile
     : (!isAuthPage ? { 
         namaLengkap: 'Budi Santoso', 
         prodi: 'Animasi', 
