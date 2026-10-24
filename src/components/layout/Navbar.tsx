@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -9,23 +9,55 @@ import {
   PlusCircle, 
   LogOut, 
   Menu, 
-  X,
-  FileText,
-  User,
-  Compass,
-  Users
+  X, 
+  FileText, 
+  User, 
+  Compass, 
+  Users,
+  ChevronDown,
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
+
+interface ExtendedProfile {
+  namaLengkap?: string;
+  prodi?: string;
+  angkatan?: string;
+  fotoProfil?: string;
+  pekerjaanSaatIni?: string;
+}
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Simulasi tampilan user login untuk seluruh halaman (kecuali halaman login/register)
   const isAuthPage = pathname === '/login' || pathname === '/register';
   const effectiveUser = user || (!isAuthPage ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
-  const effectiveProfile = profile || (!isAuthPage ? { namaLengkap: 'Budi Santoso', prodi: 'Animasi', fotoProfil: '' } : null);
+  const displayProfile: ExtendedProfile | null = profile 
+    ? (profile as unknown as ExtendedProfile)
+    : (!isAuthPage ? { 
+        namaLengkap: 'Budi Santoso', 
+        prodi: 'Animasi', 
+        angkatan: '2020',
+        pekerjaanSaatIni: '3D Animator & Rigger di Infinite Studios',
+        fotoProfil: '' 
+      } : null);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -35,14 +67,14 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-sky-100 text-slate-800 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between min-h-[78px] sm:min-h-[86px] py-2">
+        <div className="flex items-center justify-between min-h-[72px] sm:min-h-[78px] py-1.5">
           
-          {/* Brand Logo - Official AlumniHub Graphic */}
+          {/* Brand Logo - Official AlumniHub Graphic (-10px to h-[52px] sm:h-[57px]) */}
           <Link href="/" className="flex items-center group focus:outline-none py-0.5 shrink-0">
             <img 
               src="/logo_alumnihub.webp" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
-              className="h-[62px] sm:h-[67px] w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-[52px] sm:h-[57px] w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </Link>
 
@@ -125,41 +157,158 @@ export default function Navbar() {
                   <span>Pasang Loker</span>
                 </Link>
 
-                <Link 
-                  href="/profil" 
-                  className={`flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full border transition hover:shadow-xs ${
-                    isActive('/profil')
-                      ? 'bg-sky-50 border-sky-300 text-[#0284c7]'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
-                >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
-                    <AlumniAvatar src={effectiveProfile?.fotoProfil} name={effectiveProfile?.namaLengkap} />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-900 truncate max-w-[100px] leading-tight">
-                      {effectiveProfile?.namaLengkap || 'Alumni MMTC'}
-                    </p>
-                    <p className="text-[10px] text-[#0284c7] font-semibold leading-tight">
-                      {effectiveProfile?.prodi || 'Alumni'}
-                    </p>
-                  </div>
-                </Link>
-
-                {user ? (
+                {/* Profile Trigger Button & Dropdown Popover */}
+                <div className="relative" ref={dropdownRef}>
                   <button
-                    onClick={() => logout()}
-                    title="Keluar dari akun"
-                    className="p-2 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
-                    aria-label="Logout"
+                    type="button"
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className={`flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full border transition cursor-pointer select-none ${
+                      profileDropdownOpen || isActive('/profil')
+                        ? 'bg-sky-50 border-sky-300 text-[#0284c7] shadow-xs'
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                    aria-expanded={profileDropdownOpen}
+                    aria-haspopup="true"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
+                      <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
+                    </div>
+                    <div className="text-left hidden lg:block">
+                      <p className="text-xs font-bold text-slate-900 truncate max-w-[100px] leading-tight">
+                        {displayProfile?.namaLengkap || 'Alumni MMTC'}
+                      </p>
+                      <p className="text-[10px] text-[#0284c7] font-semibold leading-tight">
+                        {displayProfile?.prodi || 'Alumni'}
+                      </p>
+                    </div>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#0284c7]' : ''}`} />
                   </button>
-                ) : (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">
-                    Preview
-                  </span>
-                )}
+
+                  {/* LinkedIn-style Profile Menu Dropdown */}
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-3 z-50 animate-fade-in overflow-hidden">
+                      {/* USER PROFILE SUMMARY CARD */}
+                      <div className="px-4 pb-3 border-b border-slate-100 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-base font-bold shadow-xs shrink-0 border border-slate-100">
+                            <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug truncate">
+                              {displayProfile?.namaLengkap || 'Budi Santoso'}
+                            </h4>
+                            <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed mt-0.5">
+                              {displayProfile?.pekerjaanSaatIni || `${displayProfile?.prodi || 'Animasi'} • Angkatan ${displayProfile?.angkatan || '2020'}`}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* BUTTONS: VIEW PROFILE & SETTING PROFIL */}
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <Link
+                            href={user?.uid ? `/profil/${user.uid}` : '/profil/demo-user'}
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="px-3 py-1.5 rounded-full border border-[#0284c7] text-[#0284c7] hover:bg-sky-50 text-xs font-bold text-center transition"
+                          >
+                            Lihat Profil
+                          </Link>
+                          <Link
+                            href="/profil"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="px-3 py-1.5 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold text-center transition shadow-2xs"
+                          >
+                            Setting Profil
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* SECTION: AKUN */}
+                      <div className="py-2 px-2 border-b border-slate-100">
+                        <p className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Akun
+                        </p>
+                        <Link
+                          href="/profil"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                        >
+                          <Settings className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Setting Profil &amp; Privasi</span>
+                        </Link>
+                        <Link
+                          href="/open-to-work"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Status Open to Work</span>
+                          </div>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        </Link>
+                      </div>
+
+                      {/* SECTION: KELOLA */}
+                      <div className="py-2 px-2 border-b border-slate-100">
+                        <p className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Kelola
+                        </p>
+                        <Link
+                          href="/feed"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                        >
+                          <Users className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Postingan &amp; Aktivitas</span>
+                        </Link>
+                        <Link
+                          href="/lamaran"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Status Lamaran Terkirim</span>
+                        </Link>
+                        <Link
+                          href="/post-lowongan"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                        >
+                          <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pasang Lowongan Kerja</span>
+                        </Link>
+                      </div>
+
+                      {/* SECTION: SIGN OUT */}
+                      <div className="pt-1.5 px-2">
+                        {user ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setProfileDropdownOpen(false);
+                              logout();
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer"
+                          >
+                            <LogOut className="w-3.5 h-3.5" />
+                            <span>Sign Out (Keluar)</span>
+                          </button>
+                        ) : (
+                          <div className="px-3 py-2 flex items-center justify-between text-xs text-slate-500">
+                            <span className="text-[11px]">Mode Pratinjau Demo</span>
+                            <Link
+                              href="/login"
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className="text-[11px] font-bold text-[#0284c7] hover:underline"
+                            >
+                              Masuk Akun Riil
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2.5">
@@ -263,9 +412,9 @@ export default function Navbar() {
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-6 h-6 rounded-full bg-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden">
-                    <AlumniAvatar src={effectiveProfile?.fotoProfil} name={effectiveProfile?.namaLengkap} />
+                    <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
                   </div>
-                  <span>Profil Saya ({effectiveProfile?.namaLengkap || 'Alumni'})</span>
+                  <span>Setting Profil ({displayProfile?.namaLengkap || 'Alumni'})</span>
                 </div>
                 <User className="w-4 h-4" />
               </Link>
