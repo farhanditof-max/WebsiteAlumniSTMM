@@ -22,10 +22,10 @@ export default function Navbar() {
   const { user, profile, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Jika sedang preview halaman dashboard tanpa login, aktifkan simulasi tampilan user login
-  const isDashboardRoute = pathname === '/profil' || pathname === '/post-lowongan' || pathname === '/lamaran' || pathname === '/feed' || pathname === '/beranda';
-  const effectiveUser = user || (isDashboardRoute ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
-  const effectiveProfile = profile || (isDashboardRoute ? { namaLengkap: 'Budi Santoso', prodi: 'Animasi', fotoProfil: '' } : null);
+  // Simulasi tampilan user login untuk seluruh halaman (kecuali halaman login/register)
+  const isAuthPage = pathname === '/login' || pathname === '/register';
+  const effectiveUser = user || (!isAuthPage ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
+  const effectiveProfile = profile || (!isAuthPage ? { namaLengkap: 'Budi Santoso', prodi: 'Animasi', fotoProfil: '' } : null);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -95,26 +95,24 @@ export default function Navbar() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Open to Work</span>
             </Link>
-
-            {effectiveUser && (
-              <Link 
-                href="/lamaran" 
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                  isActive('/lamaran') 
-                    ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 text-amber-600" />
-                <span>Lamaran</span>
-              </Link>
-            )}
           </div>
 
           {/* User Profile / Auth CTA */}
           <div className="hidden md:flex items-center gap-2.5">
             {effectiveUser ? (
               <div className="flex items-center gap-2">
+                <Link 
+                  href="/lamaran" 
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 border shadow-2xs whitespace-nowrap ${
+                    isActive('/lamaran')
+                      ? 'bg-amber-500 text-white border-amber-500 font-bold'
+                      : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Lamaran</span>
+                </Link>
+
                 <Link 
                   href="/post-lowongan" 
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 border shadow-2xs whitespace-nowrap ${
