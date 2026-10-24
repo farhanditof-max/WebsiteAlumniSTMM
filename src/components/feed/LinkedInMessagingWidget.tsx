@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
+import { useAuth } from '@/context/AuthContext';
 
 interface Message {
   id: string;
@@ -88,7 +89,19 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
   }
 ];
 
-export default function LinkedInMessagingWidget() {
+interface LinkedInMessagingWidgetProps {
+  userAvatar?: string;
+  userName?: string;
+}
+
+export default function LinkedInMessagingWidget({
+  userAvatar: propAvatar,
+  userName: propName
+}: LinkedInMessagingWidgetProps = {}) {
+  const { user, profile } = useAuth();
+  const userName = propName || profile?.namaLengkap || user?.displayName || 'Budi Santoso';
+  const userAvatar = propAvatar || profile?.fotoProfil || user?.photoURL;
+
   const [isOpen, setIsOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -178,15 +191,19 @@ export default function LinkedInMessagingWidget() {
       >
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-              P
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-xs shadow-2xs border border-white">
+              <AlumniAvatar 
+                src={userAvatar || undefined}
+                name={userName}
+                className="w-full h-full object-cover rounded-full"
+              />
             </div>
             <Circle className="w-2.5 h-2.5 fill-emerald-500 text-white absolute -bottom-0.5 -right-0.5" />
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-bold text-slate-900">
-              Pesan Alumni
+              Pesan
             </span>
             {totalUnread > 0 && !isOpen && (
               <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs">

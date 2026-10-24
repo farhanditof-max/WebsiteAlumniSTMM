@@ -1073,7 +1073,10 @@ export default function FeedPage() {
       />
 
       {/* LINKEDIN-STYLE FLOATING MESSAGING DRAWER */}
-      <LinkedInMessagingWidget />
+      <LinkedInMessagingWidget 
+        userAvatar={currentUser.avatar}
+        userName={currentUser.name}
+      />
     </div>
   );
 }
