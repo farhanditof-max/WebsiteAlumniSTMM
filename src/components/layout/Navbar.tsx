@@ -179,19 +179,12 @@ export default function Navbar() {
                           </div>
                         </div>
 
-                        {/* BUTTONS: VIEW PROFILE & SETTING PROFIL */}
-                        <div className="grid grid-cols-2 gap-2 pt-1">
-                          <Link
-                            href={user?.uid ? `/profil/${user.uid}` : '/profil/demo-user'}
-                            onClick={() => setProfileDropdownOpen(false)}
-                            className="px-3 py-1.5 rounded-full border border-[#0284c7] text-[#0284c7] hover:bg-sky-50 text-xs font-bold text-center transition"
-                          >
-                            Lihat Profil
-                          </Link>
+                        {/* BUTTON: SETTING PROFIL */}
+                        <div className="pt-1">
                           <Link
                             href="/profil"
                             onClick={() => setProfileDropdownOpen(false)}
-                            className="px-3 py-1.5 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold text-center transition shadow-2xs"
+                            className="w-full block py-2 px-4 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold text-center transition shadow-2xs"
                           >
                             Setting Profil
                           </Link>
