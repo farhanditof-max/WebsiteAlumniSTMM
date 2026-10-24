@@ -106,7 +106,7 @@ export default function RegisterPage() {
               alt="AlumniHub Sekolah Tinggi Multi Media" 
               className="h-11 w-auto mx-auto object-contain mb-3"
             />
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Pendaftaran Akun Alumni</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Pendaftaran Akun Alumni</h1>
             <p className="text-xs text-slate-500">
               Registrasi resmi menggunakan Nomor Alumni terdaftar kampus STMM MMTC Yogyakarta
             </p>

@@ -167,11 +167,11 @@ export default function Navbar() {
                       {/* USER PROFILE SUMMARY CARD (LEGA & PROPORSI ELEGAN) */}
                       <div className="p-5 border-b border-slate-100 space-y-4">
                         <div className="flex items-start gap-3.5">
-                          <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xl font-black shadow-xs ring-4 ring-sky-50 shrink-0 border border-slate-100">
+                          <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xl font-bold shadow-xs ring-4 ring-sky-50 shrink-0 border border-slate-100">
                             <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-base font-extrabold text-slate-900 leading-snug truncate">
+                            <h4 className="text-base font-bold text-slate-900 leading-snug truncate">
                               {displayProfile?.namaLengkap || 'Budi Santoso'}
                             </h4>
                             <p className="text-xs text-slate-600 font-medium leading-relaxed mt-0.5 line-clamp-2">

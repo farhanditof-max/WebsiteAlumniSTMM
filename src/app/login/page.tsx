@@ -72,7 +72,7 @@ function LoginContent() {
               alt="AlumniHub Sekolah Tinggi Multi Media" 
               className="h-11 w-auto mx-auto object-contain mb-3"
             />
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk Portal Alumni</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Masuk Portal Alumni</h1>
             <p className="text-xs text-slate-500">
               Gunakan Email atau Nomor Alumni MMTC yang sudah terdaftar
             </p>

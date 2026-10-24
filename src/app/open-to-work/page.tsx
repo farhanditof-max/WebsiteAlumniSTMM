@@ -101,7 +101,7 @@ export default function OpenToWorkPage() {
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             Katalog Talenta Kreatif &amp; Penyiaran
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
             Alumni MMTC <span className="text-emerald-600">Open to Work</span>
           </h1>
           <p className="text-slate-600 text-sm max-w-2xl leading-relaxed">

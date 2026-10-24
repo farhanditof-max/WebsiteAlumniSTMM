@@ -192,7 +192,7 @@ function LowonganContent() {
             <Briefcase className="w-3.5 h-3.5" />
             Bursa Karir Resmi MMTC
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
             Portal Lowongan Kerja Alumni
           </h1>
           <p className="text-slate-600 text-sm max-w-2xl leading-relaxed">

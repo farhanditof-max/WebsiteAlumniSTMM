@@ -477,7 +477,7 @@ export default function FeedPage() {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <h1 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                 Beranda &amp; Jejaring Sosial Alumni STMM MMTC
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500 text-white font-bold">
                   Community Feed

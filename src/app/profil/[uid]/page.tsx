@@ -255,7 +255,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
               <AlumniAvatar src={profile.fotoProfil} name={profile.namaLengkap} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
                 {profile.namaLengkap}
               </h1>
               <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-1">

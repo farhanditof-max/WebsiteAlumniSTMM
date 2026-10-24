@@ -209,7 +209,7 @@ export default function LamaranPage() {
             <FileText className="w-3.5 h-3.5" />
             Dashboard Tracking Lamaran
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Manajemen Lamaran Kerja
           </h1>
           <p className="text-slate-600 text-xs sm:text-sm">

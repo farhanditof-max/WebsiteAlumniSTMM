@@ -486,7 +486,7 @@ export default function ProfilPage() {
             </div>
 
             <div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
                 {namaLengkap || currentProfile?.namaLengkap}
               </h1>
               <p className="text-xs sm:text-sm text-[#0284c7] font-bold mt-1">

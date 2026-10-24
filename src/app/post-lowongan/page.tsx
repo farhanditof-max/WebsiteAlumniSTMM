@@ -174,7 +174,7 @@ export default function PostLowonganPage() {
             <PlusCircle className="w-3.5 h-3.5" />
             Bursa Karir Alumni
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Pasang Lowongan Kerja Alumni
           </h1>
           <p className="text-slate-600 text-xs sm:text-sm">

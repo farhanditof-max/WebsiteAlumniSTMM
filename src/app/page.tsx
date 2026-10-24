@@ -117,7 +117,7 @@ export default function HomePage() {
               </div>
 
               {/* Big Bold Headline */}
-              <h1 className="text-4xl sm:text-6xl lg:text-[64px] font-black tracking-tight text-slate-900 leading-[1.08]">
+              <h1 className="text-4xl sm:text-6xl lg:text-[60px] font-bold text-slate-900 leading-[1.12]">
                 Portal Karir &amp; <br />
                 Karya Alumni <span className="inline-flex items-center gap-2 text-[#0284c7]">
                   MMTC
@@ -226,7 +226,7 @@ export default function HomePage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
               Program Studi Unggulan
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-bold text-slate-900">
               Klasifikasi Keahlian Khusus MMTC
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
@@ -272,7 +272,7 @@ export default function HomePage() {
                 <span className="text-xs font-bold text-sky-100 uppercase tracking-wider block">
                   Ikatan Alumni STMM MMTC Yogyakarta
                 </span>
-                <h3 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-snug">
+                <h3 className="text-2xl sm:text-4xl font-bold leading-snug">
                   Wadah Kolaborasi Industri Penyiaran &amp; Digital 😊
                 </h3>
                 <p className="text-xs sm:text-sm text-sky-100 max-w-xl leading-relaxed">
@@ -320,7 +320,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7]">Bursa Karir</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
                 Lowongan Kerja Terkini
               </h2>
             </div>
@@ -403,7 +403,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Talenta Siap Kerja</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
                 Alumni Open to Work
               </h2>
             </div>
@@ -482,7 +482,7 @@ export default function HomePage() {
               <span className="text-xs font-bold text-[#0284c7] uppercase tracking-wider block">
                 Bergabung Sekarang
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
                 Kembangkan Karir &amp; Portofoliomu
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
