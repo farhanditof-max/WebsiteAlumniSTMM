@@ -31,6 +31,11 @@ import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { parseYouTubeVideoId } from '@/lib/media';
+import { UserProfile } from '@/types';
+
+interface ExtendedUserProfile extends UserProfile {
+  pekerjaanSaatIni?: string;
+}
 
 interface CommentItem {
   id: string;
@@ -238,7 +243,7 @@ export default function FeedPage() {
     name: profile?.namaLengkap || user?.displayName || 'Budi Santoso',
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
-    role: '3D Artist & Motion Designer',
+    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
     avatar: profile?.fotoProfil || ''
   };
 
@@ -463,9 +468,12 @@ export default function FeedPage() {
                 <p className="text-xs text-[#0284c7] font-semibold mt-0.5">
                   {currentUser.prodi} • Angkatan {currentUser.angkatan}
                 </p>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  {currentUser.role}
-                </p>
+                {currentUser.role && (
+                  <p className="text-[11px] text-slate-600 font-medium mt-1.5 flex items-center justify-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
+                    <Briefcase className="w-3 h-3 text-[#0284c7] shrink-0" />
+                    <span className="truncate">{currentUser.role}</span>
+                  </p>
+                )}
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-center">

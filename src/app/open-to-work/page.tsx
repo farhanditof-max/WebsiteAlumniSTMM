@@ -14,13 +14,19 @@ import {
   ArrowRight, 
   FileText, 
   Video,
-  X
+  X,
+  Briefcase
 } from 'lucide-react';
 import { fetchOpenToWorkRest } from '@/lib/firestoreRest';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { TalentCardSkeleton } from '@/components/ui/Skeleton';
 import { OpenToWorkBadge } from '@/components/ui/Badge';
 import { extractSkills } from '@/components/profile/skills';
+
+interface ExtendedUserProfile extends UserProfile {
+  pekerjaanSaatIni?: string;
+  pekerjaan?: string;
+}
 
 export default function OpenToWorkPage() {
   const [alumniList, setAlumniList] = useState<UserProfile[]>([]);
@@ -215,6 +221,12 @@ export default function OpenToWorkPage() {
                         <p className="text-xs text-slate-500 mt-0.5">
                           {alumni.prodi} • Angkatan {alumni.angkatan}
                         </p>
+                        {((alumni as ExtendedUserProfile).pekerjaanSaatIni || (alumni as ExtendedUserProfile).pekerjaan) && (
+                          <p className="text-[11px] text-[#0284c7] font-semibold mt-0.5 flex items-center gap-1 truncate max-w-[200px]">
+                            <Briefcase className="w-3 h-3 shrink-0" />
+                            <span className="truncate">{(alumni as ExtendedUserProfile).pekerjaanSaatIni || (alumni as ExtendedUserProfile).pekerjaan}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
 

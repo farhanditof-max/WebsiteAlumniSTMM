@@ -19,7 +19,8 @@ import {
   User,
   Share2,
   Maximize2,
-  Sparkles
+  Sparkles,
+  Briefcase
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
@@ -27,6 +28,11 @@ import { OpenToWorkBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { extractSkills } from '@/components/profile/skills';
+
+interface ExtendedUserProfile extends UserProfile {
+  pekerjaanSaatIni?: string;
+  pekerjaan?: string;
+}
 
 export default function PublicProfilePage({ params }: { params: Promise<{ uid: string }> }) {
   const resolvedParams = use(params);
@@ -254,6 +260,12 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
               <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-1">
                 {profile.prodi} • Angkatan {profile.angkatan}
               </p>
+              {((profile as ExtendedUserProfile).pekerjaanSaatIni || (profile as ExtendedUserProfile).pekerjaan) && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-bold text-slate-800 mt-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
+                  <span>Bekerja di: {(profile as ExtendedUserProfile).pekerjaanSaatIni || (profile as ExtendedUserProfile).pekerjaan}</span>
+                </div>
+              )}
               <p className="text-[11px] text-slate-400 font-mono mt-1">
                 Nomor Alumni: {profile.nomorAlumni}
               </p>
