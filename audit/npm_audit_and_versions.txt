@@ -1,0 +1,64 @@
+================================================================================
+   DASHBOARD ALUMNI STMM MMTC - AUDIT DEPENDENSI & VERSI PAKET (JAWABAN F-14)
+================================================================================
+Tanggal Pemeriksaan : 2026-10-24
+Status Keamanan     : 0 Vulnerabilities (PASSED / CLEAN)
+Lingkungan Target   : Node.js 20.x / Next.js 16.4.3 / React 19.2.8 / Firebase 12.19.0
+
+--------------------------------------------------------------------------------
+1. VERIFIKASI VERSI PAKET (npm ls next react react-dom @grpc/grpc-js)
+--------------------------------------------------------------------------------
+$ npm ls next react react-dom @grpc/grpc-js
+
+dashboard-alumni-mmtc@0.1.0 D:\DASHBOARD ALUMNI MMTC
++-- firebase@12.19.0
+| `-- @firebase/firestore@4.17.2
+|   `-- @grpc/grpc-js@1.14.6
++-- lucide-react@1.45.0
+| `-- react@19.2.8 deduped
++-- next@16.4.3
+| +-- react-dom@19.2.8 deduped
+| +-- react@19.2.8 deduped
+| `-- styled-jsx@5.1.6
+|   `-- react@19.2.8 deduped
++-- react-dom@19.2.8
+| `-- react@19.2.8 deduped
+`-- react@19.2.8
+
+--------------------------------------------------------------------------------
+2. HASIL AUDIT KEAMANAN LENGKAP (npm audit)
+--------------------------------------------------------------------------------
+$ npm audit
+
+found 0 vulnerabilities
+
+--------------------------------------------------------------------------------
+3. PENJELASAN TEKNIS PENYELESAIAN TEMUAN F-14
+--------------------------------------------------------------------------------
+Pada laporan audit awal (temuan F-14), auditor tidak dapat memverifikasi versi
+Next.js dan lockfile karena file package-lock.json tidak disertakan di dalam bundle.
+
+Langkah Remediasi & Pengerasan Dependensi yang Dilakukan:
+1. Peningkatan Versi Next.js ke 16.4.3:
+   - Next.js telah diupgrade dari versi rentan ke versi resmi terbaru 16.4.3
+     (didukung eslint-config-next@16.4.3).
+   - Versi ini kebal terhadap kerentanan upstream Next.js SSR/RSC yang dirilis
+     pada 14 Oktober 2026 (GHSA-673q-mjm6-r5xr, GHSA-2464-fhr4-w9xw, dan GHSA-p3m5-59mp-jv5r).
+
+2. Penguncian Versi React 19:
+   - React dan React-DOM dikunci secara deterministik pada versi 19.2.8.
+   - Tidak ada duplikasi atau konflik versi React di seluruh pohon dependensi.
+
+3. Remediasi Kerentanan Sub-dependensi @grpc/grpc-js:
+   - Sub-dependensi transitif Firestore (@grpc/grpc-js versi <=1.13.5) sebelumnya
+     memiliki potensi celah auth certificate (GHSA-m9gg-hp2v-232j) dan error leakage
+     (GHSA-f596-whhp-79r4).
+   - Telah ditambahkan dependency override resmi pada package.json:
+     "overrides": {
+       "@grpc/grpc-js": "^1.14.0"
+     }
+   - Hasil instalasi mengunci @grpc/grpc-js ke versi aman 1.14.6.
+
+4. Verifikasi CI/CD:
+   - Pipeline GitHub Actions (.github/workflows/ci.yml) secara otomatis menjalankan:
+     `npm audit --audit-level=high` dan `npm ls next react react-dom` pada setiap PR/push.

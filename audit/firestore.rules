@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn()   { return request.auth != null; }
+    function isAdmin()    { return signedIn() && (request.auth.token.admin == true || request.auth.token.role == 'admin'); }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function locked(keys) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
+    }
+
+    // Profil Alumni Privat (F-01, F-02, F-08, F-20, F-22):
+    // Data privat dibaca pemilik atau admin, atau alumni terotentikasi bila openToWork true.
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin() || (signedIn() && resource.data.openToWork == true);
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId
+                    && (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role != 'admin')
+                    && request.resource.data.namaLengkap is string;
+      allow update: if (isOwner(userId)
+                    && locked(['role', 'uid', 'nomorAlumni', 'createdAt', 'prodi', 'angkatan'])
+                    && request.resource.data.namaLengkap is string
+                    && (request.resource.data.openToWork is bool || !request.resource.data.keys().hasAny(['openToWork']))
+                    && (!request.resource.data.keys().hasAny(['portfolio']) || (request.resource.data.portfolio is list && request.resource.data.portfolio.size() <= 12))
+                    ) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Profil Publik Mirror (F-02 Whitelist):
+    // Dibaca publik, ditulis hanya oleh Admin atau Cloud Function trigger.
+    match /public_profiles/{userId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Lowongan Kerja (F-05, F-20, F-22):
+    // postedBy terikat permanen ke request.auth.uid, validasi tipe data ketat.
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && request.resource.data.postedBy == request.auth.uid
+                    && request.resource.data.judul is string
+                    && request.resource.data.perusahaan is string
+                    && request.resource.data.lokasi is string
+                    && request.resource.data.deskripsi is string
+                    && request.resource.data.prodiTarget is list
+                    && request.resource.data.kualifikasi is list;
+      allow update: if (signedIn()
+                    && resource.data.postedBy == request.auth.uid
+                    && locked(['postedBy', 'createdAt'])
+                    && request.resource.data.judul is string
+                    && request.resource.data.prodiTarget is list
+                    && request.resource.data.kualifikasi is list
+                    ) || isAdmin();
+      allow delete: if (signedIn() && resource.data.postedBy == request.auth.uid) || isAdmin();
+    }
+
+    // Lamaran Kerja (F-06, F-21, F-22):
+    // Deterministic ID: jobId_applicantUid untuk mencegah duplicate spam & race condition.
+    match /applications/{applicationId} {
+      allow read: if signedIn() && (
+        resource.data.applicantUid == request.auth.uid || 
+        resource.data.posterUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if signedIn() 
+                    && applicationId == request.resource.data.jobId + '_' + request.auth.uid
+                    && request.resource.data.applicantUid == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.pesan is string;
+      allow update: if signedIn() && (
+        (
+          resource.data.posterUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status in ['reviewed', 'accepted', 'rejected']
+        ) || isAdmin()
+      );
+      allow delete: if (signedIn() && resource.data.applicantUid == request.auth.uid) || isAdmin();
+    }
+
+    // Permintaan Akses Kontak (F-10, F-21, F-22):
+    // Deterministic ID: requesterUid_targetUid
+    match /contact_requests/{requestId} {
+      allow read: if signedIn() && (
+        resource.data.requesterUid == request.auth.uid || 
+        resource.data.targetUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if signedIn() 
+                    && requestId == request.auth.uid + '_' + request.resource.data.targetUid
+                    && request.resource.data.requesterUid == request.auth.uid
+                    && request.resource.data.targetUid != request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.message is string;
+      allow update: if signedIn() && (
+        (
+          resource.data.targetUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status in ['approved', 'rejected']
+        ) || isAdmin()
+      );
+      allow delete: if (signedIn() && resource.data.requesterUid == request.auth.uid) || isAdmin();
+    }
+
+    // Basis Data Master Alumni (Registry Whitelist F-04, F-24):
+    match /alumni_registry/{alumniId} {
+      allow read: if signedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.isRegistered == false
+        && request.resource.data.isRegistered == true
+        && request.resource.data.registeredUid == request.auth.uid
+        && locked(['nomorAlumni', 'prodi', 'angkatan'])
+      );
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

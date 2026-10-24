@@ -1,0 +1,35 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(userId) { return signedIn() && request.auth.uid == userId; }
+
+    // Foto Profil (Avatars):
+    // F-03 & F-23: Pisahkan operasi delete dari create/update.
+    // Menolak SVG (vektor XSS), batasi ukuran maksimal 3MB, dan nama file tetap untuk mencegah storage flooding.
+    match /avatars/{userId}/{fileName} {
+      allow read: if true;
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+                    && fileName.matches('^avatar\\.(jpg|jpeg|png|webp)$')
+                    && request.resource.size < 3 * 1024 * 1024
+                    && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    // Dokumen CV (CV Documents):
+    // F-03 & F-23: Membatasi hanya format PDF maks 5MB dengan nama tetap cv.pdf.
+    match /cv_documents/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+                    && fileName == 'cv.pdf'
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType == 'application/pdf';
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

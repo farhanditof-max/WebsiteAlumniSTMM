@@ -64,3 +64,8 @@ cloudflared_bin.exe
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# firebase & temp
+firebase-debug*.log
+*.zip
+

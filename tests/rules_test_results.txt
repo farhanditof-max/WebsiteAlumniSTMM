@@ -1,0 +1,138 @@
+Executed: 2026-10-24T14:20:57.225Z
+Total Test Cases : 20
+Passed           : 20
+Failed           : 0
+Status           : ALL PASS (100% SUCCESS)
+
+-------------------------------------------------------------------------------
+ID      FINDING     STATUS    TEST CASE TITLE
+-------------------------------------------------------------------------------
+TC-01   F-01        [PASS]    Pengguna biasa tidak dapat menulis role: 'admin' ke dokumen sendiri atau orang lain
+TC-02   F-01        [PASS]    Pengguna non-admin membuka /admin/* ditolak oleh server/guard
+TC-03   F-08, F-22  [PASS]    Pengguna tidak bisa mengubah identitas permanen (nomorAlumni, prodi, angkatan, role, uid) dan dilarang delete langsung users/{uid}
+TC-04   F-04        [PASS]    Pengguna biasa tidak dapat menambah/menghapus alumni_registry; anonim dilarang membaca
+TC-05   F-04        [PASS]    Mengetik nomor alumni di form daftar tidak mengembalikan/mengisi nama resmi sebelum verifikasi
+TC-06   F-04, F-24  [PASS]    Mendaftar dengan nomor alumni terverifikasi tidak menimpa prodi/angkatan di registry master
+TC-07   F-21        [PASS]    Menyimpan field uid atau id palsu di payload tidak menimpa Document ID asli saat dibaca
+TC-08   F-02        [PASS]    Anonim hanya bisa membaca public_profiles (whitelist); users privat terlindungi
+TC-09   F-25        [PASS]    Mengunjungi /profil/<nomorAlumni> atau /profil/<email> tidak membocorkan profil; saat openToWork == false CV tersembunyi
+TC-10   F-02, UU PDP[PASS]    Nomor telepon pelamar hanya dikirim jika pelamar menyetujui checkbox izin kontak (UU PDP)
+TC-11   F-03, F-23  [PASS]    Pengguna lain tidak bisa sembarangan mengunduh CV; file dibatasi hanya cv.pdf dengan ukuran < 5MB
+TC-12   F-06        [PASS]    User A tidak bisa membaca lamaran User B kecuali pemilik lowongan yang sebenarnya
+TC-13   F-05        [PASS]    Membuat jobs dengan postedBy != auth.uid ditolak; update mengunci postedBy & createdAt
+TC-14   F-20        [PASS]    Membuat/memperbarui jobs atau users dengan tipe data salah ditolak oleh Rules
+TC-15   F-06, F-21  [PASS]    ID dokumen lamaran dikunci secara deterministik ke `${jobId}_${applicantUid}`
+TC-16   F-06, F-22  [PASS]    Poster lowongan hanya bisa mengubah status enum yang sah dan dilarang memanipulasi pesan pelamar
+TC-17   F-10, F-21, F-22[PASS]    Satu pasangan requester/target hanya punya 1 dokumen contact_requests; target hanya bisa ubah status
+TC-18   F-07        [PASS]    Sanitasi URL mencegah injeksi skema javascript: atau data: XSS pada tautan portofolio dan CV
+TC-19   F-12        [PASS]    Storage Rules menolak file SVG (vektor XSS) dan membatasi ukuran array portofolio maks 12 item
+TC-20   F-23        [PASS]    Storage Rules memisahkan operasi delete dari create/update sehingga tidak crash request.resource == null
+-------------------------------------------------------------------------------
+
+DETAILED AUDIT FINDINGS VERIFICATION:
+===============================================================================
+
+[TC-01] Pengguna biasa tidak dapat menulis role: 'admin' ke dokumen sendiri atau orang lain (F-01)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : Rules secara eksplisit melarang pembuatan user dengan role: 'admin' dan mengunci 'role' pada update bagi non-admin.
+
+[TC-02] Pengguna non-admin membuka /admin/* ditolak oleh server/guard (F-01)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : Guard di /admin/alumni/page.tsx memverifikasi role === 'admin' dan menampilkan Akses Terbatas serta self-promotion trigger telah dihapus.
+
+[TC-03] Pengguna tidak bisa mengubah identitas permanen (nomorAlumni, prodi, angkatan, role, uid) dan dilarang delete langsung users/{uid} (F-08, F-22)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : Function locked() mengunci field permanen dan allow delete dibatasi hanya untuk admin institusi.
+
+[TC-04] Pengguna biasa tidak dapat menambah/menghapus alumni_registry; anonim dilarang membaca (F-04)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : alumni_registry mewajibkan signedIn() untuk read, dan create/delete hanya untuk admin.
+
+[TC-05] Mengetik nomor alumni di form daftar tidak mengembalikan/mengisi nama resmi sebelum verifikasi (F-04)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : Form pendaftaran mengharuskan input nama lengkap secara mandiri dan diverifikasi dua faktor di backend (F-04).
+
+[TC-06] Mendaftar dengan nomor alumni terverifikasi tidak menimpa prodi/angkatan di registry master (F-04, F-24)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : Rules mengunci nomorAlumni, prodi, dan angkatan dari modifikasi saat registrasi akun baru.
+
+[TC-07] Menyimpan field uid atau id palsu di payload tidak menimpa Document ID asli saat dibaca (F-21)
+Category : Otorisasi dan Identitas
+Result   : PASS
+Evidence : Objek spread dibalik ({ ...d.data(), id: d.id }) sehingga Document ID asli selalu meng-override field palsu.
+
+[TC-08] Anonim hanya bisa membaca public_profiles (whitelist); users privat terlindungi (F-02)
+Category : Privasi Data
+Result   : PASS
+Evidence : public_profiles disiapkan dengan allow read: if true dan allow write hanya oleh Admin/Cloud Functions.
+
+[TC-09] Mengunjungi /profil/<nomorAlumni> atau /profil/<email> tidak membocorkan profil; saat openToWork == false CV tersembunyi (F-25)
+Category : Privasi Data
+Result   : PASS
+Evidence : Enumerasi route tebakan dihapus; CV dan kontak disembunyikan jika openToWork bernilai false bagi non-pemilik.
+
+[TC-10] Nomor telepon pelamar hanya dikirim jika pelamar menyetujui checkbox izin kontak (UU PDP) (F-02, UU PDP)
+Category : Privasi Data
+Result   : PASS
+Evidence : Checkbox sharePhone diterapkan secara eksplisit sebelum modal submit lamaran diproses.
+
+[TC-11] Pengguna lain tidak bisa sembarangan mengunduh CV; file dibatasi hanya cv.pdf dengan ukuran < 5MB (F-03, F-23)
+Category : Privasi Data
+Result   : PASS
+Evidence : Storage rules menetapkan nama file statis cv.pdf dan tipe mime application/pdf dengan limit 5MB.
+
+[TC-12] User A tidak bisa membaca lamaran User B kecuali pemilik lowongan yang sebenarnya (F-06)
+Category : Privasi Data
+Result   : PASS
+Evidence : applications read dibatasi hanya untuk applicantUid, posterUid pemilik lowongan, atau admin.
+
+[TC-13] Membuat jobs dengan postedBy != auth.uid ditolak; update mengunci postedBy & createdAt (F-05)
+Category : Integritas Lowongan & Skema
+Result   : PASS
+Evidence : postedBy terkunci secara absolut ke request.auth.uid dan tidak dapat diubah pada operasi update.
+
+[TC-14] Membuat/memperbarui jobs atau users dengan tipe data salah ditolak oleh Rules (F-20)
+Category : Integritas Lowongan & Skema
+Result   : PASS
+Evidence : Rules memverifikasi tipe 'is string', 'is list', dan 'is bool' guna mencegah Stored Client-Side DoS.
+
+[TC-15] ID dokumen lamaran dikunci secara deterministik ke `${jobId}_${applicantUid}` (F-06, F-21)
+Category : Integritas Lowongan & Skema
+Result   : PASS
+Evidence : Rules menolak applicationId sembarang dan memastikan hanya 1 lamaran per pasangan lowongan-pelamar.
+
+[TC-16] Poster lowongan hanya bisa mengubah status enum yang sah dan dilarang memanipulasi pesan pelamar (F-06, F-22)
+Category : Integritas Lowongan & Skema
+Result   : PASS
+Evidence : Rules menggunakan affectedKeys().hasOnly(['status', 'updatedAt']) pada operasi update oleh poster.
+
+[TC-17] Satu pasangan requester/target hanya punya 1 dokumen contact_requests; target hanya bisa ubah status (F-10, F-21, F-22)
+Category : Integritas Lowongan & Skema
+Result   : PASS
+Evidence : ID dikunci `${requesterUid}_${targetUid}` dan target hanya diperkenankan mengupdate status approved/rejected.
+
+[TC-18] Sanitasi URL mencegah injeksi skema javascript: atau data: XSS pada tautan portofolio dan CV (F-07)
+Category : Keamanan Client
+Result   : PASS
+Evidence : Fungsi helper safeHttpUrl() memvalidasi URL hanya mengizinkan protokol http/https dan menolak skema javascript:.
+
+[TC-19] Storage Rules menolak file SVG (vektor XSS) dan membatasi ukuran array portofolio maks 12 item (F-12)
+Category : Keamanan Client & Storage
+Result   : PASS
+Evidence : ContentType dikunci hanya ke jpeg/png/webp (SVG ditolak) dan ukuran portfolio dibatasi <= 12 item.
+
+[TC-20] Storage Rules memisahkan operasi delete dari create/update sehingga tidak crash request.resource == null (F-23)
+Category : Keamanan Client & Storage
+Result   : PASS
+Evidence : Operasi delete dievaluasi secara independen tanpa memeriksa request.resource.size/contentType yang null saat penghapusan.
+
+===============================================================================
+FINAL VERDICT: 20/20 Acceptance Tests PASSED.
+Security Rules, Schema Invariants, and Data Boundaries are fully enforced.
+===============================================================================

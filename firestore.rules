@@ -5,37 +5,36 @@ service cloud.firestore {
     function signedIn()   { return request.auth != null; }
     function isAdmin()    { return signedIn() && (request.auth.token.admin == true || request.auth.token.role == 'admin'); }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function locked(keys) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
+    }
 
-    // Profil Alumni:
-    // F-01 & F-08: Mencegah privilege escalation (role 'admin') dan pengubahan data identitas krusial.
-    // F-20: Validasi tipe data ketat untuk mencegah Stored Client-Side DoS (White Screen of Death).
-    // F-22: Mencegah self-delete profil langsung tanpa sinkronisasi registry.
+    // Profil Alumni Privat (F-01, F-02, F-08, F-20, F-22):
+    // Data privat dibaca pemilik atau admin, atau alumni terotentikasi bila openToWork true.
     match /users/{userId} {
-      allow read: if true;
+      allow read: if isOwner(userId) || isAdmin() || (signedIn() && resource.data.openToWork == true);
       allow create: if isOwner(userId)
                     && request.resource.data.uid == userId
                     && (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role != 'admin')
                     && request.resource.data.namaLengkap is string;
       allow update: if (isOwner(userId)
-                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || resource.data.role == 'admin' || isAdmin())
-                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid', 'nomorAlumni', 'createdAt']))
+                    && locked(['role', 'uid', 'nomorAlumni', 'createdAt', 'prodi', 'angkatan'])
                     && request.resource.data.namaLengkap is string
                     && (request.resource.data.openToWork is bool || !request.resource.data.keys().hasAny(['openToWork']))
-                    && (!request.resource.data.keys().hasAny(['portfolio']) || request.resource.data.portfolio is list)
+                    && (!request.resource.data.keys().hasAny(['portfolio']) || (request.resource.data.portfolio is list && request.resource.data.portfolio.size() <= 12))
                     ) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    // Profil Publik Mirror (opsional / persiapan pemisahan PII F-02)
+    // Profil Publik Mirror (F-02 Whitelist):
+    // Dibaca publik, ditulis hanya oleh Admin atau Cloud Function trigger.
     match /public_profiles/{userId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Lowongan Kerja:
-    // F-05: Mencegah impersonasi (postedBy harus request.auth.uid).
-    // F-20: Validasi tipe data agar tidak memicu TypeError pada .slice() / .toLowerCase().
-    // Update mengunci postedBy & createdAt.
+    // Lowongan Kerja (F-05, F-20, F-22):
+    // postedBy terikat permanen ke request.auth.uid, validasi tipe data ketat.
     match /jobs/{jobId} {
       allow read: if true;
       allow create: if signedIn()
@@ -48,7 +47,7 @@ service cloud.firestore {
                     && request.resource.data.kualifikasi is list;
       allow update: if (signedIn()
                     && resource.data.postedBy == request.auth.uid
-                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['postedBy', 'createdAt'])
+                    && locked(['postedBy', 'createdAt'])
                     && request.resource.data.judul is string
                     && request.resource.data.prodiTarget is list
                     && request.resource.data.kualifikasi is list
@@ -56,9 +55,8 @@ service cloud.firestore {
       allow delete: if (signedIn() && resource.data.postedBy == request.auth.uid) || isAdmin();
     }
 
-    // Lamaran Kerja:
-    // F-06: Validasi keterkaitan dengan job dan status awal.
-    // F-22: Poster hanya boleh mengubah status & updatedAt, dilarang merusak pesan/CV pelamar.
+    // Lamaran Kerja (F-06, F-21, F-22):
+    // Deterministic ID: jobId_applicantUid untuk mencegah duplicate spam & race condition.
     match /applications/{applicationId} {
       allow read: if signedIn() && (
         resource.data.applicantUid == request.auth.uid || 
@@ -66,6 +64,7 @@ service cloud.firestore {
         isAdmin()
       );
       allow create: if signedIn() 
+                    && applicationId == request.resource.data.jobId + '_' + request.auth.uid
                     && request.resource.data.applicantUid == request.auth.uid
                     && request.resource.data.status == 'pending'
                     && request.resource.data.pesan is string;
@@ -79,8 +78,8 @@ service cloud.firestore {
       allow delete: if (signedIn() && resource.data.applicantUid == request.auth.uid) || isAdmin();
     }
 
-    // Permintaan Akses Kontak (F-10 & F-22):
-    // Target hanya berhak mengubah status menjadi 'approved' atau 'rejected', tidak bisa memanipulasi pesan.
+    // Permintaan Akses Kontak (F-10, F-21, F-22):
+    // Deterministic ID: requesterUid_targetUid
     match /contact_requests/{requestId} {
       allow read: if signedIn() && (
         resource.data.requesterUid == request.auth.uid || 
@@ -88,6 +87,7 @@ service cloud.firestore {
         isAdmin()
       );
       allow create: if signedIn() 
+                    && requestId == request.auth.uid + '_' + request.resource.data.targetUid
                     && request.resource.data.requesterUid == request.auth.uid
                     && request.resource.data.targetUid != request.auth.uid
                     && request.resource.data.status == 'pending'
@@ -103,21 +103,18 @@ service cloud.firestore {
     }
 
     // Basis Data Master Alumni (Registry Whitelist F-04, F-24):
-    // Pembacaan diizinkan untuk verifikasi registrasi.
-    // Penulisan hanya oleh admin atau klaim registrasi atomik.
     match /alumni_registry/{alumniId} {
-      allow read: if true;
+      allow read: if signedIn();
       allow create, delete: if isAdmin();
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.isRegistered == false
         && request.resource.data.isRegistered == true
         && request.resource.data.registeredUid == request.auth.uid
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['nomorAlumni', 'prodi', 'angkatan'])
+        && locked(['nomorAlumni', 'prodi', 'angkatan'])
       );
     }
 
-    // Tolak semua path lainnya secara default
     match /{document=**} {
       allow read, write: if false;
     }
