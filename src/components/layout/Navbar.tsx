@@ -218,12 +218,12 @@ export default function Navbar() {
                           Kelola
                         </p>
                         <Link
-                          href="/profil#aktivitas"
+                          href="/aktivitas"
                           onClick={() => setProfileDropdownOpen(false)}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
                         >
                           <Users className="w-4 h-4 text-slate-400" />
-                          <span>Postingan &amp; Aktivitas</span>
+                          <span>Kelola Postingan &amp; Aktivitas</span>
                         </Link>
                         <Link
                           href="/lamaran"
