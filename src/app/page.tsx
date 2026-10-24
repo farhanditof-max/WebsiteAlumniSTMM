@@ -8,15 +8,11 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 import { PRODI_LIST } from '@/types';
 import { 
   ArrowRight, 
+  ArrowUpRight,
   Compass,
   Building2, 
   Video, 
   Tv, 
-  Gamepad2, 
-  Film, 
-  Radio, 
-  Terminal,
-  PlaySquare,
   Sparkles,
   Users,
   Briefcase,
@@ -30,92 +26,22 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const getProdiTheme = (id: string) => {
+  const getProdiCardImage = (id: string) => {
     switch (id) {
       case 'Animasi':
-        return {
-          tag: '3D & VFX',
-          borderHover: 'hover:border-indigo-400',
-          shadowHover: 'hover:shadow-indigo-500/15',
-          accentGradient: 'from-indigo-500 to-violet-500',
-          iconBox: 'bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white',
-          badge: 'text-indigo-700 bg-indigo-50/90 border-indigo-100',
-          titleHover: 'group-hover:text-indigo-600',
-          actionText: 'text-indigo-600',
-          icon: <Film className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/animasi.svg';
       case 'Matekstosi':
-        return {
-          tag: 'Studio Tech',
-          borderHover: 'hover:border-blue-400',
-          shadowHover: 'hover:shadow-blue-500/15',
-          accentGradient: 'from-blue-500 to-sky-500',
-          iconBox: 'bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white',
-          badge: 'text-blue-700 bg-blue-50/90 border-blue-100',
-          titleHover: 'group-hover:text-blue-600',
-          actionText: 'text-blue-600',
-          icon: <Tv className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/matekstosi.svg';
       case 'Manarita':
-        return {
-          tag: 'Journalism',
-          borderHover: 'hover:border-amber-400',
-          shadowHover: 'hover:shadow-amber-500/15',
-          accentGradient: 'from-amber-500 to-orange-500',
-          iconBox: 'bg-amber-50 group-hover:bg-amber-500 text-amber-600 group-hover:text-white',
-          badge: 'text-amber-700 bg-amber-50/90 border-amber-100',
-          titleHover: 'group-hover:text-amber-600',
-          actionText: 'text-amber-600',
-          icon: <Radio className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/manarita.svg';
       case 'Manaprodsi':
-        return {
-          tag: 'TV & Radio',
-          borderHover: 'hover:border-emerald-400',
-          shadowHover: 'hover:shadow-emerald-500/15',
-          accentGradient: 'from-emerald-500 to-teal-500',
-          iconBox: 'bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white',
-          badge: 'text-emerald-700 bg-emerald-50/90 border-emerald-100',
-          titleHover: 'group-hover:text-emerald-600',
-          actionText: 'text-emerald-600',
-          icon: <PlaySquare className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/manaprodsi.svg';
       case 'MIK':
-        return {
-          tag: 'IT Media',
-          borderHover: 'hover:border-cyan-400',
-          shadowHover: 'hover:shadow-cyan-500/15',
-          accentGradient: 'from-cyan-500 to-blue-500',
-          iconBox: 'bg-cyan-50 group-hover:bg-cyan-600 text-cyan-600 group-hover:text-white',
-          badge: 'text-cyan-700 bg-cyan-50/90 border-cyan-100',
-          titleHover: 'group-hover:text-cyan-600',
-          actionText: 'text-cyan-600',
-          icon: <Terminal className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/mik.svg';
       case 'Game Design':
-        return {
-          tag: 'Game Dev',
-          borderHover: 'hover:border-purple-400',
-          shadowHover: 'hover:shadow-purple-500/15',
-          accentGradient: 'from-purple-500 to-fuchsia-500',
-          iconBox: 'bg-purple-50 group-hover:bg-purple-600 text-purple-600 group-hover:text-white',
-          badge: 'text-purple-700 bg-purple-50/90 border-purple-100',
-          titleHover: 'group-hover:text-purple-600',
-          actionText: 'text-purple-600',
-          icon: <Gamepad2 className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/game-design.svg';
       default:
-        return {
-          tag: 'Multimedia',
-          borderHover: 'hover:border-sky-400',
-          shadowHover: 'hover:shadow-sky-500/15',
-          accentGradient: 'from-sky-500 to-blue-500',
-          iconBox: 'bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white',
-          badge: 'text-sky-700 bg-sky-50/90 border-sky-100',
-          titleHover: 'group-hover:text-sky-600',
-          actionText: 'text-sky-600',
-          icon: <Building2 className="w-5 h-5 transition-colors" />
-        };
+        return '/card_prodi/animasi.svg';
     }
   };
 
@@ -609,7 +535,7 @@ export default function HomePage() {
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {LOOP_PRODI_LIST.map((prodi) => {
-                const theme = getProdiTheme(prodi.id);
+                const cardImg = getProdiCardImage(prodi.id);
 
                 return (
                   <div
@@ -619,36 +545,28 @@ export default function HomePage() {
                     <Link
                       href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
                       onClick={handleCardClick}
-                      className={`group relative bg-white border border-slate-200/90 ${theme.borderHover} rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${theme.shadowHover} flex flex-col justify-between h-full overflow-hidden cursor-pointer select-none`}
+                      className="group relative block bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer select-none"
                       draggable={false}
                     >
-                      {/* Top Accent Gradient Bar */}
-                      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${theme.accentGradient} opacity-90 group-hover:h-2 transition-all`} />
+                      {/* SVG Card Illustration (High-Definition 1080x1350 Poster) */}
+                      <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-100">
+                        <img
+                          src={cardImg}
+                          alt={`Program Studi ${prodi.label} STMM MMTC`}
+                          className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                          draggable={false}
+                        />
 
-                      <div>
-                        {/* Icon & Specialization Pill */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className={`w-12 h-12 rounded-2xl ${theme.iconBox} flex items-center justify-center transition-all duration-300 shadow-2xs group-hover:rotate-6 group-hover:scale-110`}>
-                            {theme.icon}
-                          </div>
-                          <span className={`text-[10px] font-bold ${theme.badge} px-2.5 py-1 rounded-full border shadow-2xs`}>
-                            {theme.tag}
-                          </span>
+                        {/* Subtle Ambient Vignette / Hover Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                        {/* Interactive Floating Action Arrow Button di Ujung Kanan Atas */}
+                        <div 
+                          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 backdrop-blur-md border border-white/80 shadow-md flex items-center justify-center text-slate-700 group-hover:bg-[#0284c7] group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-sky-500/30 transition-all duration-300 pointer-events-none"
+                          title={`Jelajahi ${prodi.label}`}
+                        >
+                          <ArrowUpRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
-
-                        {/* Title & Description */}
-                        <h3 className={`text-sm sm:text-base font-bold text-slate-900 ${theme.titleHover} transition-colors mb-1.5 text-left`}>
-                          {prodi.label}
-                        </h3>
-                        <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed text-left line-clamp-3">
-                          {prodi.desc}
-                        </p>
-                      </div>
-
-                      {/* Bottom Action Footer with Sliding Arrow */}
-                      <div className={`mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold ${theme.actionText}`}>
-                        <span>Lihat Talenta &amp; Lowongan</span>
-                        <span className="transition-transform duration-200 group-hover:translate-x-1.5">&rarr;</span>
                       </div>
                     </Link>
                   </div>
