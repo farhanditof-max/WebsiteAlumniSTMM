@@ -24,7 +24,9 @@ import {
   CheckCircle2,
   Award,
   ShieldCheck,
-  Zap
+  Zap,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -114,6 +116,46 @@ export default function HomePage() {
           actionText: 'text-sky-600',
           icon: <Building2 className="w-5 h-5 transition-colors" />
         };
+    }
+  };
+
+  // Carousel & Horizontal Drag State for 6 Prodi Cards
+  const sliderRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [startX, setStartX] = React.useState(0);
+  const [scrollLeftState, setScrollLeftState] = React.useState(0);
+  const dragDistanceRef = React.useRef(0);
+
+  const scrollSlider = (direction: 'left' | 'right') => {
+    if (sliderRef.current) {
+      const scrollAmount = direction === 'left' ? -330 : 330;
+      sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!sliderRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - sliderRef.current.offsetLeft);
+    setScrollLeftState(sliderRef.current.scrollLeft);
+    dragDistanceRef.current = 0;
+  };
+
+  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => setIsDragging(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !sliderRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    dragDistanceRef.current = Math.abs(walk);
+    sliderRef.current.scrollLeft = scrollLeftState - walk;
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (dragDistanceRef.current > 6) {
+      e.preventDefault();
     }
   };
 
@@ -339,74 +381,120 @@ export default function HomePage() {
 
       </section>
 
-      {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI — STAGGERED SCROLL REVEAL */}
-      <section id="prodi-section" className="py-20 sm:py-28 bg-slate-50/70 border-b border-slate-100 scroll-mt-12">
+      {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI — SWIPEABLE INTERACTIVE SLIDER */}
+      <section id="prodi-section" className="py-20 sm:py-28 bg-slate-50/70 border-b border-slate-100 scroll-mt-12 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <ScrollReveal direction="up" delayMs={60} durationMs={650}>
-            <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
-              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 shadow-2xs mb-4">
-                Program Studi Unggulan
-              </span>
-              <h2 className="text-2xl sm:text-4xl lg:text-[42px] font-bold text-slate-900 leading-tight">
-                Klasifikasi Keahlian Khusus MMTC
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto mt-3.5 leading-relaxed">
-                Filter lowongan dan temukan talenta alumni berdasarkan spesialisasi bidang studi
-              </p>
+            {/* Header with Navigation Arrows */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-12">
+              <div>
+                <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 shadow-2xs mb-3">
+                  Program Studi Unggulan
+                </span>
+                <h2 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-slate-900 leading-tight">
+                  Klasifikasi Keahlian Khusus MMTC
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-2 leading-relaxed">
+                  Geser kartu untuk menemukan talenta alumni dan lowongan berdasarkan spesialisasi bidang studi
+                </p>
+              </div>
+
+              {/* Carousel Navigation Buttons */}
+              <div className="flex items-center gap-3 shrink-0 self-start sm:self-end">
+                <span className="text-[11px] font-bold text-slate-400 hidden sm:inline-block">
+                  Geser 6 Prodi
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scrollSlider('left')}
+                    className="w-11 h-11 rounded-2xl bg-white hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200/90 hover:border-sky-300 shadow-sm flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer"
+                    title="Geser ke kiri"
+                    aria-label="Geser ke kiri"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollSlider('right')}
+                    className="w-11 h-11 rounded-2xl bg-white hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200/90 hover:border-sky-300 shadow-sm flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer"
+                    title="Geser ke kanan"
+                    aria-label="Geser ke kanan"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             </div>
           </ScrollReveal>
 
-          {/* 6 Prodi Cards with Thematic Industry Accent & Staggered Wave Delays */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {PRODI_LIST.map((prodi, idx) => {
-              const theme = getProdiTheme(prodi.id);
+          {/* Swipeable / Scrollable Horizontal Cards Slider */}
+          <div className="relative -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+            <div
+              ref={sliderRef}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseLeave}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-6 pt-2 select-none scrollbar-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {PRODI_LIST.map((prodi) => {
+                const theme = getProdiTheme(prodi.id);
 
-              return (
-                <ScrollReveal 
-                  key={prodi.id} 
-                  direction="up" 
-                  delayMs={idx * 75} 
-                  durationMs={600}
-                  className="h-full"
-                >
-                  <Link
-                    href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
-                    className={`group relative bg-white border border-slate-200/90 ${theme.borderHover} rounded-3xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${theme.shadowHover} flex flex-col justify-between h-full overflow-hidden cursor-pointer`}
+                return (
+                  <div
+                    key={prodi.id}
+                    className="w-[260px] sm:w-[280px] lg:w-[310px] shrink-0 snap-start h-full"
                   >
-                    {/* Top Accent Gradient Bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.accentGradient} opacity-90 group-hover:h-1.5 transition-all`} />
+                    <Link
+                      href={`/lowongan?prodi=${encodeURIComponent(prodi.id)}`}
+                      onClick={handleCardClick}
+                      className={`group relative bg-white border border-slate-200/90 ${theme.borderHover} rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${theme.shadowHover} flex flex-col justify-between h-full overflow-hidden cursor-pointer`}
+                      draggable={false}
+                    >
+                      {/* Top Accent Gradient Bar */}
+                      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${theme.accentGradient} opacity-90 group-hover:h-2 transition-all`} />
 
-                    <div>
-                      {/* Icon & Specialization Pill */}
-                      <div className="flex items-center justify-between mb-3.5">
-                        <div className={`w-11 h-11 rounded-2xl ${theme.iconBox} flex items-center justify-center transition-all duration-300 shadow-2xs group-hover:rotate-6 group-hover:scale-105`}>
-                          {theme.icon}
+                      <div>
+                        {/* Icon & Specialization Pill */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`w-12 h-12 rounded-2xl ${theme.iconBox} flex items-center justify-center transition-all duration-300 shadow-2xs group-hover:rotate-6 group-hover:scale-110`}>
+                            {theme.icon}
+                          </div>
+                          <span className={`text-[10px] font-bold ${theme.badge} px-2.5 py-1 rounded-full border shadow-2xs`}>
+                            {theme.tag}
+                          </span>
                         </div>
-                        <span className={`text-[10px] font-bold ${theme.badge} px-2 py-0.5 rounded-full border shadow-2xs`}>
-                          {theme.tag}
-                        </span>
+
+                        {/* Title & Description */}
+                        <h3 className={`text-sm sm:text-base font-bold text-slate-900 ${theme.titleHover} transition-colors mb-1.5 text-left`}>
+                          {prodi.label}
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed text-left line-clamp-3">
+                          {prodi.desc}
+                        </p>
                       </div>
 
-                      {/* Title & Description */}
-                      <h3 className={`text-xs sm:text-sm font-bold text-slate-900 ${theme.titleHover} transition-colors mb-1 text-left`}>
-                        {prodi.label}
-                      </h3>
-                      <p className="text-[10px] sm:text-[11px] text-slate-500 leading-snug line-clamp-2 text-left">
-                        {prodi.desc}
-                      </p>
-                    </div>
-
-                    {/* Bottom Action Footer with Sliding Arrow */}
-                    <div className={`mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold ${theme.actionText}`}>
-                      <span>Lihat Talenta</span>
-                      <span className="transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
-                    </div>
-                  </Link>
-                </ScrollReveal>
-              );
-            })}
+                      {/* Bottom Action Footer with Sliding Arrow */}
+                      <div className={`mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold ${theme.actionText}`}>
+                        <span>Lihat Talenta &amp; Lowongan</span>
+                        <span className="transition-transform duration-200 group-hover:translate-x-1.5">&rarr;</span>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Mobile Swipe Hint */}
+          <div className="flex items-center justify-center gap-1.5 text-slate-400 text-[11px] font-medium pt-2 sm:hidden">
+            <span>Geser kartu ke samping</span>
+            <span className="font-bold text-sky-600">&harr;</span>
+          </div>
+
         </div>
       </section>
 
