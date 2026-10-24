@@ -12,7 +12,11 @@ import {
   Send, 
   Sparkles, 
   Video, 
-  Image as ImageIcon, 
+  Paperclip,
+  FileText,
+  UploadCloud,
+  X,
+  ExternalLink,
   UserPlus, 
   Check, 
   Flame, 
@@ -49,9 +53,10 @@ interface FeedPost {
   category: 'showreel' | 'kolaborasi' | 'diskusi' | 'pencapaian';
   content: string;
   hashtags: string[];
-  mediaType?: 'youtube' | 'image';
+  mediaType?: 'youtube' | 'image' | 'pdf';
   mediaUrl?: string;
   mediaTitle?: string;
+  mediaSize?: string;
   likesCount: number;
   isLiked?: boolean;
   comments: CommentItem[];
@@ -159,6 +164,34 @@ const INITIAL_POSTS: FeedPost[] = [
     isLiked: false,
     isFollowing: false,
     comments: []
+  },
+  {
+    id: 'post-5',
+    authorName: 'Gilang Ramadhan',
+    authorProdi: 'Game',
+    authorAngkatan: '2021',
+    authorRole: 'Game Narrative & Unity Programmer',
+    nomorAlumni: 'MMTC-2021-GME-033',
+    timeAgo: '3 hari yang lalu',
+    category: 'diskusi',
+    content: 'Bagi teman-teman alumni yang tertarik mempelajari struktur Game Design Document (GDD) standar industri, ini pitch deck dan dokumen pra-produksi game indie kami yang lolos kurasi expo. Semoga bermanfaat untuk bahan referensi produksi tugas akhir maupun portofolio ya!',
+    hashtags: ['#GameDevMMTC', '#GameDesignDocument', '#PitchDeck', '#Unity3D'],
+    mediaType: 'pdf',
+    mediaUrl: '#',
+    mediaTitle: 'Game_Design_Document_Prototype_2026.pdf',
+    mediaSize: '3.4 MB',
+    likesCount: 57,
+    isLiked: false,
+    isFollowing: false,
+    comments: [
+      {
+        id: 'c-5',
+        authorName: 'Sarah Pradipta',
+        authorProdi: 'Animasi',
+        text: 'Keren banget strukturnya Lang! Sangat detail bagian character breakdown-nya.',
+        timeAgo: '2 hari yang lalu'
+      }
+    ]
   }
 ];
 
@@ -216,7 +249,10 @@ export default function FeedPage() {
   const [newContent, setNewContent] = useState('');
   const [newCategory, setNewCategory] = useState<'showreel' | 'kolaborasi' | 'diskusi' | 'pencapaian'>('diskusi');
   const [newMediaUrl, setNewMediaUrl] = useState('');
-  const [newMediaType, setNewMediaType] = useState<'youtube' | 'image' | 'none'>('none');
+  const [newMediaType, setNewMediaType] = useState<'youtube' | 'media' | 'none'>('none');
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [attachedPreview, setAttachedPreview] = useState<string>('');
+  const [attachedFileType, setAttachedFileType] = useState<'image' | 'pdf'>('image');
   const [isPosting, setIsPosting] = useState(false);
   const [postAlert, setPostAlert] = useState('');
 
@@ -234,6 +270,21 @@ export default function FeedPage() {
   });
   const [connectedUsers, setConnectedUsers] = useState<Record<string, boolean>>({});
 
+  const handleFileAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAttachedFile(file);
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    setAttachedFileType(isPdf ? 'pdf' : 'image');
+    setAttachedPreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachedFile(null);
+    setAttachedPreview('');
+    setNewMediaUrl('');
+  };
+
   // Handlers
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,6 +293,29 @@ export default function FeedPage() {
     setIsPosting(true);
 
     setTimeout(() => {
+      let finalMediaType: 'youtube' | 'image' | 'pdf' | undefined = undefined;
+      let finalMediaUrl: string | undefined = undefined;
+      let finalMediaTitle: string | undefined = undefined;
+      let finalMediaSize: string | undefined = undefined;
+
+      if (newMediaType === 'youtube' && newMediaUrl.trim()) {
+        finalMediaType = 'youtube';
+        finalMediaUrl = newMediaUrl.trim();
+        finalMediaTitle = 'Video Showreel';
+      } else if (newMediaType === 'media') {
+        if (attachedFile) {
+          finalMediaType = attachedFileType;
+          finalMediaUrl = attachedPreview;
+          finalMediaTitle = attachedFile.name;
+          finalMediaSize = `${(attachedFile.size / (1024 * 1024)).toFixed(1)} MB`;
+        } else if (newMediaUrl.trim()) {
+          const isPdf = newMediaUrl.toLowerCase().includes('.pdf');
+          finalMediaType = isPdf ? 'pdf' : 'image';
+          finalMediaUrl = newMediaUrl.trim();
+          finalMediaTitle = isPdf ? 'Dokumen PDF Alumni' : 'Media Foto';
+        }
+      }
+
       const createdPost: FeedPost = {
         id: `post-${Date.now()}`,
         authorName: currentUser.name,
@@ -254,9 +328,10 @@ export default function FeedPage() {
         category: newCategory,
         content: newContent.trim(),
         hashtags: [`#AlumniMMTC`, `#${currentUser.prodi}MMTC`],
-        mediaType: newMediaType !== 'none' ? newMediaType : undefined,
-        mediaUrl: newMediaUrl.trim() || undefined,
-        mediaTitle: newMediaType === 'youtube' ? 'Video Showreel' : undefined,
+        mediaType: finalMediaType,
+        mediaUrl: finalMediaUrl,
+        mediaTitle: finalMediaTitle,
+        mediaSize: finalMediaSize,
         likesCount: 1,
         isLiked: true,
         comments: []
@@ -265,6 +340,8 @@ export default function FeedPage() {
       setPosts([createdPost, ...posts]);
       setNewContent('');
       setNewMediaUrl('');
+      setAttachedFile(null);
+      setAttachedPreview('');
       setNewMediaType('none');
       setIsPosting(false);
       setPostAlert('🎉 Postingan Anda berhasil diterbitkan di Beranda Alumni!');
@@ -479,18 +556,84 @@ export default function FeedPage() {
               </div>
 
               {/* MEDIA ATTACHMENT INPUT (IF TOGGLED) */}
-              {newMediaType !== 'none' && (
-                <div className="p-3 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-2">
+              {newMediaType === 'youtube' && (
+                <div className="p-3.5 rounded-2xl bg-red-50/60 border border-red-100 space-y-2">
                   <label className="text-[11px] font-bold text-slate-700 block">
-                    {newMediaType === 'youtube' ? 'Tautan Video YouTube (Showreel)' : 'URL Foto / Gambar BTS Syuting'}
+                    Tautan Video YouTube (Showreel)
                   </label>
                   <input
                     type="text"
                     value={newMediaUrl}
                     onChange={(e) => setNewMediaUrl(e.target.value)}
-                    placeholder={newMediaType === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 'https://... atau paste link gambar'}
-                    className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7]"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-red-400"
                   />
+                </div>
+              )}
+
+              {newMediaType === 'media' && (
+                <div className="p-3.5 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                      <Paperclip className="w-3.5 h-3.5 text-[#0284c7]" />
+                      Lampirkan Media (Foto Gambar atau Dokumen PDF)
+                    </label>
+                    {attachedFile && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveAttachment}
+                        className="text-[11px] text-red-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" /> Hapus
+                      </button>
+                    )}
+                  </div>
+
+                  {attachedFile ? (
+                    <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-sky-200">
+                      {attachedFileType === 'pdf' ? (
+                        <div className="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                      ) : (
+                        <img
+                          src={attachedPreview}
+                          alt="Preview"
+                          className="w-9 h-9 rounded-lg object-cover shrink-0 border border-slate-200"
+                        />
+                      )}
+                      <div className="flex-1 truncate">
+                        <p className="text-xs font-bold text-slate-800 truncate">{attachedFile.name}</p>
+                        <p className="text-[10px] text-slate-400">
+                          {attachedFileType === 'pdf' ? 'Dokumen PDF' : 'Gambar / Foto'} • {(attachedFile.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-sky-300 bg-white hover:bg-sky-50/50 cursor-pointer transition">
+                        <UploadCloud className="w-6 h-6 text-[#0284c7] mb-1" />
+                        <span className="text-xs font-bold text-slate-700">Pilih Berkas Foto atau Dokumen PDF</span>
+                        <span className="text-[10px] text-slate-400 mt-0.5">Mendukung file Gambar (JPG, PNG, WEBP) atau Dokumen PDF</span>
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf,.pdf"
+                          onChange={handleFileAttachment}
+                          className="hidden"
+                        />
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-400 whitespace-nowrap">atau URL:</span>
+                        <input
+                          type="text"
+                          value={newMediaUrl}
+                          onChange={(e) => setNewMediaUrl(e.target.value)}
+                          placeholder="Paste link gambar atau link PDF..."
+                          className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7]"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -512,15 +655,15 @@ export default function FeedPage() {
 
                   <button
                     type="button"
-                    onClick={() => setNewMediaType(newMediaType === 'image' ? 'none' : 'image')}
+                    onClick={() => setNewMediaType(newMediaType === 'media' ? 'none' : 'media')}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                      newMediaType === 'image'
+                      newMediaType === 'media'
                         ? 'bg-sky-50 text-[#0284c7] border border-sky-200'
                         : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
-                    <ImageIcon className="w-3.5 h-3.5 text-[#0284c7]" />
-                    <span>Foto BTS</span>
+                    <Paperclip className="w-3.5 h-3.5 text-[#0284c7]" />
+                    <span>Media</span>
                   </button>
 
                   <select
@@ -686,6 +829,33 @@ export default function FeedPage() {
                           alt={post.mediaTitle || 'Foto Postingan'}
                           className="w-full h-full max-h-80 object-cover"
                         />
+                      </div>
+                    )}
+
+                    {post.mediaType === 'pdf' && (
+                      <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 hover:border-sky-200 transition group">
+                        <div className="flex items-center gap-3.5 truncate pr-3">
+                          <div className="w-11 h-11 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 shadow-2xs">
+                            <FileText className="w-6 h-6" />
+                          </div>
+                          <div className="truncate text-left">
+                            <p className="text-xs font-bold text-slate-900 group-hover:text-[#0284c7] transition truncate">
+                              {post.mediaTitle || 'Dokumen PDF Alumni'}
+                            </p>
+                            <span className="text-[11px] text-slate-400">
+                              Dokumen PDF • {post.mediaSize || 'Berkas Dokumen'}
+                            </span>
+                          </div>
+                        </div>
+                        <a
+                          href={post.mediaUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-sky-300 text-xs font-bold text-[#0284c7] shadow-2xs transition inline-flex items-center gap-1.5 shrink-0"
+                        >
+                          <span>Buka PDF</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
                       </div>
                     )}
 
