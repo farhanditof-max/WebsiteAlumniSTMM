@@ -64,100 +64,99 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation - Clean Rounded Pill Links */}
-          <div className="hidden md:flex items-center gap-1.5 lg:gap-2 bg-slate-50/80 p-1.5 rounded-full border border-slate-200/70">
+          <div className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-full border border-slate-200/80">
             <Link 
               href="/" 
-              className={`px-4 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 pathname === '/' 
                   ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
-              Beranda
+              <Compass className="w-3.5 h-3.5 text-slate-400" />
+              <span>Beranda</span>
             </Link>
 
             <Link 
               href="/feed" 
-              className={`px-3.5 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 isActive('/feed') || isActive('/beranda')
                   ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <Users className="w-3.5 h-3.5 text-[#0284c7]" />
-              Feed Komunitas
+              <span>Feed</span>
             </Link>
 
             <Link 
               href="/lowongan" 
-              className={`px-4 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 isActive('/lowongan') 
                   ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
-              Lowongan Kerja
+              <span>Lowongan</span>
             </Link>
 
             <Link 
               href="/open-to-work" 
-              className={`px-4 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 isActive('/open-to-work') 
                   ? 'bg-white text-emerald-700 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Open to Work
+              <span>Open to Work</span>
             </Link>
 
             {effectiveUser && (
-              <>
-                <Link 
-                  href="/post-lowongan" 
-                  className={`px-3.5 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                    isActive('/post-lowongan') 
-                      ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                  }`}
-                >
-                  <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
-                  Pasang Loker
-                </Link>
-
-                <Link 
-                  href="/lamaran" 
-                  className={`px-3.5 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                    isActive('/lamaran') 
-                      ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5 text-amber-600" />
-                  Lamaran
-                </Link>
-              </>
+              <Link 
+                href="/lamaran" 
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                  isActive('/lamaran') 
+                    ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-600" />
+                <span>Lamaran</span>
+              </Link>
             )}
           </div>
 
           {/* User Profile / Auth CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2.5">
             {effectiveUser ? (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
+                <Link 
+                  href="/post-lowongan" 
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 border shadow-2xs whitespace-nowrap ${
+                    isActive('/post-lowongan')
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200/80'
+                  }`}
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>Pasang Loker</span>
+                </Link>
+
                 <Link 
                   href="/profil" 
-                  className={`flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full border transition hover:shadow-xs ${
+                  className={`flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full border transition hover:shadow-xs ${
                     isActive('/profil')
                       ? 'bg-sky-50 border-sky-300 text-[#0284c7]'
                       : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
                     <AlumniAvatar src={effectiveProfile?.fotoProfil} name={effectiveProfile?.namaLengkap} />
                   </div>
                   <div className="text-left">
-                    <p className="text-xs font-bold text-slate-900 truncate max-w-[120px] leading-tight">
+                    <p className="text-xs font-bold text-slate-900 truncate max-w-[100px] leading-tight">
                       {effectiveProfile?.namaLengkap || 'Alumni MMTC'}
                     </p>
                     <p className="text-[10px] text-[#0284c7] font-semibold leading-tight">
@@ -165,18 +164,19 @@ export default function Navbar() {
                     </p>
                   </div>
                 </Link>
+
                 {user ? (
                   <button
                     onClick={() => logout()}
                     title="Keluar dari akun"
-                    className="p-2.5 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                    className="p-2 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                     aria-label="Logout"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-3.5 h-3.5" />
                   </button>
                 ) : (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">
-                    Preview Mode
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">
+                    Preview
                   </span>
                 )}
               </div>
@@ -232,7 +232,7 @@ export default function Navbar() {
             }`}
           >
             <Users className="w-4 h-4 text-[#0284c7]" />
-            Feed Komunitas
+            Feed Alumni
           </Link>
           <Link 
             href="/lowongan" 
