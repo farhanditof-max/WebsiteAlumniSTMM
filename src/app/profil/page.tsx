@@ -27,7 +27,8 @@ import {
   Eye,
   Sparkles,
   Maximize2,
-  Briefcase
+  Briefcase,
+  MapPin
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
@@ -35,8 +36,20 @@ import { CinemaLightbox } from '@/components/ui/Modal';
 import { extractSkills } from '@/components/profile/skills';
 import { UserProfile } from '@/types';
 
+const InstagramIcon = ({ className = "w-3.5 h-3.5 text-pink-600" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
+  domisili?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  websiteUrl?: string;
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
@@ -57,9 +70,13 @@ const DEMO_PROFILE = {
   email: 'budi.santoso@alumni.mmtc.ac.id',
   openToWork: true,
   pekerjaanSaatIni: '3D Animator di Infinite Studios',
+  domisili: 'Sleman, D.I. Yogyakarta',
   bio: '3D Character Animator & Rigger lulusan STMM MMTC Yogyakarta. Terbiasa menangani pipeline produksi animasi 3D studio, motion graphics penyiaran, serta asset 3D untuk game engine.',
   phone: '081234567890',
   linkedinUrl: 'https://linkedin.com/in/budi-santoso-mmtc',
+  instagramUrl: 'https://instagram.com/budisantoso.art',
+  youtubeUrl: 'https://youtube.com/@budisantosoanim',
+  websiteUrl: 'https://behance.net/budisantoso',
   cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',
   cvFileUrl: '',
   portfolio: [
@@ -89,9 +106,13 @@ export default function ProfilPage() {
   const [angkatan, setAngkatan] = useState(currentProfile?.angkatan ?? DEMO_PROFILE.angkatan);
   const [openToWork, setOpenToWork] = useState(currentProfile?.openToWork ?? true);
   const [pekerjaanSaatIni, setPekerjaanSaatIni] = useState((currentProfile as ExtendedUserProfile | null)?.pekerjaanSaatIni ?? DEMO_PROFILE.pekerjaanSaatIni);
+  const [domisili, setDomisili] = useState((currentProfile as ExtendedUserProfile | null)?.domisili ?? DEMO_PROFILE.domisili);
   const [bio, setBio] = useState(currentProfile?.bio ?? DEMO_PROFILE.bio);
   const [phone, setPhone] = useState(currentProfile?.phone ?? DEMO_PROFILE.phone);
   const [linkedinUrl, setLinkedinUrl] = useState(currentProfile?.linkedinUrl ?? DEMO_PROFILE.linkedinUrl);
+  const [instagramUrl, setInstagramUrl] = useState((currentProfile as ExtendedUserProfile | null)?.instagramUrl ?? DEMO_PROFILE.instagramUrl);
+  const [youtubeUrl, setYoutubeUrl] = useState((currentProfile as ExtendedUserProfile | null)?.youtubeUrl ?? DEMO_PROFILE.youtubeUrl);
+  const [websiteUrl, setWebsiteUrl] = useState((currentProfile as ExtendedUserProfile | null)?.websiteUrl ?? DEMO_PROFILE.websiteUrl);
   const [cvExternalLink, setCvExternalLink] = useState(currentProfile?.cvExternalLink ?? DEMO_PROFILE.cvExternalLink);
 
   // Upload file state
@@ -115,14 +136,19 @@ export default function ProfilPage() {
   useEffect(() => {
     if (profile && initializedUidRef.current !== profile.uid) {
       initializedUidRef.current = profile.uid;
+      const ext = profile as ExtendedUserProfile;
       setNamaLengkap(profile.namaLengkap || '');
       setProdi(profile.prodi || 'Animasi');
       setAngkatan(profile.angkatan || '');
       setOpenToWork(profile.openToWork ?? true);
-      setPekerjaanSaatIni((profile as ExtendedUserProfile).pekerjaanSaatIni || '');
+      setPekerjaanSaatIni(ext.pekerjaanSaatIni || '');
+      setDomisili(ext.domisili || '');
       setBio(profile.bio || '');
       setPhone(profile.phone || '');
       setLinkedinUrl(profile.linkedinUrl || '');
+      setInstagramUrl(ext.instagramUrl || '');
+      setYoutubeUrl(ext.youtubeUrl || '');
+      setWebsiteUrl(ext.websiteUrl || '');
       setCvExternalLink(profile.cvExternalLink || '');
       setPortfolioList(profile.portfolio || []);
     }
@@ -306,6 +332,10 @@ export default function ProfilPage() {
         email: profile?.email || user.email || '',
         openToWork: Boolean(openToWork),
         pekerjaanSaatIni: pekerjaanSaatIni.trim(),
+        domisili: domisili.trim(),
+        instagramUrl: instagramUrl.trim(),
+        youtubeUrl: youtubeUrl.trim(),
+        websiteUrl: websiteUrl.trim(),
         bio: bio.trim(),
         phone: phone.trim(),
         linkedinUrl: linkedinUrl.trim(),
@@ -497,6 +527,12 @@ export default function ProfilPage() {
                   <span>{pekerjaanSaatIni}</span>
                 </p>
               )}
+              {domisili && (
+                <p className="text-xs text-slate-600 font-medium mt-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                  <span>{domisili}</span>
+                </p>
+              )}
               <p className="text-[11px] text-slate-400 font-mono mt-0.5">
                 Nomor Alumni: {currentProfile?.nomorAlumni}
               </p>
@@ -603,12 +639,28 @@ export default function ProfilPage() {
               </div>
             </div>
 
-            {/* CONTACT & SOCIAL */}
+            {/* CONTACT, LOCATION & SOCIAL LINKS */}
             <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-3.5 text-xs shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">
                 Kontak &amp; Tautan Profil
               </h3>
+
+              {/* DOMISILI SAAT INI */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                  Kota Domisili Saat Ini
+                </label>
+                <input
+                  type="text"
+                  value={domisili}
+                  onChange={(e) => setDomisili(e.target.value)}
+                  placeholder="Contoh: Sleman, D.I. Yogyakarta / Jakarta"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+              </div>
               
+              {/* WHATSAPP */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-emerald-600" />
@@ -618,21 +670,67 @@ export default function ProfilPage() {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="08123456789"
+                  placeholder="081234567890"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
 
+              {/* LINKEDIN */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-[#0284c7]" />
-                  LinkedIn / Portfolio URL
+                  LinkedIn Profil URL
                 </label>
                 <input
                   type="url"
                   value={linkedinUrl}
                   onChange={(e) => setLinkedinUrl(e.target.value)}
                   placeholder="https://linkedin.com/in/..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+              </div>
+
+              {/* INSTAGRAM */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
+                  Instagram Portofolio / Akun
+                </label>
+                <input
+                  type="url"
+                  value={instagramUrl}
+                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  placeholder="https://instagram.com/username"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+              </div>
+
+              {/* YOUTUBE CHANNEL */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <Video className="w-3.5 h-3.5 text-red-600" />
+                  Channel YouTube / Vimeo Showreel
+                </label>
+                <input
+                  type="url"
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  placeholder="https://youtube.com/@channel"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+              </div>
+
+              {/* WEBSITE / BEHANCE */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
+                  Website / Behance / ArtStation
+                </label>
+                <input
+                  type="url"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://behance.net/username atau web pribadi"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
