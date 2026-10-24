@@ -10,21 +10,22 @@ import { createJob } from '@/lib/jobs';
 import { PRODI_LIST, ProdiType } from '@/types';
 import { 
   PlusCircle, 
-  AlertCircle,
-  Loader2,
-  CheckCircle2,
-  Building2,
-  Briefcase,
-  MapPin,
-  Calendar,
-  DollarSign,
-  FileText,
-  GraduationCap
+  AlertCircle, 
+  Loader2, 
+  CheckCircle2, 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  DollarSign, 
+  FileText, 
+  GraduationCap,
+  Sparkles
 } from 'lucide-react';
 
 export default function PostLowonganPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
+  const isDemo = !user;
 
   const [judul, setJudul] = useState('');
   const [perusahaan, setPerusahaan] = useState('');
@@ -77,18 +78,25 @@ export default function PostLowonganPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      setError('Anda harus masuk terlebih dahulu untuk mempublikasikan lowongan.');
-      return;
-    }
 
     if (!judul.trim() || !perusahaan.trim() || !lokasi.trim() || !deskripsi.trim()) {
-      setError('Mohon lengkapi semua kolom wajib.');
+      setError('Mohon lengkapi semua kolom wajib bertanda bintang (*).');
       return;
     }
 
     setLoading(true);
     setError('');
+
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setLoading(false);
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/lowongan');
+        }, 1500);
+      }, 700);
+      return;
+    }
 
     try {
       const kualifikasi = kualifikasiRaw
@@ -134,39 +142,39 @@ export default function PostLowonganPage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <Briefcase className="w-10 h-10 text-slate-400 mx-auto" />
-            <h2 className="text-xl font-bold">Harap Masuk Terlebih Dahulu</h2>
-            <p className="text-xs text-slate-500">Hanya alumni MMTC yang dapat mempublikasikan lowongan kerja.</p>
-            <Link 
-              href="/login?redirect=/post-lowongan" 
-              className="inline-block px-5 py-2.5 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shadow-xs"
-            >
-              Masuk ke Akun
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
+    <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        
+        {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-sky-500 to-[#0284c7] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-sky-500/10 animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-5 h-5 text-amber-300 shrink-0" />
+              <div>
+                <p className="text-xs font-bold leading-tight">Mode Pratinjau Form Pasang Lowongan (Preview Tanpa Login)</p>
+                <p className="text-[11px] text-sky-100">
+                  Anda dapat mencoba menginput judul, multi-select prodi, dan simulasi publikasi loker secara langsung.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="px-4 py-1.5 rounded-full bg-white text-[#0284c7] text-xs font-bold hover:bg-sky-50 transition shrink-0 text-center shadow-xs"
+            >
+              Masuk Akun Asli
+            </Link>
+          </div>
+        )}
+
         <div className="mb-8 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
             <PlusCircle className="w-3.5 h-3.5" />
             Bursa Karir Alumni
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
             Pasang Lowongan Kerja Alumni
           </h1>
           <p className="text-slate-600 text-xs sm:text-sm">
@@ -187,12 +195,12 @@ export default function PostLowonganPage() {
             {error && (
               <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5 animate-fade-in">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                <span className="font-medium">{error}</span>
+                <span className="font-semibold">{error}</span>
               </div>
             )}
 
             {/* SECTION 1: INFORMASI DASAR */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-5 shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#0284c7]" />
                 Detail Posisi &amp; Perusahaan
@@ -200,7 +208,7 @@ export default function PostLowonganPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     Judul Posisi / Pekerjaan *
                   </label>
                   <input
@@ -214,7 +222,7 @@ export default function PostLowonganPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     Nama Perusahaan / Studio *
                   </label>
                   <input
@@ -230,7 +238,7 @@ export default function PostLowonganPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
                     Lokasi Kerja *
                   </label>
@@ -245,7 +253,7 @@ export default function PostLowonganPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
                     Tipe Pekerjaan *
                   </label>
                   <select
@@ -261,7 +269,7 @@ export default function PostLowonganPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
                     <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
                     Perkiraan Gaji (Opsional)
                   </label>
@@ -271,14 +279,14 @@ export default function PostLowonganPage() {
                     onChange={(e) => setGajiRange(e.target.value)}
                     onBlur={handleGajiBlur}
                     placeholder="e.g. 7.500.000 atau 5jt - 8jt"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-semibold text-emerald-700"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-bold text-emerald-700"
                   />
                 </div>
               </div>
 
               {/* BATAS WAKTU LAMARAN */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-slate-400" />
                   Batas Waktu Lamaran / Deadline (Opsional)
                 </label>
@@ -292,7 +300,7 @@ export default function PostLowonganPage() {
             </div>
 
             {/* SECTION 2: PILIH JURUSAN TARGET */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-4 shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
                 <GraduationCap className="w-4 h-4 text-[#0284c7]" />
                 Target Program Studi Alumni (Bisa pilih lebih dari satu) *
@@ -306,15 +314,15 @@ export default function PostLowonganPage() {
                       type="button"
                       key={p.id}
                       onClick={() => toggleProdi(p.id)}
-                      className={`p-3.5 rounded-xl border text-left text-xs transition cursor-pointer ${
+                      className={`p-3.5 rounded-2xl border text-left text-xs transition cursor-pointer ${
                         isChecked 
-                          ? 'bg-sky-50 border-[#0284c7] text-[#0284c7] font-semibold shadow-2xs' 
+                          ? 'bg-sky-50 border-[#0284c7] text-[#0284c7] font-bold shadow-2xs' 
                           : 'bg-slate-50 border-slate-200/80 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-bold text-slate-900">{p.label}</span>
-                        {isChecked && <span className="text-[10px] bg-[#0284c7] text-white px-1.5 py-0.2 rounded font-bold">✓</span>}
+                        {isChecked && <span className="text-[10px] bg-[#0284c7] text-white px-1.5 py-0.2 rounded-full font-bold">✓</span>}
                       </div>
                       <span className="text-[11px] text-slate-500 line-clamp-1 leading-snug">{p.desc}</span>
                     </button>
@@ -324,14 +332,14 @@ export default function PostLowonganPage() {
             </div>
 
             {/* SECTION 3: DESKRIPSI & PERSYARATAN */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-4 shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-[#0284c7]" />
                 Deskripsi &amp; Persyaratan Kualifikasi
               </h3>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Deskripsi Pekerjaan &amp; Tanggung Jawab *
                 </label>
                 <textarea
@@ -345,7 +353,7 @@ export default function PostLowonganPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Kualifikasi &amp; Persyaratan (Tulis satu persyaratan per baris)
                 </label>
                 <textarea
@@ -362,7 +370,7 @@ export default function PostLowonganPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-7 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-sm font-bold shadow-xs transition flex items-center gap-2 disabled:opacity-50 active:scale-[0.98]"
+                className="px-8 py-3.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white text-sm font-bold shadow-md shadow-sky-500/20 transition flex items-center gap-2 disabled:opacity-50 active:scale-[0.98] cursor-pointer"
               >
                 {loading ? (
                   <>

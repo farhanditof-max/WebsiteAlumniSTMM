@@ -25,8 +25,6 @@ import {
   Users,
   Briefcase,
   Star,
-  TrendingUp,
-  Heart,
   Play,
   CheckCircle2,
   Award

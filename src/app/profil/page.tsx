@@ -24,7 +24,8 @@ import {
   Save,
   Globe,
   Phone,
-  Eye
+  Eye,
+  Sparkles
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
@@ -36,25 +37,59 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
   return Promise.race([promise, timeoutPromise]);
 }
 
+// Data Dummy Demo untuk Preview Mode Tanpa Login
+const DEMO_PROFILE = {
+  uid: 'demo-alumni-001',
+  namaLengkap: 'Budi Santoso',
+  fotoProfil: '',
+  prodi: 'Animasi' as ProdiType,
+  angkatan: '2020',
+  nomorAlumni: 'MMTC-2020-103',
+  email: 'budi.santoso@alumni.mmtc.ac.id',
+  openToWork: true,
+  bio: '3D Character Animator & Rigger lulusan STMM MMTC Yogyakarta. Terbiasa menangani pipeline produksi animasi 3D studio, motion graphics penyiaran, serta asset 3D untuk game engine.',
+  phone: '081234567890',
+  linkedinUrl: 'https://linkedin.com/in/budi-santoso-mmtc',
+  cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',
+  cvFileUrl: '',
+  portfolio: [
+    {
+      id: 'demo-1',
+      title: '3D Character Animation Showreel 2026',
+      type: 'youtube' as const,
+      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    },
+    {
+      id: 'demo-2',
+      title: 'Broadcast Motion Graphic Package',
+      type: 'behance' as const,
+      url: 'https://behance.net'
+    }
+  ]
+};
+
 export default function ProfilPage() {
   const { user, profile, loading: authLoading, refreshProfile } = useAuth();
+  const isDemo = !user;
 
-  const [namaLengkap, setNamaLengkap] = useState(profile?.namaLengkap ?? '');
-  const [prodi, setProdi] = useState<ProdiType>(profile?.prodi ?? 'Animasi');
-  const [angkatan, setAngkatan] = useState(profile?.angkatan ?? '');
-  const [openToWork, setOpenToWork] = useState(profile?.openToWork ?? true);
-  const [bio, setBio] = useState(profile?.bio ?? '');
-  const [phone, setPhone] = useState(profile?.phone ?? '');
-  const [linkedinUrl, setLinkedinUrl] = useState(profile?.linkedinUrl ?? '');
-  const [cvExternalLink, setCvExternalLink] = useState(profile?.cvExternalLink ?? '');
+  const currentProfile = profile || (isDemo ? DEMO_PROFILE : null);
+
+  const [namaLengkap, setNamaLengkap] = useState(currentProfile?.namaLengkap ?? DEMO_PROFILE.namaLengkap);
+  const [prodi, setProdi] = useState<ProdiType>(currentProfile?.prodi ?? 'Animasi');
+  const [angkatan, setAngkatan] = useState(currentProfile?.angkatan ?? DEMO_PROFILE.angkatan);
+  const [openToWork, setOpenToWork] = useState(currentProfile?.openToWork ?? true);
+  const [bio, setBio] = useState(currentProfile?.bio ?? DEMO_PROFILE.bio);
+  const [phone, setPhone] = useState(currentProfile?.phone ?? DEMO_PROFILE.phone);
+  const [linkedinUrl, setLinkedinUrl] = useState(currentProfile?.linkedinUrl ?? DEMO_PROFILE.linkedinUrl);
+  const [cvExternalLink, setCvExternalLink] = useState(currentProfile?.cvExternalLink ?? DEMO_PROFILE.cvExternalLink);
 
   // Upload file state
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [uploadingCV, setUploadingCV] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // New Portfolio State
-  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(profile?.portfolio ?? []);
+  // Portfolio State
+  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(currentProfile?.portfolio ?? DEMO_PROFILE.portfolio);
   const [portType, setPortType] = useState<'youtube' | 'pinterest' | 'behance' | 'image' | 'link'>('youtube');
   const [portTitle, setPortTitle] = useState('');
   const [portUrl, setPortUrl] = useState('');
@@ -81,7 +116,7 @@ export default function ProfilPage() {
   }, [profile]);
 
   const handleAddPortfolio = async () => {
-    if (!portTitle.trim() || !portUrl.trim() || !user) return;
+    if (!portTitle.trim() || !portUrl.trim()) return;
     const newItem: PortfolioItem = {
       id: Date.now().toString(),
       type: portType,
@@ -93,7 +128,12 @@ export default function ProfilPage() {
     setPortTitle('');
     setPortUrl('');
 
-    // Auto-save langsung ke database Firestore dengan setDoc merge
+    if (isDemo || !user) {
+      setMsg({ type: 'success', text: `[Preview] Berhasil menambahkan "${newItem.title}" ke galeri showreel!` });
+      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      return;
+    }
+
     try {
       await withTimeout(
         setDoc(doc(db, 'users', user.uid), {
@@ -114,9 +154,14 @@ export default function ProfilPage() {
   };
 
   const handleRemovePortfolio = async (id: string) => {
-    if (!user) return;
     const updatedList = portfolioList.filter(p => p.id !== id);
     setPortfolioList(updatedList);
+
+    if (isDemo || !user) {
+      setMsg({ type: 'success', text: '[Preview] Item portofolio berhasil dihapus dari simulasi.' });
+      setTimeout(() => setMsg({ type: '', text: '' }), 3000);
+      return;
+    }
 
     try {
       await withTimeout(
@@ -138,7 +183,7 @@ export default function ProfilPage() {
   };
 
   const handleUploadCV = async () => {
-    if (!cvFile || !user) return;
+    if (!cvFile) return;
 
     if (cvFile.size > 5 * 1024 * 1024) {
       setMsg({ type: 'error', text: 'Ukuran file CV melebihi batas maksimal 5MB.' });
@@ -147,6 +192,15 @@ export default function ProfilPage() {
 
     setUploadingCV(true);
     setMsg({ type: '', text: '' });
+
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setUploadingCV(false);
+        setMsg({ type: 'success', text: '[Preview] File CV PDF berhasil disimulasikan terunggah!' });
+        setCvFile(null);
+      }, 800);
+      return;
+    }
 
     try {
       const fileName = `${user.uid}_${Date.now()}_${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
@@ -174,7 +228,7 @@ export default function ProfilPage() {
   };
 
   const handleAvatarUpload = async (file: File) => {
-    if (!file || !user) return;
+    if (!file) return;
 
     if (file.size > 3 * 1024 * 1024) {
       setMsg({ type: 'error', text: 'Ukuran foto profil melebihi batas maksimal 3MB.' });
@@ -183,6 +237,14 @@ export default function ProfilPage() {
 
     setUploadingAvatar(true);
     setMsg({ type: '', text: '' });
+
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setUploadingAvatar(false);
+        setMsg({ type: 'success', text: '[Preview] Foto profil berhasil disimulasikan!' });
+      }, 700);
+      return;
+    }
 
     try {
       const ext = file.name.split('.').pop() || 'jpg';
@@ -210,9 +272,17 @@ export default function ProfilPage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
     setSaving(true);
     setMsg({ type: '', text: '' });
+
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setSaving(false);
+        setMsg({ type: 'success', text: '✨ [Preview Mode] Seluruh perubahan profil & showreel berhasil disimulasikan!' });
+        setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      }, 600);
+      return;
+    }
 
     try {
       const updateData: Record<string, unknown> = {
@@ -271,7 +341,7 @@ export default function ProfilPage() {
       const videoId = parseYouTubeVideoId(item.url);
 
       return videoId ? (
-        <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black shadow-2xs">
+        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-xs">
           <iframe
             src={`https://www.youtube.com/embed/${videoId}`}
             className="w-full h-full border-0"
@@ -297,7 +367,7 @@ export default function ProfilPage() {
         href={item.url.startsWith('http') ? item.url : `https://${item.url}`} 
         target="_blank" 
         rel="noopener noreferrer"
-        className="flex items-center justify-between p-3.5 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 rounded-xl transition group"
+        className="flex items-center justify-between p-4 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 rounded-2xl transition group"
       >
         <div className="space-y-0.5">
           <span className="text-xs font-bold text-slate-800 group-hover:text-[#0284c7] transition truncate block max-w-[200px]">
@@ -324,36 +394,39 @@ export default function ProfilPage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-xl font-bold">Harap Masuk Terlebih Dahulu</h2>
-            <p className="text-xs text-slate-500">Silakan login untuk mengelola portofolio &amp; CV alumni.</p>
-            <Link href="/login" className="inline-block px-5 py-2.5 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shadow-xs">
-              Masuk ke Akun
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
+    <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         
+        {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-sky-500 to-[#0284c7] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-sky-500/10 animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-5 h-5 text-amber-300 shrink-0" />
+              <div>
+                <p className="text-xs font-bold leading-tight">Mode Pratinjau Dashboard Alumni (Preview Tanpa Login)</p>
+                <p className="text-[11px] text-sky-100">
+                  Anda sedang meninjau form profil, avatar uploader visual, showreel 2-kolom, dan pengaturan CV secara langsung.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="px-4 py-1.5 rounded-full bg-white text-[#0284c7] text-xs font-bold hover:bg-sky-50 transition shrink-0 text-center shadow-xs"
+            >
+              Masuk Akun Asli
+            </Link>
+          </div>
+        )}
+
         {/* PROFILE HEADER CARD */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm">
           <div className="flex items-center gap-5">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center text-3xl font-bold shadow-2xs overflow-hidden border-2 border-white shrink-0">
-                <AlumniAvatar src={profile?.fotoProfil} name={namaLengkap || profile?.namaLengkap} />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-3xl font-bold shadow-xs overflow-hidden border-2 border-white shrink-0">
+                <AlumniAvatar src={currentProfile?.fotoProfil} name={namaLengkap || currentProfile?.namaLengkap} />
               </div>
 
               <label 
@@ -385,31 +458,29 @@ export default function ProfilPage() {
             </div>
 
             <div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                {namaLengkap || profile?.namaLengkap}
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                {namaLengkap || currentProfile?.namaLengkap}
               </h1>
-              <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-1">
-                {prodi} • Angkatan {angkatan || profile?.angkatan}
+              <p className="text-xs sm:text-sm text-[#0284c7] font-bold mt-1">
+                {prodi} • Angkatan {angkatan || currentProfile?.angkatan}
               </p>
               <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                Nomor Alumni: {profile?.nomorAlumni}
+                Nomor Alumni: {currentProfile?.nomorAlumni}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {profile?.uid && (
-              <Link
-                href={`/profil/${profile.uid}`}
-                target="_blank"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 transition shadow-2xs"
-              >
-                <Eye className="w-3.5 h-3.5 text-slate-500" />
-                <span>Lihat Profil Publik</span>
-              </Link>
-            )}
+            <Link
+              href={currentProfile?.uid ? `/profil/${currentProfile.uid}` : '/open-to-work'}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 transition shadow-2xs"
+            >
+              <Eye className="w-3.5 h-3.5 text-slate-500" />
+              <span>Lihat Profil Publik</span>
+            </Link>
 
-            <label className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer text-xs font-semibold select-none hover:bg-slate-100/70 transition">
+            <label className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 cursor-pointer text-xs font-bold select-none hover:bg-slate-100/70 transition">
               <input
                 type="checkbox"
                 checked={openToWork}
@@ -425,7 +496,7 @@ export default function ProfilPage() {
 
         {/* FEEDBACK TOAST / ALERT */}
         {msg.text && (
-          <div className={`mb-6 p-4 rounded-xl text-xs flex items-center gap-2.5 border animate-fade-in ${
+          <div className={`mb-6 p-4 rounded-2xl text-xs flex items-center gap-2.5 border animate-fade-in ${
             msg.type === 'success' 
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
               : 'bg-red-50 border-red-200 text-red-800'
@@ -435,7 +506,7 @@ export default function ProfilPage() {
             ) : (
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
             )}
-            <span className="font-medium">{msg.text}</span>
+            <span className="font-semibold">{msg.text}</span>
           </div>
         )}
 
@@ -446,17 +517,17 @@ export default function ProfilPage() {
           <div className="w-full lg:w-80 shrink-0 space-y-6">
             
             {/* CV UPLOAD & LINK */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-[#0284c7]" />
                 Resume &amp; CV Alumni
               </h3>
 
-              {profile?.cvFileUrl && (
-                <div className="p-3.5 bg-sky-50/80 border border-sky-100 rounded-xl flex items-center justify-between text-xs">
-                  <span className="text-slate-700 truncate max-w-[130px] font-semibold">CV PDF Tersimpan</span>
+              {currentProfile?.cvFileUrl ? (
+                <div className="p-3.5 bg-sky-50/80 border border-sky-100 rounded-2xl flex items-center justify-between text-xs">
+                  <span className="text-slate-700 truncate max-w-[130px] font-bold">CV PDF Tersimpan</span>
                   <a 
-                    href={profile.cvFileUrl} 
+                    href={currentProfile.cvFileUrl} 
                     target="_blank" 
                     rel="noreferrer"
                     className="text-[#0284c7] hover:underline flex items-center gap-1 font-bold"
@@ -464,22 +535,22 @@ export default function ProfilPage() {
                     Buka PDF <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
-              )}
+              ) : null}
 
               <div className="space-y-2">
-                <label className="block text-[11px] font-semibold text-slate-600">Unggah File PDF CV (Maks 5MB)</label>
+                <label className="block text-[11px] font-bold text-slate-700">Unggah File PDF CV (Maks 5MB)</label>
                 <input 
                   type="file" 
                   accept=".pdf"
                   onChange={(e) => setCvFile(e.target.files?.[0] || null)}
-                  className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#0284c7] file:text-white hover:file:bg-[#0369a1] cursor-pointer"
+                  className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#0284c7] file:text-white hover:file:bg-[#0369a1] cursor-pointer"
                 />
                 {cvFile && (
                   <button
                     type="button"
                     onClick={handleUploadCV}
                     disabled={uploadingCV}
-                    className="w-full py-2 mt-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition shadow-2xs"
+                    className="w-full py-2.5 mt-1 rounded-full bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white flex items-center justify-center gap-1.5 transition shadow-xs"
                   >
                     {uploadingCV ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                     Simpan ke Cloud Storage
@@ -488,25 +559,25 @@ export default function ProfilPage() {
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                <label className="block text-[11px] font-semibold text-slate-600">Atau Tautan Google Drive / Cloud</label>
+                <label className="block text-[11px] font-bold text-slate-700">Atau Tautan Google Drive / Cloud</label>
                 <input
                   type="url"
                   value={cvExternalLink}
                   onChange={(e) => setCvExternalLink(e.target.value)}
                   placeholder="https://drive.google.com/..."
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
             </div>
 
             {/* CONTACT & SOCIAL */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-3.5 text-xs shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-3.5 text-xs shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">
                 Kontak &amp; Tautan Profil
               </h3>
               
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center gap-1.5">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-emerald-600" />
                   Nomor WhatsApp / HP
                 </label>
@@ -515,12 +586,12 @@ export default function ProfilPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="08123456789"
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center gap-1.5">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-[#0284c7]" />
                   LinkedIn / Portfolio URL
                 </label>
@@ -529,7 +600,7 @@ export default function ProfilPage() {
                   value={linkedinUrl}
                   onChange={(e) => setLinkedinUrl(e.target.value)}
                   placeholder="https://linkedin.com/in/..."
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
             </div>
@@ -539,27 +610,27 @@ export default function ProfilPage() {
           <div className="flex-1 w-full space-y-6">
             
             {/* PERSONAL DETAILS & BIO FORM */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-4 shadow-2xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
                 Informasi Biodata &amp; Keahlian
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Nama Lengkap</label>
                   <input
                     type="text"
                     value={namaLengkap}
                     onChange={(e) => setNamaLengkap(e.target.value)}
                     placeholder="Nama Lengkap"
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Program Studi</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Program Studi</label>
                   <select
                     value={prodi}
                     onChange={(e) => setProdi(e.target.value as ProdiType)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
                   >
                     {PRODI_LIST.map((p) => (
                       <option key={p.id} value={p.id}>
@@ -569,19 +640,19 @@ export default function ProfilPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Tahun Angkatan</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Tahun Angkatan</label>
                   <input
                     type="text"
                     value={angkatan}
                     onChange={(e) => setAngkatan(e.target.value)}
                     placeholder="2020"
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Bio &amp; Ringkasan Portofolio</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Bio &amp; Ringkasan Portofolio</label>
                 <textarea
                   rows={3}
                   value={bio}
@@ -592,25 +663,25 @@ export default function ProfilPage() {
               </div>
             </div>
 
-            {/* PORTFOLIO ITEMS SECTION */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-6 shadow-2xs">
+            {/* PORTFOLIO ITEMS SECTION (SHOWREEL GALLERY 2 KOLOM) */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-6 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Video className="w-4 h-4 text-[#0284c7]" />
-                    Galeri Portofolio &amp; Showreel
+                    Galeri Portofolio &amp; Showreel (Layout 2-Kolom)
                   </h3>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Embed video YouTube, karya Behance, atau link portfolio (ditampilkan dalam susunan 2-kolom pada desktop)
+                    Embed video YouTube, karya Behance, atau link portfolio tersusun responsif 2 kolom di desktop
                   </p>
                 </div>
               </div>
 
               {/* INPUT FORM ADD ITEM */}
-              <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200 space-y-3">
+              <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Platform Karya</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Platform Karya</label>
                     <select
                       value={portType}
                       onChange={(e) => setPortType(e.target.value as 'youtube' | 'pinterest' | 'behance' | 'image' | 'link')}
@@ -624,7 +695,7 @@ export default function ProfilPage() {
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Judul Karya / Showreel</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Judul Karya / Showreel</label>
                     <input
                       type="text"
                       value={portTitle}
@@ -636,7 +707,7 @@ export default function ProfilPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
                     Tautan / Kode Embed
                   </label>
                   <div className="flex gap-2">
@@ -651,7 +722,7 @@ export default function ProfilPage() {
                       type="button"
                       onClick={handleAddPortfolio}
                       disabled={!portTitle.trim() || !portUrl.trim()}
-                      className="px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] disabled:opacity-40 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition shadow-2xs"
+                      className="px-5 py-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] disabled:opacity-40 text-white text-xs font-bold flex items-center gap-1.5 shrink-0 transition shadow-xs cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Tambah
@@ -662,14 +733,14 @@ export default function ProfilPage() {
 
               {/* LIST OF PORTFOLIO: SUSUN 2 2 (2 COLUMNS) */}
               {portfolioList.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400 text-xs space-y-1">
-                  <p className="font-semibold text-slate-600">Belum ada item portofolio yang ditambahkan.</p>
+                <div className="text-center py-12 border border-dashed border-slate-200 rounded-2xl text-slate-400 text-xs space-y-1">
+                  <p className="font-bold text-slate-600">Belum ada item portofolio yang ditambahkan.</p>
                   <p className="text-slate-400">Masukkan tautan video showreel YouTube atau link portofolio Anda di atas.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {portfolioList.map((item) => (
-                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-3 shadow-2xs">
+                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-3 shadow-2xs">
                       <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
                         <span className="text-xs font-bold text-slate-900 truncate" title={item.title}>
                           {item.title}
@@ -677,7 +748,7 @@ export default function ProfilPage() {
                         <button
                           type="button"
                           onClick={() => handleRemovePortfolio(item.id)}
-                          className="text-slate-400 hover:text-red-600 p-1 rounded-lg hover:bg-white transition"
+                          className="text-slate-400 hover:text-red-600 p-1 rounded-lg hover:bg-white transition cursor-pointer"
                           title="Hapus Karya"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -698,7 +769,7 @@ export default function ProfilPage() {
                 type="button"
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="px-6 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-xs flex items-center gap-2 disabled:opacity-50 transition active:scale-[0.99]"
+                className="px-8 py-3.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white text-xs font-bold shadow-md shadow-sky-500/20 flex items-center gap-2 disabled:opacity-50 transition active:scale-[0.98] cursor-pointer"
               >
                 {saving ? (
                   <>

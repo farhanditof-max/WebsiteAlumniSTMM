@@ -21,6 +21,11 @@ export default function Navbar() {
   const { user, profile, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Jika sedang preview halaman dashboard tanpa login, aktifkan simulasi tampilan user login
+  const isDashboardRoute = pathname === '/profil' || pathname === '/post-lowongan' || pathname === '/lamaran';
+  const effectiveUser = user || (isDashboardRoute ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
+  const effectiveProfile = profile || (isDashboardRoute ? { namaLengkap: 'Budi Santoso', prodi: 'Animasi', fotoProfil: '' } : null);
+
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
     return pathname.startsWith(path);
@@ -94,7 +99,7 @@ export default function Navbar() {
               Open to Work
             </Link>
 
-            {user && (
+            {effectiveUser && (
               <>
                 <Link 
                   href="/post-lowongan" 
@@ -123,9 +128,9 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* User Profile / Auth CTA - Friendly Round Pill Buttons */}
+          {/* User Profile / Auth CTA */}
           <div className="hidden md:flex items-center gap-3">
-            {user ? (
+            {effectiveUser ? (
               <div className="flex items-center gap-2.5">
                 <Link 
                   href="/profil" 
@@ -136,25 +141,31 @@ export default function Navbar() {
                   }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
-                    <AlumniAvatar src={profile?.fotoProfil} name={profile?.namaLengkap} />
+                    <AlumniAvatar src={effectiveProfile?.fotoProfil} name={effectiveProfile?.namaLengkap} />
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-bold text-slate-900 truncate max-w-[120px] leading-tight">
-                      {profile?.namaLengkap || 'Alumni MMTC'}
+                      {effectiveProfile?.namaLengkap || 'Alumni MMTC'}
                     </p>
                     <p className="text-[10px] text-[#0284c7] font-semibold leading-tight">
-                      {profile?.prodi || 'Alumni'}
+                      {effectiveProfile?.prodi || 'Alumni'}
                     </p>
                   </div>
                 </Link>
-                <button
-                  onClick={() => logout()}
-                  title="Keluar dari akun"
-                  className="p-2.5 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
-                  aria-label="Logout"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+                {user ? (
+                  <button
+                    onClick={() => logout()}
+                    title="Keluar dari akun"
+                    className="p-2.5 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                    aria-label="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">
+                    Preview Mode
+                  </span>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2.5">
@@ -223,7 +234,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {user ? (
+          {effectiveUser ? (
             <div className="pt-2 border-t border-slate-100 space-y-2">
               <Link 
                 href="/post-lowongan" 
@@ -248,22 +259,24 @@ export default function Navbar() {
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-6 h-6 rounded-full bg-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden">
-                    <AlumniAvatar src={profile?.fotoProfil} name={profile?.namaLengkap} />
+                    <AlumniAvatar src={effectiveProfile?.fotoProfil} name={effectiveProfile?.namaLengkap} />
                   </div>
-                  <span>Profil Saya ({profile?.namaLengkap || 'Alumni'})</span>
+                  <span>Profil Saya ({effectiveProfile?.namaLengkap || 'Alumni'})</span>
                 </div>
                 <User className="w-4 h-4" />
               </Link>
-              <button
-                onClick={() => {
-                  logout();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 rounded-2xl transition"
-              >
-                <LogOut className="w-4 h-4" />
-                Keluar
-              </button>
+              {user ? (
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 rounded-2xl transition"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Keluar
+                </button>
+              ) : null}
             </div>
           ) : (
             <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
