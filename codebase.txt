@@ -1,7 +1,7 @@
 ================================================================================
    DASHBOARD ALUMNI STMM MMTC - COMPLETE REPOSITORY CODEBASE BUNDLE (2026)
-   Generated at: 2026-10-24T14:20:23.146Z
-   Total files included: 42
+   Generated at: 2026-10-24T14:33:18.157Z
+   Total files included: 43
 ================================================================================
 
 
@@ -27,7 +27,7 @@ FILE: package.json
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^6.0.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -705,6 +705,12 @@ git push origin feat/ui-<nama-fitur>
 
 
 ================================================================================
+FILE: .npmrc
+================================================================================
+legacy-peer-deps=true
+
+
+================================================================================
 FILE: .github/workflows/ci.yml
 ================================================================================
 name: CI / Security & Integrity Pipeline
@@ -762,7 +768,7 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID || '1:123456789:web:abcdef' }}
 
   rules-testing:
-    name: Firebase Rules Unit Testing
+    name: Firebase Rules Security Verification (Bagian 10)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -776,19 +782,10 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Setup Java (for Firebase Emulators)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Firebase Tools CLI
-        run: npm install -g firebase-tools
-
-      - name: Run Firebase Rules Unit Tests
+      - name: Run Firebase Rules Acceptance Tests
         run: npm run test:rules
 
 
