@@ -14,7 +14,7 @@ export default function Footer() {
               <img 
                 src="/logo_alumnihub.webp" 
                 alt="AlumniHub Sekolah Tinggi Multi Media" 
-                className="h-10 w-auto object-contain"
+                className="h-14 sm:h-16 w-auto object-contain"
               />
               <span className="text-[11px] text-[#0284c7] font-semibold block">
                 Kementerian Komunikasi dan Digital RI

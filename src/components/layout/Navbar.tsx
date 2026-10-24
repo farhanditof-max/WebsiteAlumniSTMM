@@ -35,14 +35,14 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-sky-100 text-slate-800 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 sm:h-20">
+        <div className="flex items-center justify-between min-h-[78px] sm:min-h-[86px] py-2">
           
           {/* Brand Logo - Official AlumniHub Graphic */}
-          <Link href="/" className="flex items-center group focus:outline-none py-1 shrink-0">
+          <Link href="/" className="flex items-center group focus:outline-none py-0.5 shrink-0">
             <img 
               src="/logo_alumnihub.webp" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
-              className="h-[35px] sm:h-[40px] w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-[62px] sm:h-[67px] w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </Link>
 
