@@ -28,6 +28,7 @@ import { OpenToWorkBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { extractSkills } from '@/components/profile/skills';
+import AlumniActivityHistory from '@/components/profile/AlumniActivityHistory';
 
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
@@ -437,6 +438,14 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
                 </div>
               )}
             </div>
+
+            {/* AKTIVITAS & RIWAYAT POSTINGAN ALUMNI (LINKEDIN / FACEBOOK STYLE) */}
+            <AlumniActivityHistory 
+              authorName={profile.namaLengkap}
+              authorProdi={profile.prodi}
+              authorAvatar={profile.fotoProfil}
+              isOwner={false}
+            />
           </div>
         </div>
 

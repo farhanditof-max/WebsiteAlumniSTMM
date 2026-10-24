@@ -256,7 +256,24 @@ export default function FeedPage() {
     avatar: profile?.fotoProfil || ''
   };
 
-  const [posts, setPosts] = useState<FeedPost[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<FeedPost[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('alumni_user_posts');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const existingIds = new Set(INITIAL_POSTS.map(p => p.id));
+            const newPosts = parsed.filter((p: FeedPost) => !existingIds.has(p.id));
+            return [...newPosts, ...INITIAL_POSTS];
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return INITIAL_POSTS;
+  });
   const [selectedFilter, setSelectedFilter] = useState<string>('semua');
   
   // Post Creator State
@@ -365,7 +382,18 @@ export default function FeedPage() {
         comments: []
       };
 
-      setPosts([createdPost, ...posts]);
+      const newPostsList = [createdPost, ...posts];
+      setPosts(newPostsList);
+
+      // Save to localStorage so profile history immediately shows this post
+      try {
+        const stored = localStorage.getItem('alumni_user_posts');
+        const existing = stored ? JSON.parse(stored) : [];
+        localStorage.setItem('alumni_user_posts', JSON.stringify([createdPost, ...existing]));
+      } catch {
+        // ignore
+      }
+
       setNewContent('');
       setNewMediaUrl('');
       setAttachedFile(null);

@@ -30,6 +30,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
+import AlumniActivityHistory from '@/components/profile/AlumniActivityHistory';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { extractSkills } from '@/components/profile/skills';
@@ -833,6 +834,14 @@ export default function ProfilPage() {
                 </div>
               )}
             </div>
+
+            {/* AKTIVITAS & RIWAYAT POSTINGAN ALUMNI (LINKEDIN / FACEBOOK STYLE) */}
+            <AlumniActivityHistory 
+              authorName={namaLengkap || currentProfile?.namaLengkap}
+              authorProdi={prodi || currentProfile?.prodi}
+              authorAvatar={currentProfile?.fotoProfil}
+              isOwner={true}
+            />
 
             {/* SAVE BUTTON */}
             <div className="flex justify-end pt-2">
