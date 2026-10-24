@@ -12,7 +12,8 @@ import {
   X,
   FileText,
   User,
-  Compass
+  Compass,
+  Users
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 
@@ -22,7 +23,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Jika sedang preview halaman dashboard tanpa login, aktifkan simulasi tampilan user login
-  const isDashboardRoute = pathname === '/profil' || pathname === '/post-lowongan' || pathname === '/lamaran';
+  const isDashboardRoute = pathname === '/profil' || pathname === '/post-lowongan' || pathname === '/lamaran' || pathname === '/feed' || pathname === '/beranda';
   const effectiveUser = user || (isDashboardRoute ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
   const effectiveProfile = profile || (isDashboardRoute ? { namaLengkap: 'Budi Santoso', prodi: 'Animasi', fotoProfil: '' } : null);
 
@@ -67,12 +68,24 @@ export default function Navbar() {
             <Link 
               href="/" 
               className={`px-4 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all ${
-                isActive('/') 
+                pathname === '/' 
                   ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               Beranda
+            </Link>
+
+            <Link 
+              href="/feed" 
+              className={`px-3.5 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                isActive('/feed') || isActive('/beranda')
+                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 text-[#0284c7]" />
+              Feed Komunitas
             </Link>
 
             <Link 
@@ -205,11 +218,21 @@ export default function Navbar() {
             href="/" 
             onClick={() => setMobileMenuOpen(false)}
             className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-medium transition ${
-              isActive('/') ? 'bg-sky-50 text-[#0284c7] font-bold' : 'text-slate-700 hover:bg-slate-50'
+              pathname === '/' ? 'bg-sky-50 text-[#0284c7] font-bold' : 'text-slate-700 hover:bg-slate-50'
             }`}
           >
             <Compass className="w-4 h-4 text-slate-400" />
             Beranda
+          </Link>
+          <Link 
+            href="/feed" 
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-medium transition ${
+              isActive('/feed') || isActive('/beranda') ? 'bg-sky-50 text-[#0284c7] font-bold' : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <Users className="w-4 h-4 text-[#0284c7]" />
+            Feed Komunitas
           </Link>
           <Link 
             href="/lowongan" 
