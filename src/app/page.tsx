@@ -187,36 +187,46 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* RIGHT CONTENT: Hero Showcase with Floating Glass Cards */}
+            {/* RIGHT CONTENT: Hero Showcase with Campus Photo & Floating Glass Cards */}
             <div className="lg:col-span-5 relative flex items-center justify-center">
               
-              {/* Center Portrait / Graphic Container */}
-              <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[4/5] rounded-[40px] bg-gradient-to-tr from-sky-200 via-sky-100 to-blue-50 border-4 border-white shadow-xl shadow-sky-500/10 flex flex-col items-center justify-end overflow-hidden p-6">
+              {/* Center Portrait / Campus Photo Container */}
+              <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[4/5] rounded-[40px] border-4 border-white shadow-2xl shadow-sky-500/15 overflow-hidden group">
                 
-                {/* Official Logo Watermark in background */}
-                <div className="absolute top-8 w-28 h-28 opacity-25">
-                  <img src="/logo_stmm.png" alt="STMM MMTC" className="w-full h-full object-contain" />
+                {/* Real Campus Image */}
+                <img 
+                  src="/kampus_stmm.jpg" 
+                  alt="Gedung Kampus STMM MMTC Yogyakarta" 
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                />
+
+                {/* Soft Gradient Overlay for depth & typography readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-sky-900/20 pointer-events-none" />
+
+                {/* Top Institution Badge on Photo */}
+                <div className="absolute top-4 left-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/40 shadow-xs">
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <img src="/logo_stmm.png" alt="Logo STMM" className="w-full h-full object-contain" />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-800">Kampus STMM MMTC</span>
                 </div>
 
-                <div className="relative z-10 text-center space-y-3 pb-8">
-                  <div className="w-24 h-24 rounded-full bg-white p-2 mx-auto shadow-md shadow-sky-100 flex items-center justify-center">
-                    <img src="/logo_stmm.png" alt="STMM MMTC" className="w-full h-full object-contain" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-xl text-slate-900">STMM MMTC</h3>
-                    <p className="text-xs font-bold text-[#0284c7]">Yogyakarta</p>
-                    <p className="text-[11px] text-slate-500 max-w-[220px] mx-auto mt-1 leading-relaxed">
-                      Kementerian Komunikasi dan Digital Republik Indonesia
-                    </p>
-                  </div>
+                {/* Bottom Caption Overlay */}
+                <div className="absolute bottom-5 left-5 right-5 text-left text-white z-10 space-y-1">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-sky-500/80 text-[10px] font-bold tracking-wide uppercase">
+                    Yogyakarta
+                  </span>
+                  <h3 className="font-extrabold text-lg sm:text-xl text-white leading-tight">
+                    Kampus STMM &ldquo;MMTC&rdquo;
+                  </h3>
+                  <p className="text-[11px] text-slate-200 leading-snug">
+                    Jl. Magelang Km. 6, Sleman • Kementerian Komunikasi dan Digital RI
+                  </p>
                 </div>
-
-                {/* Bottom decorative curve */}
-                <div className="w-full h-2 bg-gradient-to-r from-sky-400 to-[#0284c7] rounded-full" />
               </div>
 
               {/* Floating Card 1: Top Right */}
-              <div className="absolute -top-4 -right-2 sm:right-0 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-3.5 shadow-lg shadow-slate-200/50 flex items-center gap-2.5 animate-bounce [animation-duration:6s]">
+              <div className="absolute -top-4 -right-2 sm:right-0 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-3.5 shadow-lg shadow-slate-200/50 flex items-center gap-2.5 animate-bounce [animation-duration:6s] z-20">
                 <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-[#0284c7]">
                   <Heart className="w-4 h-4 fill-[#0284c7]" />
                 </div>
@@ -227,7 +237,7 @@ export default function HomePage() {
               </div>
 
               {/* Floating Card 2: Left Mid */}
-              <div className="absolute top-1/3 -left-4 sm:-left-6 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-lg shadow-slate-200/50 space-y-1">
+              <div className="absolute top-1/3 -left-4 sm:-left-6 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-lg shadow-slate-200/50 space-y-1 z-20">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lulusan Terserap</span>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-black text-slate-900">94.8%</span>
@@ -241,7 +251,7 @@ export default function HomePage() {
               </div>
 
               {/* Floating Card 3: Bottom Right */}
-              <div className="absolute -bottom-4 right-2 sm:right-4 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-lg shadow-slate-200/50 max-w-[210px] space-y-1.5">
+              <div className="absolute -bottom-4 right-2 sm:right-4 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3.5 shadow-lg shadow-slate-200/50 max-w-[210px] space-y-1.5 z-20">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-[10px]">
                     DN
