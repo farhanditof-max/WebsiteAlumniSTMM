@@ -30,6 +30,7 @@ import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
+import LinkedInMessagingWidget from '@/components/feed/LinkedInMessagingWidget';
 import { parseYouTubeVideoId } from '@/lib/media';
 import { UserProfile } from '@/types';
 
@@ -1070,6 +1071,9 @@ export default function FeedPage() {
         subtitle={shareData?.subtitle}
         shareUrl={shareData?.url || ''}
       />
+
+      {/* LINKEDIN-STYLE FLOATING MESSAGING DRAWER */}
+      <LinkedInMessagingWidget />
     </div>
   );
 }
