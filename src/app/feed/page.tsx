@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -24,7 +24,8 @@ import {
   Users, 
   Calendar, 
   Maximize2, 
-  Briefcase
+  Briefcase,
+  ChevronDown
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
@@ -236,6 +237,13 @@ const TRENDING_TOPICS = [
   { tag: '#LokerAlumniJogja', count: '51 postingan' }
 ];
 
+const POST_CATEGORIES = [
+  { id: 'diskusi' as const, label: 'Diskusi', icon: '💡', desc: 'Tanya jawab, opini & wawasan alumni' },
+  { id: 'showreel' as const, label: 'Showreel', icon: '🎬', desc: 'Karya video, animasi, 3D & portofolio' },
+  { id: 'kolaborasi' as const, label: 'Kolaborasi', icon: '🤝', desc: 'Ajak project, tim freelance & riset' },
+  { id: 'pencapaian' as const, label: 'Prestasi', icon: '🏆', desc: 'Penghargaan, sertifikasi & karir' }
+];
+
 export default function FeedPage() {
   const { user, profile } = useAuth();
 
@@ -275,6 +283,20 @@ export default function FeedPage() {
     'post-2': true
   });
   const [connectedUsers, setConnectedUsers] = useState<Record<string, boolean>>({});
+
+  // Custom Category Dropdown State
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setCategoryDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleFileAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -675,16 +697,73 @@ export default function FeedPage() {
                     <span>Media</span>
                   </button>
 
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value as 'showreel' | 'kolaborasi' | 'diskusi' | 'pencapaian')}
-                    className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 font-medium focus:outline-none"
-                  >
-                    <option value="diskusi">💡 Diskusi</option>
-                    <option value="showreel">🎬 Showreel</option>
-                    <option value="kolaborasi">🤝 Kolaborasi</option>
-                    <option value="pencapaian">🏆 Prestasi</option>
-                  </select>
+                  {/* CUSTOM STYLED CATEGORY DROPDOWN */}
+                  <div className="relative" ref={categoryDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer select-none ${
+                        categoryDropdownOpen
+                          ? 'bg-sky-50 text-[#0284c7] border-sky-300 shadow-2xs'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
+                      aria-expanded={categoryDropdownOpen}
+                      aria-haspopup="listbox"
+                    >
+                      <span>
+                        {POST_CATEGORIES.find(c => c.id === newCategory)?.icon || '💡'}
+                      </span>
+                      <span>
+                        {POST_CATEGORIES.find(c => c.id === newCategory)?.label || 'Diskusi'}
+                      </span>
+                      <ChevronDown 
+                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                          categoryDropdownOpen ? 'rotate-180 text-[#0284c7]' : ''
+                        }`} 
+                      />
+                    </button>
+
+                    {categoryDropdownOpen && (
+                      <div className="absolute left-0 mt-2 w-56 sm:w-64 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-1.5 z-30 animate-fade-in">
+                        <div className="px-2.5 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Pilih Kategori Postingan
+                        </div>
+                        <div className="space-y-1">
+                          {POST_CATEGORIES.map((cat) => {
+                            const isSelected = newCategory === cat.id;
+                            return (
+                              <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => {
+                                  setNewCategory(cat.id);
+                                  setCategoryDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-sky-50 text-[#0284c7] font-bold'
+                                    : 'hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-base flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 shrink-0">
+                                    {cat.icon}
+                                  </span>
+                                  <div>
+                                    <p className="text-xs font-bold leading-tight">{cat.label}</p>
+                                    <p className="text-[10px] text-slate-400 leading-tight mt-0.5">{cat.desc}</p>
+                                  </div>
+                                </div>
+                                {isSelected && (
+                                  <Check className="w-4 h-4 text-[#0284c7] shrink-0" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <button
