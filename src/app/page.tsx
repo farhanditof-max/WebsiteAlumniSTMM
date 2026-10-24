@@ -239,26 +239,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TRUSTED BY / PARTNER LOGO STRIP (CLEAN MONOCHROME) WITH SCROLLREVEAL */}
-      <section className="py-10 bg-white border-b border-slate-100 overflow-hidden">
-        <ScrollReveal direction="up" delayMs={60} durationMs={700}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Alumni MMTC Berkarir di Berbagai Stasiun TV, Studio Animasi &amp; Industri Kreatif
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-slate-400 font-extrabold text-sm sm:text-base tracking-tight opacity-75">
-              <span className="hover:text-slate-700 transition">TVRI NASIONAL</span>
-              <span className="hover:text-slate-700 transition">TRANS MEDIA</span>
-              <span className="hover:text-slate-700 transition">NET TV</span>
-              <span className="hover:text-slate-700 transition">MD ANIMATION</span>
-              <span className="hover:text-slate-700 transition">MNC GROUP</span>
-              <span className="hover:text-slate-700 transition">GAMELOFT</span>
-              <span className="hover:text-slate-700 transition">KOMPAS TV</span>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
       {/* KLASIFIKASI BIDANG KEAHLIAN / PRODI — STAGGERED SCROLL REVEAL */}
       <section className="py-20 sm:py-28 bg-slate-50/70 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
