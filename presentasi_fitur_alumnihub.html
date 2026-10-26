@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Presentasi Fitur Dashboard Alumni MMTC</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+    @page {
+      size: 1920px 1080px;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+      page-break-inside: avoid;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 80px 110px;
+      background: #ffffff;
+    }
+
+    /* Ambient Background Elements */
+    .bg-gradient-cover {
+      background: radial-gradient(circle at 85% 15%, #e0f2fe 0%, #f0f9ff 35%, #ffffff 70%);
+    }
+    .bg-gradient-slide {
+      background: radial-gradient(circle at 90% 10%, #f0f9ff 0%, #ffffff 60%);
+    }
+
+    /* Header Bar */
+    .slide-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 24px;
+    }
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: 0.5px;
+    }
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #0284c7;
+    }
+    .feature-index {
+      font-size: 16px;
+      font-weight: 800;
+      color: #64748b;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 8px 20px;
+      border-radius: 9999px;
+      letter-spacing: 1.5px;
+    }
+
+    /* Content Area */
+    .slide-body {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 70px;
+      align-items: center;
+      margin-top: 40px;
+      margin-bottom: auto;
+    }
+
+    .feature-badge {
+      display: inline-block;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #0284c7;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      padding: 8px 18px;
+      border-radius: 9999px;
+      margin-bottom: 20px;
+    }
+
+    .feature-title {
+      font-size: 54px;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.15;
+      margin-bottom: 22px;
+      letter-spacing: -1px;
+    }
+    .feature-desc {
+      font-size: 22px;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .feature-points {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .point-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+    .point-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: #e0f2fe;
+      color: #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .point-text {
+      font-size: 20px;
+      color: #334155;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+    .point-text strong {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    /* Visual Card on Right */
+    .visual-panel {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 36px;
+      padding: 44px;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08);
+      position: relative;
+    }
+    .visual-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 24px;
+    }
+    .visual-stat-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    .visual-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .visual-bullet-item {
+      background: #ffffff;
+      border: 1.5px solid #f1f5f9;
+      border-radius: 18px;
+      padding: 16px 20px;
+      font-size: 17px;
+      color: #334155;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .visual-bullet-badge {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #0284c7;
+      flex-shrink: 0;
+    }
+
+    /* Bottom Bar */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      border-top: 2px solid #f1f5f9;
+      padding-top: 24px;
+      font-size: 15px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    /* Cover Specific */
+    .cover-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100%;
+      max-width: 1300px;
+    }
+    .cover-tag {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0284c7;
+      background: #e0f2fe;
+      border: 2px solid #bae6fd;
+      padding: 10px 24px;
+      border-radius: 9999px;
+      margin-bottom: 30px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .cover-title {
+      font-size: 82px;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.1;
+      margin-bottom: 28px;
+      letter-spacing: -2px;
+    }
+    .cover-title span {
+      color: #0284c7;
+    }
+    .cover-desc {
+      font-size: 26px;
+      color: #475569;
+      line-height: 1.6;
+      max-width: 1000px;
+      margin-bottom: 48px;
+    }
+    .cover-meta {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 20px 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+    .cover-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cover-meta-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .cover-meta-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== SLIDE 1: COVER ==================== -->
+  <div class="slide bg-gradient-cover">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>SEKOLAH TINGGI MULTI MEDIA "MMTC" YOGYAKARTA</span>
+      </div>
+      <div class="feature-index">DOKUMEN PRESENTASI FITUR</div>
+    </div>
+
+    <div class="cover-body">
+      <div class="cover-tag">Platform Karir &amp; Portofolio Terpadu</div>
+      <h1 class="cover-title">
+        Dashboard Alumni <br />
+        <span>STMM MMTC</span> Yogyakarta
+      </h1>
+      <p class="cover-desc">
+        Kompilasi lengkap fitur ekosistem digital resmi untuk menghubungkan lulusan penyiaran, animasi, game studio, dan teknologi multimedia dengan peluang industri nasional.
+      </p>
+
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Total Fitur Utama</div>
+          <div class="cover-meta-value">9 Modul Spesifik</div>
+        </div>
+        <div style="width: 2px; height: 36px; background: #e2e8f0;"></div>
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Format Dokumen</div>
+          <div class="cover-meta-value">1 Halaman Per Fitur</div>
+        </div>
+        <div style="width: 2px; height: 36px; background: #e2e8f0;"></div>
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Status Sistem</div>
+          <div class="cover-meta-value" style="color: #059669;">Siap Produksi (Verified)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Portal Resmi Ikatan Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 01</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 2: FITUR 1 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 01 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Modul Autentikasi &bull; /login &amp; /register</div>
+        <h2 class="feature-title">Autentikasi &amp; Validasi Akun Alumni</h2>
+        <p class="feature-desc">
+          Pintu gerbang keamanan yang memverifikasi identitas resmi lulusan STMM MMTC sebelum dapat mengakses jejaring dan melamar lowongan kerja.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Validasi Data Akademik Resmi:</strong> Wajib mencantumkan Nomor Alumni / NIM, Angkatan, serta 1 dari 6 Program Studi MMTC saat registrasi.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Firebase Auth Berstandar Industri:</strong> Enkripsi kata sandi dan manajemen sesi aman berbasis token JWT.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Sinkronisasi State Lintas Tab:</strong> Pembaruan profil langsung ter-update di seluruh tab browser tanpa perlu refresh halaman.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">🎯 Nilai Manfaat Utama</div>
+        <div class="visual-stat-title">Keamanan &amp; Verifikasi</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Mencegah akun palsu / spammer industri</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Menjamin kredibilitas lulusan bagi perekrut</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Session timeout aman &amp; pemulihan sandi</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Integrasi seamless dengan Firestore Rules</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 02</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 3: FITUR 2 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 02 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Beranda Interaktif &bull; / (Root)</div>
+        <h2 class="feature-title">Beranda &amp; Slider Prodi Berteknologi Fisika</h2>
+        <p class="feature-desc">
+          Etalase utama visual yang menyajikan keunggulan institusi serta kartu program studi beranimasi sirkular tak berbatas.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Hero Section Ber-CTA Interaktif:</strong> Tombol 'Jelajahi Alumni Hub' berhiaskan efek kilau shimmer, rotating compass, dan ambient glow.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Infinite Circular Loop:</strong> Slider 6 kartu Program Studi dapat digeser terus menerus ke kiri/kanan tanpa pernah mentok.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Momentum Fling / Rolling Physics:</strong> Saat kartu di-drag dan dilempar kencang, kartu meluncur bebas dengan deselerasi inersia 60 FPS.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">🎨 6 Program Studi Terintegrasi</div>
+        <div class="visual-stat-title">Aset Grafis Poster SVG HD</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Animasi (3D Art, VFX, Rigging)</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Manaprodsi (Manajemen Produksi Siaran)</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Manarita (Pemberitaan &amp; Jurnalistik)</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Matekstosi, MIK, dan Game Design</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 03</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 4: FITUR 3 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 03 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Direktori Talenta &bull; /open-to-work</div>
+        <h2 class="feature-title">Katalog Talenta Alumni "Open to Work"</h2>
+        <p class="feature-desc">
+          Katalog terbuka bagi perusahaan dan studio untuk mencari talenta lulusan MMTC yang siap segera dipekerjakan.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Badge Status Emerald Aktif:</strong> Penanda visual instan bagi alumni yang sedang membuka diri untuk tawaran pekerjaan baru.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Filter Komprehensif Berdasarkan Prodi:</strong> Pencarian terarah spesifik prodi (misal: hanya talenta Animasi atau Game).</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Akses Direct Contact 1-Klik:</strong> Tombol pintas untuk langsung menghubungi talenta via WhatsApp resmi atau profil LinkedIn.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">⚡ Keuntungan bagi Recruiter</div>
+        <div class="visual-stat-title">Perekrutan Cepat &amp; Tepat</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Langsung melihat showreel &amp; CV kandidat</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Filter angkatan untuk level junior/senior</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Pencarian nama &amp; keahlian secara real-time</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Zero layout shift dengan skeleton loading</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 04</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 5: FITUR 4 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 04 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Bursa Karir &bull; /lowongan</div>
+        <h2 class="feature-title">Bursa Lowongan Kerja Industri Kreatif</h2>
+        <p class="feature-desc">
+          Pusat informasi karir terverifikasi dari studio animasi, stasiun televisi, radio, dan agensi kreatif nasional.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Segmentasi Tipe Pekerjaan:</strong> Filter lowongan Full-Time, Part-Time, Freelance Project, dan Magang Industri.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Modal Detail &amp; Kualifikasi Loker:</strong> Menampilkan deskripsi peran, kriteria teknis, rentang gaji, dan batas akhir pendaftaran.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Formulir Submit Lamaran Instan:</strong> Fitur melamar langsung dari aplikasi dengan melampirkan portofolio dan cover letter.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">🎯 Ekosistem Kerja Terpadu</div>
+        <div class="visual-stat-title">Fasilitas bagi Pencari Kerja</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Kurasi khusus kompetensi lulusan MMTC</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Pemberitahuan loker remote vs on-site</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Pencegahan loker kadaluarsa otomatis</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Tautan langsung ke website resmi kantor</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 05</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 6: FITUR 5 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 05 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Portal Perekrut &bull; /post-lowongan</div>
+        <h2 class="feature-title">Formulir Pasang Lowongan Kerja Mandiri</h2>
+        <p class="feature-desc">
+          Fasilitas terstruktur bagi alumni senior, studio mitra, atau HRD perusahaan untuk mempublikasikan peluang karir baru.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Penargetan Spesifik Prodi:</strong> Pemasang lowongan dapat memilih program studi yang paling cocok untuk kriteria pekerjaan.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Struktur Form Bersih &amp; Rapi:</strong> Input terstruktur meliputi nama perusahaan, posisi, sistem kerja, benefit, dan kontak lamaran.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Validasi Input &amp; Keamanan Data:</strong> Memastikan seluruh informasi lowongan valid dan terbebas dari penipuan.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">🤝 Kolaborasi Lintas Angkatan</div>
+        <div class="visual-stat-title">Dampak untuk Komunitas</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Alumni senior merekrut adik tingkat</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Proses publikasi loker 100% gratis</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Kandidat yang melamar terjamin relevan</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Terhubung langsung ke dashboard pelamar</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 06</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 7: FITUR 6 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 06 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Manajemen Karya &bull; /profil</div>
+        <h2 class="feature-title">Editor Profil &amp; Galeri Showreel Multimedia</h2>
+        <p class="feature-desc">
+          Ruang personal bagi setiap alumni untuk mengelola data diri, resume karir, serta galeri karya audio-visual mereka.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Galeri Showreel Responsif 2-Kolom:</strong> Embed video YouTube, karya Behance, ArtStation, dan Pinterest secara rapi.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Toggle Kesiapan Kerja (Open to Work):</strong> Mengaktifkan status pencari kerja secara fleksibel hanya dengan 1 kali klik.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Pengelolaan Tautan Resume / CV:</strong> Lampiran link CV Google Drive atau dokumen eksternal untuk dipelajari perekrut.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">🎥 Khusus Portofolio Media</div>
+        <div class="visual-stat-title">Dukungan Berbagai Platform</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>YouTube &amp; Vimeo player interaktif</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Koleksi desain grafis &amp; ilustrasi</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Demo reel karya animasi 3D &amp; motion</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Penyimpanan data lokal instan &amp; cloud</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 07</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 8: FITUR 7 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 07 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Portofolio Publik &bull; /profil/[uid]</div>
+        <h2 class="feature-title">Halaman Publik Portofolio (Shareable Link)</h2>
+        <p class="feature-desc">
+          Laman etalase profesional publik yang dapat disebarkan ke klien atau recruiter luar tanpa mewajibkan mereka login.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Mode Pemutar Cinema Layar Penuh:</strong> Menampilkan video showreel alumni dalam ukuran besar dengan pengalaman visual sinematik.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Modal Share Cepat (Social Share):</strong> Fitur salin tautan personal, bagikan langsung ke WhatsApp, dan bagikan ke feed LinkedIn.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Badge Identitas Terverifikasi:</strong> Menampilkan nama resmi, prodi, nomor alumni, dan ketersediaan kerja secara profesional.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">🌐 Personal Branding Modern</div>
+        <div class="visual-stat-title">Fungsi Kartu Nama Digital</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Bisa dicantumkan di CV / Bio Instagram</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Dapat dibuka lancar di semua smartphone</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Akses langsung ke tombol chat WhatsApp</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Tampilan estetik berstandar agensi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 08</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 9: FITUR 8 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 08 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Pelacak Karir &bull; /lamaran</div>
+        <h2 class="feature-title">Dashboard Pelacak Status Lamaran Kerja</h2>
+        <p class="feature-desc">
+          Panel kontrol terpadu dua arah untuk memantau progres karir pelamar serta mengelola kandidat bagi pemasang lowongan.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Pelacak Status Dua Arah:</strong> Memberikan transparansi status lamaran (Pending, Sedang Ditinjau, Wawancara, Diterima, Ditolak).</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Manajemen Pelamar bagi Recruiter:</strong> Pemasang loker dapat melihat CV, pesan motivasi, dan tautan portofolio setiap kandidat.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Badge Visual Berkode Warna:</strong> Amber untuk review, Emerald untuk diterima, Red untuk ditolak, dan Sky untuk lamaran baru.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">📊 Transparansi Rekrutmen</div>
+        <div class="visual-stat-title">Pengalaman Tanpa Ghosting</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Pelamar mengetahui progres lamarannya</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Riwayat lamaran tersimpan rapi</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Efisiensi screening bagi pemilik studio</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Komunikasi rekrutmen terpusat</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 09</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 10: FITUR 9 ==================== -->
+  <div class="slide bg-gradient-slide">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>ALUMNI HUB MMTC &bull; FITUR SISTEM</span>
+      </div>
+      <div class="feature-index">FITUR 09 / 09</div>
+    </div>
+
+    <div class="slide-body">
+      <div>
+        <div class="feature-badge">Komunitas &bull; /feed &amp; /aktivitas</div>
+        <h2 class="feature-title">Linimasa Aktivitas &amp; Feed Jejaring Alumni</h2>
+        <p class="feature-desc">
+          Kanal komunikasi sosial dan linimasa kegiatan untuk mempererat tali silaturahmi serta kolaborasi proyek antar angkatan MMTC.
+        </p>
+
+        <div class="feature-points">
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Timeline Kabar &amp; Karya Kreatif:</strong> Tempat berbagi pencapaian rilis film animasi, penayangan siaran televisi, atau perilisan game baru.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Peluang Kolaborasi Lintas Disiplin:</strong> Menghubungkan anak Animasi dengan anak Matekstosi atau MIK untuk proyek bersama.</div>
+          </div>
+          <div class="point-item">
+            <div class="point-icon">✓</div>
+            <div class="point-text"><strong>Info Agenda Kampus &amp; Ikatan Alumni:</strong> Pengumuman temu alumni, webinar industri kreatif, dan workshop multimedia.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-panel">
+        <div class="visual-pill">💡 Guyub &amp; Kolaboratif</div>
+        <div class="visual-stat-title">Kekuatan Jaringan Alumni</div>
+        <div class="visual-bullets">
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Memperluas relasi di industri penyiaran</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Inspirasi karya dari sesama lulusan</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Dukungan mentoring bagi alumni baru</div>
+          <div class="visual-bullet-item"><div class="visual-bullet-badge"></div>Menjaga kultur kekeluargaan MMTC</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Dashboard Alumni STMM MMTC Yogyakarta</span>
+      <span>Halaman 10</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SLIDE 11: PENUTUP ==================== -->
+  <div class="slide bg-gradient-cover">
+    <div class="slide-topbar">
+      <div class="brand-tag">
+        <div class="brand-dot"></div>
+        <span>SEKOLAH TINGGI MULTI MEDIA "MMTC" YOGYAKARTA</span>
+      </div>
+      <div class="feature-index">KESIMPULAN EKOSISTEM</div>
+    </div>
+
+    <div class="cover-body">
+      <div class="cover-tag">Arsitektur &amp; Standar Teknologi</div>
+      <h1 class="cover-title">
+        Siap Mendukung Masa Depan <br />
+        <span>Kreator Multimedia</span> Indonesia
+      </h1>
+      <p class="cover-desc">
+        Seluruh modul dibangun di atas fondasi teknologi modern <strong>Next.js 16 (Turbopack)</strong>, <strong>Tailwind CSS v4</strong>, dan <strong>Firebase Cloud Services</strong> dengan jaminan performa responsif, waktu muat cepat, dan desain berstandar industri.
+      </p>
+
+      <div class="cover-meta" style="width: 100%; justify-content: space-around;">
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Framework UI</div>
+          <div class="cover-meta-value">Next.js 16 + React 19</div>
+        </div>
+        <div style="width: 2px; height: 36px; background: #e2e8f0;"></div>
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Styling System</div>
+          <div class="cover-meta-value">Tailwind CSS v4</div>
+        </div>
+        <div style="width: 2px; height: 36px; background: #e2e8f0;"></div>
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Backend &amp; Security</div>
+          <div class="cover-meta-value">Firebase Auth &amp; Firestore Rules</div>
+        </div>
+        <div style="width: 2px; height: 36px; background: #e2e8f0;"></div>
+        <div class="cover-meta-item">
+          <div class="cover-meta-label">Aset Grafis</div>
+          <div class="cover-meta-value">Vector SVG &amp; Lucide Icons</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Portal Resmi Ikatan Alumni STMM MMTC Yogyakarta &bull; Terima Kasih</span>
+      <span>Halaman 11 (Selesai)</span>
+    </div>
+  </div>
+
+</body>
+</html>
