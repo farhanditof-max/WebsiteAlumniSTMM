@@ -327,33 +327,33 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* BOTTOM FEATURE DOCK: Headline Only, No Sub-headline, Clean Solid Icon Without Pill Effect */}
+        {/* BOTTOM FEATURE DOCK: No badge container, clean white icons & text over blue hero artwork */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-5xl mx-auto bg-white border border-slate-200/80 rounded-2xl py-4 px-6 sm:px-10 shadow-lg shadow-slate-900/5 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div className="max-w-5xl mx-auto py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/25">
               
               {/* Feature 1: Jaringan Alumni */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
-                <Users className="w-5 h-5 text-[#0284c7] shrink-0" />
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Jaringan Alumni</h4>
+                <Users className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Jaringan Alumni</h4>
               </div>
 
               {/* Feature 2: Peluang Karier */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <Handshake className="w-5 h-5 text-[#0284c7] shrink-0" />
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Peluang Karier</h4>
+                <Handshake className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Peluang Karier</h4>
               </div>
 
               {/* Feature 3: Kegiatan & Reuni */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <Calendar className="w-5 h-5 text-[#0284c7] shrink-0" />
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Kegiatan &amp; Reuni</h4>
+                <Calendar className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Kegiatan &amp; Reuni</h4>
               </div>
 
               {/* Feature 4: Berita & Cerita Alumni */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <BookOpen className="w-5 h-5 text-[#0284c7] shrink-0" />
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Berita &amp; Cerita Alumni</h4>
+                <BookOpen className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Berita &amp; Cerita Alumni</h4>
               </div>
 
             </div>
@@ -363,12 +363,12 @@ export default function HomePage() {
           <div className="flex justify-center pt-2">
             <a 
               href="#prodi-section" 
-              className="inline-flex flex-col items-center gap-1 text-slate-400 hover:text-[#1e3a8a] transition-colors group cursor-pointer"
+              className="inline-flex flex-col items-center gap-1 text-white/80 hover:text-white transition-colors group cursor-pointer"
               title="Scroll untuk melihat Program Studi Unggulan"
             >
               <span className="text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Eksplorasi Program Studi</span>
-              <div className="w-4 h-7 sm:w-5 sm:h-8 rounded-full border-2 border-slate-300 group-hover:border-[#1e3a8a] flex items-start justify-center p-1 transition-colors">
-                <div className="w-1 h-2 rounded-full bg-slate-400 group-hover:bg-[#1e3a8a] animate-bounce" />
+              <div className="w-4 h-7 sm:w-5 sm:h-8 rounded-full border-2 border-white/60 group-hover:border-white flex items-start justify-center p-1 transition-colors">
+                <div className="w-1 h-2 rounded-full bg-white/80 group-hover:bg-white animate-bounce" />
               </div>
             </a>
           </div>
