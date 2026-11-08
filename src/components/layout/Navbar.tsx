@@ -271,19 +271,19 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-sky-100 text-slate-800 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between min-h-[72px] sm:min-h-[78px] py-1.5">
+        <div className="flex items-center justify-between min-h-[64px] sm:min-h-[68px] py-2">
           
           {/* Brand Logo - Official AlumniHub Graphic (-10px to h-[52px] sm:h-[57px]) */}
           <Link href="/" className="flex items-center group focus:outline-none py-0.5 shrink-0">
             <img 
               src="/logo_alumnihub.png" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
-              className="h-[52px] sm:h-[57px] w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-[38px] sm:h-[42px] w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </Link>
 
           {/* Desktop Navigation - Clean Text Navigation without pill containers */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8 h-9">
             <Link 
               href="/" 
               className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
@@ -345,7 +345,7 @@ export default function Navbar() {
                       setNotificationOpen(!notificationOpen);
                       setProfileDropdownOpen(false);
                     }}
-                    className={`relative p-2 rounded-lg transition-colors cursor-pointer select-none flex items-center justify-center ${
+                    className={`relative w-9 h-9 rounded-xl transition-colors cursor-pointer select-none flex items-center justify-center ${
                       notificationOpen
                         ? 'text-[#0284c7]'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
@@ -374,7 +374,7 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer select-none ${
+                    className={`flex items-center gap-2 h-9 px-2 rounded-xl text-sm font-semibold transition-colors cursor-pointer select-none ${
                       profileDropdownOpen || isActive('/profil')
                         ? 'text-[#0284c7] font-bold'
                         : 'text-slate-600 hover:text-slate-900'
@@ -382,7 +382,7 @@ export default function Navbar() {
                     aria-expanded={profileDropdownOpen}
                     aria-haspopup="true"
                   >
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-[11px] font-bold overflow-hidden shadow-2xs">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
                       <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
                     </div>
                     <span className="hidden lg:inline leading-none">
