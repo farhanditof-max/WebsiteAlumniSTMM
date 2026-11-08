@@ -559,14 +559,13 @@ export default function FeedPage() {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedFilter(cat.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold transition cursor-pointer text-left ${
+                    className={`w-full flex items-center px-3.5 py-2.5 rounded-xl font-semibold transition cursor-pointer text-left ${
                       active
                         ? 'bg-sky-50 text-[#0087cc] font-bold shadow-2xs'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
                     <span>{cat.label}</span>
-                    {active && <span className="w-1.5 h-1.5 rounded-full bg-[#0087cc]" />}
                   </button>
                 );
               })}

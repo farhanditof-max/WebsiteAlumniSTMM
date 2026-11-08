@@ -24,34 +24,33 @@ export default function Footer() {
               Platform karir dan jejaring resmi alumni Sekolah Tinggi Multi Media (MMTC) Yogyakarta. Wadah terpadu kolaborasi profesional industri penyiaran, animasi, game, dan teknologi informasi.
             </p>
             <div className="pt-1 flex items-center gap-2 text-[11px] text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Portal Terintegrasi Alumni & Industri Kreatif</span>
+              <span>Portal Terintegrasi Alumni &amp; Industri Kreatif</span>
             </div>
           </div>
 
           {/* Program Studi */}
           <div className="lg:col-span-2">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
-              Program Studi & Keahlian
+              Program Studi &amp; Keahlian
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> Animasi
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-600">
+              <span className="hover:text-slate-900 transition cursor-default">
+                Animasi
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> Game Design
+              <span className="hover:text-slate-900 transition cursor-default">
+                Game Design
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Manajemen Informasi & Komunikasi (MIK)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Informasi &amp; Komunikasi (MIK)
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> Manajemen Teknik Studio (Matekstosi)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Teknik Studio (Matekstosi)
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Manajemen Pemberitaan (Manarita)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Pemberitaan (Manarita)
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Manajemen Produksi Siaran (Manaprodsi)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Produksi Siaran (Manaprodsi)
               </span>
             </div>
           </div>
