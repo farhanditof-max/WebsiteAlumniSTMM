@@ -282,14 +282,8 @@ export default function HomePage() {
             <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
                 
-                {/* 1. Badge Pill with Graduation Cap */}
-                <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#e8f1fd]/90 backdrop-blur-sm text-[#1e3a8a] text-xs font-bold tracking-wide shadow-2xs">
-                  <GraduationCap className="w-4 h-4 text-[#1e3a8a]" />
-                  <span>Komunitas Alumni MMTC</span>
-                </div>
-
-                {/* 2. Headline: Exact Text & Highlight Stroke */}
-                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight mt-5">
+                {/* Headline: Exact Text & Highlight Stroke */}
+                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Tetap Terhubung, <br />
                   <span className="relative inline-block mt-1">
                     <span className="absolute inset-x-[-8px] bottom-1 sm:bottom-2 h-4 sm:h-5 bg-gradient-to-r from-sky-200/80 via-blue-200/70 to-indigo-200/60 -rotate-1 rounded-md -z-10" />
