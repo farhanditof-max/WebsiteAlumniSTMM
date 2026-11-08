@@ -241,7 +241,7 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto z-10 pb-8 lg:pb-0">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
@@ -255,16 +255,8 @@ export default function HomePage() {
                   Ruang bagi seluruh alumni Sekolah Tinggi Multi Media untuk terhubung kembali, berbagi peluang, dan berkolaborasi di berbagai bidang.
                 </p>
 
-                {/* HERO FOTO (HP & tablet): Ditata di atas tombol CTA */}
-                <div className="relative lg:hidden w-full mt-6 mb-6 overflow-hidden rounded-2xl shadow-sm border border-slate-100 pointer-events-none select-none">
-                  <img
-                    src="/landing_hero_mobile.jpg"
-                    alt="Komunitas Alumni STMM MMTC Yogyakarta"
-                    className="block w-full h-auto max-h-[380px] object-cover object-[50%_15%]"
-                  />
-                </div>
-
-                <div className="pt-2 lg:pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+                {/* Desktop Buttons (hanya tampil di desktop lg:flex) */}
+                <div className="pt-4 hidden lg:flex flex-row items-center gap-3.5">
                   <Link 
                     href="/open-to-work" 
                     className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white font-bold text-sm tracking-wide shadow-md shadow-[#0087cc]/25 hover:shadow-lg hover:shadow-[#0087cc]/30 transition-all duration-200 active:scale-[0.98]"
@@ -287,6 +279,45 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-6 hidden lg:block min-h-[380px] pointer-events-none" />
+          </div>
+        </div>
+
+        {/* HERO FOTO FULL-BLEED (HP & Tablet): Menyatu dengan gradient putih di atas dan biru di bawah */}
+        <div className="relative lg:hidden w-full mt-6 overflow-hidden">
+          <div className="relative w-full h-[460px] sm:h-[500px]">
+            <img
+              src="/landing_hero_mobile.jpg"
+              alt="Komunitas Alumni STMM MMTC Yogyakarta"
+              className="w-full h-full object-cover object-[50%_12%] pointer-events-none select-none"
+            />
+            {/* Gradient atas memudar ke putih (menyatu dengan teks headline di atas) */}
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none" />
+            
+            {/* Gradient bawah memudar ke biru MMTC pekat (menyatu dengan dock) */}
+            <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#0188cc] via-[#0188cc]/90 to-transparent pointer-events-none" />
+
+            {/* Tombol CTA mengambang di atas gradient biru di bagian bawah foto */}
+            <div className="absolute inset-x-0 bottom-4 px-4 sm:px-6 z-10">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                <Link 
+                  href="/open-to-work" 
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-white hover:bg-slate-50 text-[#0087cc] font-bold text-sm tracking-wide shadow-lg shadow-black/15 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <span>Gabung Sekarang</span>
+                  <ArrowRight className="w-4 h-4 text-[#0087cc]" />
+                </Link>
+
+                <Link 
+                  href="/feed" 
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm border border-white/40 shadow-sm backdrop-blur-md transition-all duration-200 active:scale-[0.98]"
+                >
+                  <div className="w-5 h-5 rounded-full border border-white/60 flex items-center justify-center text-white">
+                    <Play className="w-2.5 h-2.5 fill-current ml-0.5 text-white" />
+                  </div>
+                  <span>Lihat Cerita Alumni</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
