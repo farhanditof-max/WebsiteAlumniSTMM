@@ -276,56 +276,56 @@ export default function Navbar() {
           {/* Brand Logo - Official AlumniHub Graphic (-10px to h-[52px] sm:h-[57px]) */}
           <Link href="/" className="flex items-center group focus:outline-none py-0.5 shrink-0">
             <img 
-              src="/logo_alumnihub.webp" 
+              src="/logo_alumnihub.png" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
               className="h-[52px] sm:h-[57px] w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </Link>
 
-          {/* Desktop Navigation - Clean Rounded Pill Links */}
-          <div className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-full border border-slate-200/80">
+          {/* Desktop Navigation - Clean Text Navigation without pill containers */}
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             <Link 
               href="/" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 pathname === '/' 
-                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-[#0284c7] font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Compass className="w-3.5 h-3.5 text-slate-400" />
+              <Compass className={`w-4 h-4 ${pathname === '/' ? 'text-[#0284c7]' : 'text-slate-400'}`} />
               <span>Beranda</span>
             </Link>
 
             <Link 
               href="/feed" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 isActive('/feed') || isActive('/beranda')
-                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-[#0284c7] font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Users className="w-3.5 h-3.5 text-[#0284c7]" />
+              <Users className={`w-4 h-4 ${isActive('/feed') || isActive('/beranda') ? 'text-[#0284c7]' : 'text-slate-400'}`} />
               <span>Feed</span>
             </Link>
 
             <Link 
               href="/lowongan" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 isActive('/lowongan') 
-                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-[#0284c7] font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
+              <Briefcase className={`w-4 h-4 ${isActive('/lowongan') ? 'text-[#0284c7]' : 'text-slate-400'}`} />
               <span>Lowongan</span>
             </Link>
 
             <Link 
               href="/open-to-work" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 isActive('/open-to-work') 
-                  ? 'bg-white text-emerald-700 shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-emerald-600 font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -345,10 +345,10 @@ export default function Navbar() {
                       setNotificationOpen(!notificationOpen);
                       setProfileDropdownOpen(false);
                     }}
-                    className={`relative p-2.5 rounded-full border transition cursor-pointer select-none flex items-center justify-center ${
+                    className={`relative p-2 rounded-lg transition-colors cursor-pointer select-none flex items-center justify-center ${
                       notificationOpen
-                        ? 'bg-sky-50 border-sky-300 text-[#0284c7] shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900'
+                        ? 'text-[#0284c7]'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                     }`}
                     aria-label="Lihat Notifikasi"
                     aria-expanded={notificationOpen}
@@ -374,25 +374,20 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className={`flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full border transition cursor-pointer select-none ${
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer select-none ${
                       profileDropdownOpen || isActive('/profil')
-                        ? 'bg-sky-50 border-sky-300 text-[#0284c7] shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
+                        ? 'text-[#0284c7] font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                     aria-expanded={profileDropdownOpen}
                     aria-haspopup="true"
                   >
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-[11px] font-bold overflow-hidden shadow-2xs">
                       <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
                     </div>
-                    <div className="text-left hidden lg:block">
-                      <p className="text-xs font-bold text-slate-900 truncate max-w-[100px] leading-tight">
-                        {displayProfile?.namaLengkap || 'Alumni MMTC'}
-                      </p>
-                      <p className="text-[10px] text-[#0284c7] font-semibold leading-tight">
-                        {displayProfile?.prodi || 'Alumni'}
-                      </p>
-                    </div>
+                    <span className="hidden lg:inline leading-none">
+                      Me
+                    </span>
                     <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#0284c7]' : ''}`} />
                   </button>
 
@@ -541,10 +536,10 @@ export default function Navbar() {
                     setNotificationOpen(!notificationOpen);
                     setMobileMenuOpen(false);
                   }}
-                  className={`relative p-2 rounded-xl border transition flex items-center justify-center cursor-pointer ${
+                  className={`relative p-2 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
                     notificationOpen
-                      ? 'bg-sky-50 border-sky-300 text-[#0284c7]'
-                      : 'bg-white border-slate-200 text-slate-700'
+                      ? 'text-[#0284c7]'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                   }`}
                   aria-label="Notifikasi"
                 >

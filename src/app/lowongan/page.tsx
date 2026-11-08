@@ -279,18 +279,6 @@ function LowonganContent() {
               ))}
             </div>
 
-            <label className="flex items-center gap-2 cursor-pointer select-none text-slate-700 font-semibold">
-              <input
-                type="checkbox"
-                checked={onlyWithSalary}
-                onChange={(e) => setOnlyWithSalary(e.target.checked)}
-                className="w-4 h-4 text-[#0284c7] rounded bg-white border-slate-300 focus:ring-[#0284c7]"
-              />
-              <span className="text-emerald-700 font-bold flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                Cantumkan Gaji
-              </span>
-            </label>
           </div>
         </div>
 
