@@ -166,7 +166,7 @@ export default function Navbar() {
         prodi: 'Animasi', 
         angkatan: '2020',
         pekerjaanSaatIni: '3D Animator & Rigger di Infinite Studios',
-        fotoProfil: '' 
+        fotoProfil: '/profile_dary.jpg' 
       } : null);
 
   const isActive = (path: string) => {

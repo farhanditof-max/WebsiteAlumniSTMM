@@ -68,7 +68,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
 const DEMO_PROFILE = {
   uid: 'demo-alumni-001',
   namaLengkap: 'Dary Halim',
-  fotoProfil: '',
+  fotoProfil: '/profile_dary.jpg',
   prodi: 'Animasi' as ProdiType,
   angkatan: '2020',
   nomorAlumni: 'MMTC-2020-103',

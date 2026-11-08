@@ -265,7 +265,7 @@ export default function FeedPage() {
     bio: profile?.bio || 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
     role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
     domisili: (profile as ExtendedUserProfile | null)?.domisili || 'Sleman, D.I. Yogyakarta',
-    avatar: profile?.fotoProfil || ''
+    avatar: profile?.fotoProfil || '/profile_dary.jpg'
   };
 
   const [posts, setPosts] = useState<FeedPost[]>(() => {
@@ -525,9 +525,9 @@ export default function FeedPage() {
               {/* TOP PORTRAIT PHOTO */}
               <div className="w-full aspect-[4/4.2] rounded-[22px] overflow-hidden bg-slate-100 relative group">
                 <img
-                  src={currentUser.avatar || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80'}
+                  src={currentUser.avatar || '/profile_dary.jpg'}
                   alt={currentUser.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = 'none';
                   }}
