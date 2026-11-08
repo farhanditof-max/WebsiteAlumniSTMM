@@ -67,29 +67,29 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
 // Data Dummy Demo untuk Preview Mode Tanpa Login
 const DEMO_PROFILE = {
   uid: 'demo-alumni-001',
-  namaLengkap: 'Budi Santoso',
+  namaLengkap: 'Dary Halim',
   fotoProfil: '',
   prodi: 'Animasi' as ProdiType,
   angkatan: '2020',
   nomorAlumni: 'MMTC-2020-103',
-  email: 'budi.santoso@alumni.mmtc.ac.id',
+  email: 'dary.halim@alumni.mmtc.ac.id',
   openToWork: true,
   pekerjaanSaatIni: '3D Animator di Infinite Studios',
   domisili: 'Sleman, D.I. Yogyakarta',
   bio: '3D Character Animator & Rigger lulusan STMM MMTC Yogyakarta. Terbiasa menangani pipeline produksi animasi 3D studio, motion graphics penyiaran, serta asset 3D untuk game engine.',
   phone: '081234567890',
-  linkedinUrl: 'https://linkedin.com/in/budi-santoso-mmtc',
-  instagramUrl: 'https://instagram.com/budisantoso.art',
+  linkedinUrl: 'https://linkedin.com/in/dary-halim-mmtc',
+  instagramUrl: 'https://instagram.com/daryhalim.art',
   customLinks: [
     {
       id: 'demo-link-1',
       title: 'Channel YouTube / Vimeo Showreel',
-      url: 'https://youtube.com/@budisantosoanim'
+      url: 'https://youtube.com/@daryhalimanim'
     },
     {
       id: 'demo-link-2',
       title: 'Website / Behance / ArtStation',
-      url: 'https://behance.net/budisantoso'
+      url: 'https://behance.net/daryhalim'
     }
   ],
   cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',

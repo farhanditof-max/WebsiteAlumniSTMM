@@ -156,13 +156,13 @@ export default function Navbar() {
 
   // Simulasi tampilan user login untuk seluruh halaman (kecuali halaman login/register)
   const isAuthPage = pathname === '/login' || pathname === '/register';
-  const effectiveUser = user || (!isAuthPage ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
+  const effectiveUser = user || (!isAuthPage ? { uid: 'demo-user', email: 'dary.halim@alumni.mmtc.ac.id' } : null);
   const displayProfile: ExtendedProfile | null = profile 
     ? (profile as unknown as ExtendedProfile)
     : demoStorageProfile
     ? demoStorageProfile
     : (!isAuthPage ? { 
-        namaLengkap: 'Budi Santoso', 
+        namaLengkap: 'Dary Halim', 
         prodi: 'Animasi', 
         angkatan: '2020',
         pekerjaanSaatIni: '3D Animator & Rigger di Infinite Studios',
@@ -402,7 +402,7 @@ export default function Navbar() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <h4 className="text-base font-bold text-slate-900 leading-snug truncate">
-                              {displayProfile?.namaLengkap || 'Budi Santoso'}
+                              {displayProfile?.namaLengkap || 'Dary Halim'}
                             </h4>
                             <p className="text-xs text-slate-600 font-medium leading-relaxed mt-0.5 line-clamp-2">
                               {displayProfile?.pekerjaanSaatIni || `${displayProfile?.prodi || 'Animasi'} • Angkatan ${displayProfile?.angkatan || '2020'}`}

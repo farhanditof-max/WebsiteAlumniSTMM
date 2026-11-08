@@ -36,35 +36,35 @@ interface Conversation {
 const INITIAL_CONVERSATIONS: Conversation[] = [
   {
     id: 'conv-1',
-    name: 'Sarah Pradipta',
+    name: 'Farhandito Fadila',
     prodi: 'Animasi',
     role: '3D Animator di Infinite Studios',
     online: true,
     unreadCount: 1,
-    lastMessage: 'Boleh minta kontak WhatsApp-nya Bud buat diskusi rig Blender?',
+    lastMessage: 'Boleh minta kontak WhatsApp-nya Dar buat diskusi rig Blender?',
     lastTime: '10m',
     messages: [
-      { id: 'm1', sender: 'them', text: 'Halo Budi! Showreel rigging kamu di feed keren banget.', time: '14:20' },
-      { id: 'm2', sender: 'me', text: 'Halo Sar! Makasih banyak ya, kemarin coba explore auto-rigging add-on.', time: '14:22' },
-      { id: 'm3', sender: 'them', text: 'Boleh minta kontak WhatsApp-nya Bud buat diskusi rig Blender?', time: '14:25' }
+      { id: 'm1', sender: 'them', text: 'Halo Dary! Showreel rigging kamu di feed keren banget.', time: '14:20' },
+      { id: 'm2', sender: 'me', text: 'Halo Dit! Makasih banyak ya, kemarin coba explore auto-rigging add-on.', time: '14:22' },
+      { id: 'm3', sender: 'them', text: 'Boleh minta kontak WhatsApp-nya Dar buat diskusi rig Blender?', time: '14:25' }
     ]
   },
   {
     id: 'conv-2',
-    name: 'Dimas Wicaksono',
+    name: 'Goklas Simanjuntak',
     prodi: 'Matekstosi',
     role: 'Broadcast Director di MNC Media',
     online: true,
     unreadCount: 1,
-    lastMessage: 'Halo Mas Budi, lowongan broadcast engineer di MNC masih buka ya.',
+    lastMessage: 'Halo Mas Dary, lowongan broadcast engineer di MNC masih buka ya.',
     lastTime: '1j',
     messages: [
-      { id: 'm4', sender: 'them', text: 'Halo Mas Budi, lowongan broadcast engineer di MNC masih buka ya. Kalau ada alumni MMTC yang mau apply bisa langsung info saya.', time: '13:30' }
+      { id: 'm4', sender: 'them', text: 'Halo Mas Dary, lowongan broadcast engineer di MNC masih buka ya. Kalau ada alumni MMTC yang mau apply bisa langsung info saya.', time: '13:30' }
     ]
   },
   {
     id: 'conv-3',
-    name: 'Rian Kusuma',
+    name: 'Reza Hambali',
     prodi: 'Manaprod',
     role: 'Producer di Lumina Lab',
     online: false,
@@ -72,7 +72,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
     lastTime: '1h',
     messages: [
       { id: 'm5', sender: 'them', text: 'Showreel kamu udah aku tonton, mantap banget visualnya!', time: 'Kemarin' },
-      { id: 'm6', sender: 'me', text: 'Siap Mas Rian, terima kasih banyak apresiasinya!', time: 'Kemarin' }
+      { id: 'm6', sender: 'me', text: 'Siap Mas Reza, terima kasih banyak apresiasinya!', time: 'Kemarin' }
     ]
   },
   {
@@ -99,7 +99,7 @@ export default function LinkedInMessagingWidget({
   userName: propName
 }: LinkedInMessagingWidgetProps = {}) {
   const { user, profile } = useAuth();
-  const userName = propName || profile?.namaLengkap || user?.displayName || 'Budi Santoso';
+  const userName = propName || profile?.namaLengkap || user?.displayName || 'Dary Halim';
   const userAvatar = propAvatar || profile?.fotoProfil || user?.photoURL;
 
   const [isOpen, setIsOpen] = useState(false);

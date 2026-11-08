@@ -50,7 +50,7 @@ export interface UserActivityPost {
 const DEFAULT_POSTS: UserActivityPost[] = [
   {
     id: 'user-post-1',
-    authorName: 'Budi Santoso',
+    authorName: 'Dary Halim',
     authorProdi: 'Animasi',
     authorAngkatan: '2020',
     authorRole: '3D Animator di Infinite Studios',
@@ -66,7 +66,7 @@ const DEFAULT_POSTS: UserActivityPost[] = [
   },
   {
     id: 'user-post-2',
-    authorName: 'Budi Santoso',
+    authorName: 'Dary Halim',
     authorProdi: 'Animasi',
     authorAngkatan: '2020',
     authorRole: '3D Animator di Infinite Studios',
@@ -86,7 +86,7 @@ export default function AktivitasPage() {
   const { user, profile } = useAuth();
 
   const currentUser = {
-    name: profile?.namaLengkap || user?.displayName || 'Budi Santoso',
+    name: profile?.namaLengkap || user?.displayName || 'Dary Halim',
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
     role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',

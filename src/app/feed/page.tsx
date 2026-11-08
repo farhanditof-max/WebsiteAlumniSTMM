@@ -73,7 +73,7 @@ interface FeedPost {
 const INITIAL_POSTS: FeedPost[] = [
   {
     id: 'post-1',
-    authorName: 'Sarah Pradipta',
+    authorName: 'Farhandito Fadila',
     authorProdi: 'Animasi',
     authorAngkatan: '2020',
     authorRole: '3D Animator & Rigger di Infinite Studios',
@@ -91,23 +91,23 @@ const INITIAL_POSTS: FeedPost[] = [
     comments: [
       {
         id: 'c-1',
-        authorName: 'Budi Santoso',
+        authorName: 'Dary Halim',
         authorProdi: 'Animasi',
-        text: 'Keren banget rigging facials-nya Sar! Pake add-on Blender apa manual shape keys?',
+        text: 'Keren banget rigging facials-nya Dit! Pake add-on Blender apa manual shape keys?',
         timeAgo: '1 jam yang lalu'
       },
       {
         id: 'c-2',
-        authorName: 'Sarah Pradipta',
+        authorName: 'Farhandito Fadila',
         authorProdi: 'Animasi',
-        text: '@Budi Santoso Kombinasi Rigify custom rig sama corrective blend shapes manual Bud!',
+        text: '@Dary Halim Kombinasi Rigify custom rig sama corrective blend shapes manual Dar!',
         timeAgo: '45 menit yang lalu'
       }
     ]
   },
   {
     id: 'post-2',
-    authorName: 'Dimas Wicaksono',
+    authorName: 'Goklas Simanjuntak',
     authorProdi: 'Matekstosi',
     authorAngkatan: '2019',
     authorRole: 'Broadcast Technical Director di MNC Media Group',
@@ -125,16 +125,16 @@ const INITIAL_POSTS: FeedPost[] = [
     comments: [
       {
         id: 'c-3',
-        authorName: 'Rian Kusuma',
+        authorName: 'Reza Hambali',
         authorProdi: 'Manaprod',
-        text: 'Mantap Mas Dimas! Dulu switcher Studio 2 MMTC sering kita pakai bareng ya haha.',
+        text: 'Mantap Mas Goklas! Dulu switcher Studio 2 MMTC sering kita pakai bareng ya haha.',
         timeAgo: '3 jam yang lalu'
       }
     ]
   },
   {
     id: 'post-3',
-    authorName: 'Rian Kusuma',
+    authorName: 'Reza Hambali',
     authorProdi: 'Manaprod',
     authorAngkatan: '2021',
     authorRole: 'Producer & Director di Lumina Creative Lab',
@@ -149,16 +149,16 @@ const INITIAL_POSTS: FeedPost[] = [
     comments: [
       {
         id: 'c-4',
-        authorName: 'Eka Pratama',
+        authorName: 'Amrina Rosyada',
         authorProdi: 'Animasi',
-        text: 'Minat Mas Rian! Portofolio showreel after effects saya ada di profil.',
+        text: 'Minat Mas Reza! Portofolio showreel after effects saya ada di profil.',
         timeAgo: '20 jam yang lalu'
       }
     ]
   },
   {
     id: 'post-4',
-    authorName: 'Anisa Rahmawati',
+    authorName: 'Amrina Rosyada',
     authorProdi: 'Manarita',
     authorAngkatan: '2022',
     authorRole: 'News Presenter & Digital Journalist',
@@ -170,11 +170,19 @@ const INITIAL_POSTS: FeedPost[] = [
     likesCount: 84,
     isLiked: false,
     isFollowing: false,
-    comments: []
+    comments: [
+      {
+        id: 'c-5',
+        authorName: 'Tutus Resmahadi',
+        authorProdi: 'Game',
+        text: 'Selamat Amrina! Liputan dokumenter yang sangat berbobot dan membanggakan almamater.',
+        timeAgo: '1 hari yang lalu'
+      }
+    ]
   },
   {
     id: 'post-5',
-    authorName: 'Gilang Ramadhan',
+    authorName: 'Tutus Resmahadi',
     authorProdi: 'Game',
     authorAngkatan: '2021',
     authorRole: 'Game Narrative & Unity Programmer',
@@ -192,10 +200,10 @@ const INITIAL_POSTS: FeedPost[] = [
     isFollowing: false,
     comments: [
       {
-        id: 'c-5',
-        authorName: 'Sarah Pradipta',
-        authorProdi: 'Animasi',
-        text: 'Keren banget strukturnya Lang! Sangat detail bagian character breakdown-nya.',
+        id: 'c-6',
+        authorName: 'Tito Ari Pratama',
+        authorProdi: 'Game',
+        text: 'Keren banget strukturnya Mas Tutus! Sangat detail bagian character breakdown-nya.',
         timeAgo: '2 hari yang lalu'
       }
     ]
@@ -205,7 +213,7 @@ const INITIAL_POSTS: FeedPost[] = [
 const SUGGESTED_CONNECTIONS = [
   {
     id: 's-1',
-    name: 'Gilang Ramadhan',
+    name: 'Tito Ari Pratama',
     prodi: 'Game',
     angkatan: '2021',
     role: 'Unity Gameplay Programmer',
@@ -213,7 +221,7 @@ const SUGGESTED_CONNECTIONS = [
   },
   {
     id: 's-2',
-    name: 'Jessica Meliana',
+    name: 'Via Ruby',
     prodi: 'MIK',
     angkatan: '2020',
     role: 'Product Designer / UI UX',
@@ -221,7 +229,7 @@ const SUGGESTED_CONNECTIONS = [
   },
   {
     id: 's-3',
-    name: 'Rahmat Hidayat',
+    name: 'Adam Narotama',
     prodi: 'Matekstosi',
     angkatan: '2019',
     role: 'Audio Post & Sound Designer',
@@ -249,7 +257,7 @@ export default function FeedPage() {
 
   // Simulated logged-in user profile
   const currentUser = {
-    name: profile?.namaLengkap || user?.displayName || 'Budi Santoso',
+    name: profile?.namaLengkap || user?.displayName || 'Dary Halim',
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
     role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
