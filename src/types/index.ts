@@ -23,6 +23,12 @@ export interface PortfolioItem {
   description?: string;
 }
 
+export interface CustomProfileLink {
+  id: string;
+  title: string;
+  url: string;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -35,10 +41,17 @@ export interface UserProfile {
   openToWork: boolean;
   cvFileUrl?: string;
   cvExternalLink?: string;
+  hasCv?: boolean;
   portfolio: PortfolioItem[];
   phone?: string;
   linkedinUrl?: string;
+  role?: 'admin' | 'alumni';
+  pekerjaanSaatIni?: string;
+  domisili?: string;
+  customLinks?: CustomProfileLink[];
+  following?: string[];
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface JobPosting {
@@ -74,4 +87,91 @@ export interface JobApplication {
   applicantPhone?: string;
   status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
   appliedAt: string;
+}
+
+export interface ContactRequest {
+  id: string;
+  requesterUid: string;
+  requesterName: string;
+  requesterEmail: string;
+  requesterProdi?: string;
+  targetUid: string;
+  targetName: string;
+  purpose: string;
+  message: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt?: string;
+  targetPhone?: string;
+  targetEmail?: string;
+}
+
+export interface AlumniRegistryItem {
+  id?: string;
+  nomorAlumni: string;
+  namaLengkap: string;
+  prodi: ProdiType;
+  angkatan: string;
+  isRegistered?: boolean;
+  registeredUid?: string;
+  registeredEmail?: string;
+  registeredAt?: string;
+  createdAt?: string;
+}
+
+export type FeedCategory = 'showreel' | 'kolaborasi' | 'diskusi' | 'pencapaian';
+
+export interface FeedComment {
+  id: string;
+  authorUid: string;
+  authorName: string;
+  authorProdi: string;
+  authorAvatar?: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface FeedPost {
+  id: string;
+  authorUid: string;
+  authorName: string;
+  authorProdi: string;
+  authorAngkatan?: string;
+  authorRole?: string;
+  authorAvatar?: string;
+  nomorAlumni?: string;
+  category: FeedCategory;
+  content: string;
+  hashtags?: string[];
+  mediaType?: 'youtube' | 'image' | 'pdf';
+  mediaUrl?: string;
+  mediaTitle?: string;
+  mediaSize?: string;
+  likesCount: number;
+  likedBy: string[];
+  commentsCount: number;
+  comments: FeedComment[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  senderUid: string;
+  senderName: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface ChatConversation {
+  id: string;
+  participants: string[];
+  participantProfiles?: Record<string, {
+    namaLengkap: string;
+    prodi?: string;
+    fotoProfil?: string;
+  }>;
+  lastMessage: string;
+  updatedAt: string;
+  messages?: ChatMessage[];
 }

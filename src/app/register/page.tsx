@@ -24,7 +24,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [registeredNumbers, setRegisteredNumbers] = useState<string[]>(['MMTC-2018-001']);
+  const [registeredNumbers, setRegisteredNumbers] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadRegisteredNumbers() {
@@ -141,7 +141,7 @@ export default function RegisterPage() {
               {VERIFIED_ALUMNI_LIST.map((item) => {
                 const cleanItemNo = item.nomorAlumni.toUpperCase();
                 const isSelected = nomorAlumni.toUpperCase() === cleanItemNo;
-                const isTaken = item.status === 'terdaftar' || registeredNumbers.includes(cleanItemNo);
+                const isTaken = registeredNumbers.includes(cleanItemNo);
                 return (
                   <button
                     type="button"
@@ -177,9 +177,21 @@ export default function RegisterPage() {
           )}
 
           {error && (
-            <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5 animate-fade-in">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span className="font-medium leading-relaxed">{error}</span>
+            <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs flex flex-col gap-2 animate-fade-in">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <span className="font-medium leading-relaxed">{error}</span>
+              </div>
+              {(error.includes('sudah terdaftar') || error.includes('Login') || error.includes('Masuk')) && (
+                <div className="pt-1 pl-6.5">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-1.5 font-bold text-[#0284c7] hover:underline"
+                  >
+                    <span>Masuk Sekarang →</span>
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -195,7 +207,7 @@ export default function RegisterPage() {
                   required
                   value={nomorAlumni}
                   onChange={(e) => handleNomorAlumniChange(e.target.value)}
-                  placeholder="MMTC-2020-103"
+                  placeholder="MMTC-2018-001"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-mono uppercase"
                 />
               </div>

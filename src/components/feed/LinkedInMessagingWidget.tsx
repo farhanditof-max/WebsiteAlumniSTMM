@@ -1,6 +1,6 @@
 'use client';
-
-import React, { useState } from 'react';
+/* eslint-disable react-hooks/purity */
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronUp, 
   ChevronDown, 
@@ -12,6 +12,16 @@ import {
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { useAuth } from '@/context/AuthContext';
+import { 
+  collection, 
+  doc, 
+  query, 
+  where, 
+  onSnapshot, 
+  setDoc, 
+  arrayUnion 
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface Message {
   id: string;
@@ -108,6 +118,72 @@ export default function LinkedInMessagingWidget({
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [inputMessage, setInputMessage] = useState('');
 
+  // Real-time synchronization with Firestore collection 'conversations'
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    try {
+      const q = query(
+        collection(db, 'conversations'),
+        where('participants', 'array-contains', user.uid)
+      );
+
+      const unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const firestoreConvs: Conversation[] = snapshot.docs.map((d) => {
+              const data = d.data();
+              const participants = (data.participants as string[]) || [];
+              const otherUid = participants.find((uid) => uid !== user.uid) || 'peer';
+              const otherProfile = data.participantProfiles?.[otherUid] || {};
+
+              const messages: Message[] = (data.messages || []).map(
+                (m: { id?: string; senderUid?: string; text?: string; createdAt?: string }) => ({
+                  id: m.id || `m-${Date.now()}`,
+                  sender: m.senderUid === user.uid ? 'me' : 'them',
+                  text: m.text || '',
+                  time: m.createdAt
+                    ? new Date(m.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                    : 'Baru saja'
+                })
+              );
+
+              return {
+                id: d.id,
+                name: otherProfile.namaLengkap || data.otherName || 'Alumni MMTC',
+                prodi: otherProfile.prodi || data.otherProdi || 'STMM MMTC',
+                role: otherProfile.role || data.otherRole || 'Alumni',
+                avatar: otherProfile.fotoProfil || data.otherAvatar || undefined,
+                online: true,
+                unreadCount: 0,
+                lastMessage: data.lastMessage || (messages[messages.length - 1]?.text || ''),
+                lastTime: data.updatedAt
+                  ? new Date(data.updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                  : 'Baru saja',
+                messages
+              };
+            });
+
+            // Merge with initial conversations so starter contacts are always available for demo presentation
+            setConversations(() => {
+              const fsIds = new Set(firestoreConvs.map((c) => c.id));
+              const remainingInitials = INITIAL_CONVERSATIONS.filter((c) => !fsIds.has(c.id));
+              return [...firestoreConvs, ...remainingInitials];
+            });
+          }
+        },
+        (error) => {
+          console.warn('LinkedInMessagingWidget conversations listener fallback:', error);
+        }
+      );
+
+      return () => unsub();
+    } catch (err) {
+      console.warn('LinkedInMessagingWidget Firestore query error:', err);
+    }
+  }, [user?.uid]);
+
   const activeConv = conversations.find(c => c.id === activeChatId);
 
   const totalUnread = conversations.reduce((acc, curr) => acc + (curr.unreadCount || 0), 0);
@@ -123,13 +199,15 @@ export default function LinkedInMessagingWidget({
     }));
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim() || !activeChatId) return;
 
+    const textToSend = inputMessage.trim();
+    const nowIso = new Date().toISOString();
     const newMsg: Message = {
       id: `m-${Date.now()}`,
       sender: 'me',
-      text: inputMessage.trim(),
+      text: textToSend,
       time: 'Baru saja'
     };
 
@@ -147,8 +225,52 @@ export default function LinkedInMessagingWidget({
 
     setInputMessage('');
 
-    // Simulated short auto reply after 1.5s
-    setTimeout(() => {
+    // If user is logged in, sync to Firestore collection 'conversations'
+    if (user?.uid) {
+      const convDocId = activeChatId.startsWith('conv_') ? activeChatId : `conv_${user.uid}_${activeChatId}`;
+      const otherParty = activeConv ? {
+        namaLengkap: activeConv.name,
+        prodi: activeConv.prodi,
+        fotoProfil: activeConv.avatar || '',
+        role: activeConv.role
+      } : {
+        namaLengkap: 'Alumni MMTC',
+        prodi: 'STMM MMTC',
+        fotoProfil: '',
+        role: 'Alumni'
+      };
+
+      try {
+        await setDoc(doc(db, 'conversations', convDocId), {
+          id: convDocId,
+          participants: [user.uid, activeChatId],
+          participantProfiles: {
+            [user.uid]: {
+              namaLengkap: userName,
+              prodi: profile?.prodi || 'Animasi',
+              fotoProfil: userAvatar || '',
+              role: profile?.pekerjaanSaatIni || 'Alumni STMM MMTC'
+            },
+            [activeChatId]: otherParty
+          },
+          lastMessage: textToSend,
+          updatedAt: nowIso,
+          messages: arrayUnion({
+            id: newMsg.id,
+            senderUid: user.uid,
+            senderName: userName,
+            text: textToSend,
+            createdAt: nowIso
+          })
+        }, { merge: true });
+      } catch (err) {
+        console.warn('LinkedInMessagingWidget Firestore write warning:', err);
+      }
+    }
+
+    // Simulated short auto reply after 1.5s for presentation demo reliability
+    setTimeout(async () => {
+      const replyIso = new Date().toISOString();
       const replyMsg: Message = {
         id: `reply-${Date.now()}`,
         sender: 'them',
@@ -167,6 +289,25 @@ export default function LinkedInMessagingWidget({
         }
         return c;
       }));
+
+      if (user?.uid) {
+        const convDocId = activeChatId.startsWith('conv_') ? activeChatId : `conv_${user.uid}_${activeChatId}`;
+        try {
+          await setDoc(doc(db, 'conversations', convDocId), {
+            lastMessage: replyMsg.text,
+            updatedAt: replyIso,
+            messages: arrayUnion({
+              id: replyMsg.id,
+              senderUid: activeChatId,
+              senderName: activeConv?.name || 'Alumni STMM',
+              text: replyMsg.text,
+              createdAt: replyIso
+            })
+          }, { merge: true });
+        } catch {
+          // ignore
+        }
+      }
     }, 1500);
   };
 

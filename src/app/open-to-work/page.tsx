@@ -22,13 +22,16 @@ import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { TalentCardSkeleton } from '@/components/ui/Skeleton';
 import { OpenToWorkBadge } from '@/components/ui/Badge';
 import { extractSkills } from '@/components/profile/skills';
+import { useAuth } from '@/context/AuthContext';
 
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
   pekerjaan?: string;
+  domisili?: string;
 }
 
 export default function OpenToWorkPage() {
+  const { profile: authProfile } = useAuth();
   const [alumniList, setAlumniList] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProdi, setSelectedProdi] = useState<string>('ALL');
@@ -39,7 +42,7 @@ export default function OpenToWorkPage() {
     async function fetchOpenToWorkAlumni() {
       setLoading(true);
 
-      // 1. Coba REST API terarah terlebih dahulu (~100ms & efisien tanpa full collection dump)
+      // 1. Coba REST API terarah terlebih dahulu (~100ms dari public_profiles)
       try {
         const otUsers = await fetchOpenToWorkRest();
         if (isMounted && otUsers.length > 0) {
@@ -51,9 +54,9 @@ export default function OpenToWorkPage() {
         console.warn('REST fetch failed in open-to-work, trying SDK:', restErr);
       }
 
-      // 2. Fallback ke Firestore SDK dengan timeout ketat
+      // 2. Fallback ke Firestore SDK membaca public_profiles whitelist
       try {
-        const q = query(collection(db, 'users'), where('openToWork', '==', true));
+        const q = query(collection(db, 'public_profiles'), where('openToWork', '==', true));
         const fetchPromise = getDocs(q);
         const timeoutPromise = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('OpenToWork fetch timeout')), 3000)
@@ -64,7 +67,7 @@ export default function OpenToWorkPage() {
           setAlumniList(list);
         }
       } catch (err) {
-        console.error('Error fetching open to work alumni:', err);
+        console.error('Error fetching open to work alumni from public_profiles:', err);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -77,7 +80,17 @@ export default function OpenToWorkPage() {
     };
   }, []);
 
-  const filteredAlumni = alumniList.filter((a) => {
+  // Self-healing: Pastikan profil pengguna yang sedang login langsung muncul jika openToWork aktif
+  const displayedAlumniList = React.useMemo(() => {
+    if (!authProfile || !authProfile.openToWork) return alumniList;
+    const exists = alumniList.some((a) => a.uid === authProfile.uid);
+    if (exists) {
+      return alumniList.map((a) => (a.uid === authProfile.uid ? { ...a, ...authProfile } : a));
+    }
+    return [authProfile, ...alumniList];
+  }, [alumniList, authProfile]);
+
+  const filteredAlumni = displayedAlumniList.filter((a) => {
     const matchesProdi = selectedProdi === 'ALL' || a.prodi === selectedProdi;
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = 

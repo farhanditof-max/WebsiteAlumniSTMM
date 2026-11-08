@@ -44,6 +44,7 @@ function LowonganContent() {
   const [applyingJob, setApplyingJob] = useState<JobPosting | null>(null);
   const [coverNote, setCoverNote] = useState('');
   const [customCvLink, setCustomCvLink] = useState('');
+  const [sharePhone, setSharePhone] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
   const [applyError, setApplyError] = useState('');
@@ -124,6 +125,7 @@ function LowonganContent() {
     setApplySuccess(false);
     setCoverNote('');
     setCustomCvLink(profile?.cvExternalLink || '');
+    setSharePhone(false);
   };
 
   const handleApplySubmit = async (e: React.FormEvent) => {
@@ -159,7 +161,7 @@ function LowonganContent() {
         applicantName,
         applicantEmail,
         applicantProdi,
-        applicantPhone: profile?.phone,
+        applicantPhone: sharePhone ? profile?.phone : undefined,
         posterUid: applyingJob.postedBy,
         pesan: coverNote.trim(),
         cvUrl: profile?.cvFileUrl,
@@ -528,6 +530,20 @@ function LowonganContent() {
                       placeholder="Ceritakan sedikit ketertarikanmu pada posisi ini, pengalaman proyek relevan, atau showreel karya terbaikmu..."
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:border-[#0284c7] focus:bg-white transition leading-relaxed"
                     />
+                  </div>
+
+                  {/* F-02 & UU PDP Consent: Izin eksplisit berbagi nomor WhatsApp */}
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 text-xs text-slate-700">
+                    <input
+                      type="checkbox"
+                      id="sharePhoneCheck"
+                      checked={sharePhone}
+                      onChange={(e) => setSharePhone(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded text-[#0284c7] border-slate-300 focus:ring-[#0284c7] cursor-pointer"
+                    />
+                    <label htmlFor="sharePhoneCheck" className="text-[11px] leading-relaxed cursor-pointer select-none">
+                      Bagikan nomor WhatsApp saya (<code>{profile?.phone || 'belum diisi'}</code>) kepada poster lowongan ini untuk keperluan komunikasi lanjutan.
+                    </label>
                   </div>
 
                   <div className="flex items-center justify-end gap-3 pt-2">

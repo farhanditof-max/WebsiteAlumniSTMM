@@ -32,175 +32,81 @@ import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
 import LinkedInMessagingWidget from '@/components/feed/LinkedInMessagingWidget';
-import { parseYouTubeVideoId } from '@/lib/media';
-import { UserProfile } from '@/types';
+import { parseYouTubeVideoId, safeHttpUrl } from '@/lib/media';
+import { 
+  subscribeToFeedPosts, 
+  createFeedPost, 
+  toggleLikePost, 
+  addPostComment, 
+  INITIAL_CURATED_POSTS 
+} from '@/lib/feed';
+import { UserProfile, FeedCategory } from '@/types';
 
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
 }
 
-interface CommentItem {
+export interface FeedPostUI {
   id: string;
+  authorUid?: string;
   authorName: string;
   authorProdi: string;
+  authorAngkatan?: string;
+  authorRole?: string;
   authorAvatar?: string;
-  text: string;
+  nomorAlumni?: string;
   timeAgo: string;
-}
-
-interface FeedPost {
-  id: string;
-  authorName: string;
-  authorProdi: string;
-  authorAngkatan: string;
-  authorRole: string;
-  authorAvatar?: string;
-  nomorAlumni: string;
-  timeAgo: string;
-  category: 'showreel' | 'kolaborasi' | 'diskusi' | 'pencapaian';
+  category: FeedCategory;
   content: string;
-  hashtags: string[];
+  hashtags?: string[];
   mediaType?: 'youtube' | 'image' | 'pdf';
   mediaUrl?: string;
   mediaTitle?: string;
   mediaSize?: string;
   likesCount: number;
+  likedBy?: string[];
   isLiked?: boolean;
-  comments: CommentItem[];
+  commentsCount?: number;
+  comments: Array<{
+    id: string;
+    authorUid?: string;
+    authorName: string;
+    authorProdi?: string;
+    authorAvatar?: string;
+    text: string;
+    timeAgo?: string;
+    createdAt?: string;
+  }>;
   isFollowing?: boolean;
 }
 
-const INITIAL_POSTS: FeedPost[] = [
-  {
-    id: 'post-1',
-    authorName: 'Sarah Pradipta',
-    authorProdi: 'Animasi',
-    authorAngkatan: '2020',
-    authorRole: '3D Animator & Rigger di Infinite Studios',
-    nomorAlumni: 'MMTC-2020-ANM-042',
-    timeAgo: '2 jam yang lalu',
-    category: 'showreel',
-    content: 'Halo teman-teman alumni! Senang banget akhirnya bisa share breakdown showreel 3D Character Rigging & Animation yang kami kerjakan menggunakan Blender & Maya. Silakan tonton showreel-nya di bawah ya! Untuk teman-teman sesama alumni Animasi MMTC yang mau diskusi seputar pipeline game engine Unity / Unreal, let\'s connect! 🚀',
-    hashtags: ['#AnimasiMMTC', '#Blender3D', '#CharacterRigging', '#Showreel2026'],
-    mediaType: 'youtube',
-    mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    mediaTitle: '3D Character Animation & Rigging Breakdown Reel 2026',
-    likesCount: 42,
-    isLiked: false,
-    isFollowing: false,
-    comments: [
-      {
-        id: 'c-1',
-        authorName: 'Budi Santoso',
-        authorProdi: 'Animasi',
-        text: 'Keren banget rigging facials-nya Sar! Pake add-on Blender apa manual shape keys?',
-        timeAgo: '1 jam yang lalu'
-      },
-      {
-        id: 'c-2',
-        authorName: 'Sarah Pradipta',
-        authorProdi: 'Animasi',
-        text: '@Budi Santoso Kombinasi Rigify custom rig sama corrective blend shapes manual Bud!',
-        timeAgo: '45 menit yang lalu'
-      }
-    ]
-  },
-  {
-    id: 'post-2',
-    authorName: 'Dimas Wicaksono',
-    authorProdi: 'Matekstosi',
-    authorAngkatan: '2019',
-    authorRole: 'Broadcast Technical Director di MNC Media Group',
-    nomorAlumni: 'MMTC-2019-MTK-019',
-    timeAgo: '5 jam yang lalu',
-    category: 'pencapaian',
-    content: 'Nostalgia memori saat masih praktikum di Studio TV STMM MMTC dulu, dari belajar switcher Blackmagic sampai sekarang handle Live Production OB Van multi-kamera di Jakarta. Proud to be part of MMTC Alumni! Buat adik-adik tingkat yang mau tanya-tanya seputar karir broadcast engineering, pintu selalu terbuka.',
-    hashtags: ['#Broadcasting', '#StudioTVMMTC', '#BroadcastEngineering', '#MediaProduction'],
-    mediaType: 'image',
-    mediaUrl: '/kampus_stmm.jpg',
-    mediaTitle: 'Studio Production & Campus Memories STMM MMTC',
-    likesCount: 68,
-    isLiked: true,
-    isFollowing: true,
-    comments: [
-      {
-        id: 'c-3',
-        authorName: 'Rian Kusuma',
-        authorProdi: 'Manaprod',
-        text: 'Mantap Mas Dimas! Dulu switcher Studio 2 MMTC sering kita pakai bareng ya haha.',
-        timeAgo: '3 jam yang lalu'
-      }
-    ]
-  },
-  {
-    id: 'post-3',
-    authorName: 'Rian Kusuma',
-    authorProdi: 'Manaprod',
-    authorAngkatan: '2021',
-    authorRole: 'Producer & Director di Lumina Creative Lab',
-    nomorAlumni: 'MMTC-2021-MNP-088',
-    timeAgo: '1 hari yang lalu',
-    category: 'kolaborasi',
-    content: '🚨 [CALL FOR CREW / KOLABORASI ALUMNI]\nTim produksi kami sedang membutuhkan 1 orang Motion Graphic Artist & 1 Colorist (DaVinci Resolve) untuk proyek iklan komersil brand otomotif bulan depan (remote/hybrid Jogja-Jakarta). Fee profesional bersaing.\n\nAlumni yang berminat silakan komen atau langsung hubungi via profil!',
-    hashtags: ['#KolaborasiMMTC', '#LokerKreatif', '#CariCrew', '#MotionGraphics'],
-    likesCount: 31,
-    isLiked: false,
-    isFollowing: false,
-    comments: [
-      {
-        id: 'c-4',
-        authorName: 'Eka Pratama',
-        authorProdi: 'Animasi',
-        text: 'Minat Mas Rian! Portofolio showreel after effects saya ada di profil.',
-        timeAgo: '20 jam yang lalu'
-      }
-    ]
-  },
-  {
-    id: 'post-4',
-    authorName: 'Anisa Rahmawati',
-    authorProdi: 'Manarita',
-    authorAngkatan: '2022',
-    authorRole: 'News Presenter & Digital Journalist',
-    nomorAlumni: 'MMTC-2022-MNR-014',
-    timeAgo: '2 hari yang lalu',
-    category: 'pencapaian',
-    content: 'Alhamdulillah karya liputan dokumenter tim kami berhasil terpilih masuk nominasi Festival Film Pendek & Jurnalistik Mahasiswa 2026. Terima kasih banyak atas bimbingan para dosen dan ekosistem kampus STMM MMTC Yogyakarta yang selalu mengasah intuisi kami di lapangan. Maju terus pers kampus dan alumni MMTC!',
-    hashtags: ['#ManaritaMMTC', '#JurnalismeKreatif', '#FestivalFilm', '#Dokumenter'],
-    likesCount: 84,
-    isLiked: false,
-    isFollowing: false,
-    comments: []
-  },
-  {
-    id: 'post-5',
-    authorName: 'Gilang Ramadhan',
-    authorProdi: 'Game',
-    authorAngkatan: '2021',
-    authorRole: 'Game Narrative & Unity Programmer',
-    nomorAlumni: 'MMTC-2021-GME-033',
-    timeAgo: '3 hari yang lalu',
-    category: 'diskusi',
-    content: 'Bagi teman-teman alumni yang tertarik mempelajari struktur Game Design Document (GDD) standar industri, ini pitch deck dan dokumen pra-produksi game indie kami yang lolos kurasi expo. Semoga bermanfaat untuk bahan referensi produksi tugas akhir maupun portofolio ya!',
-    hashtags: ['#GameDevMMTC', '#GameDesignDocument', '#PitchDeck', '#Unity3D'],
-    mediaType: 'pdf',
-    mediaUrl: '#',
-    mediaTitle: 'Game_Design_Document_Prototype_2026.pdf',
-    mediaSize: '3.4 MB',
-    likesCount: 57,
-    isLiked: false,
-    isFollowing: false,
-    comments: [
-      {
-        id: 'c-5',
-        authorName: 'Sarah Pradipta',
-        authorProdi: 'Animasi',
-        text: 'Keren banget strukturnya Lang! Sangat detail bagian character breakdown-nya.',
-        timeAgo: '2 hari yang lalu'
-      }
-    ]
-  }
-];
+function formatTimeAgo(isoString?: string): string {
+  if (!isoString) return 'Baru saja';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString;
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return 'Baru saja';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} menit yang lalu`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours} jam yang lalu`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays} hari yang lalu`;
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+const DEFAULT_POSTS: FeedPostUI[] = INITIAL_CURATED_POSTS.map(p => ({
+  ...p,
+  timeAgo: formatTimeAgo(p.createdAt),
+  isLiked: false,
+  isFollowing: false,
+  comments: (p.comments || []).map(c => ({
+    ...c,
+    timeAgo: formatTimeAgo(c.createdAt)
+  }))
+}));
 
 const SUGGESTED_CONNECTIONS = [
   {
@@ -249,31 +155,33 @@ export default function FeedPage() {
 
   // Simulated logged-in user profile
   const currentUser = {
-    name: profile?.namaLengkap || user?.displayName || 'Budi Santoso',
+    uid: user?.uid || '',
+    name: profile?.namaLengkap || user?.displayName || (user ? 'Alumni STMM' : 'Pengunjung Tamu'),
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
-    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
-    avatar: profile?.fotoProfil || ''
+    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || (user ? 'Alumni STMM MMTC' : 'Pengunjung Tamu'),
+    avatar: profile?.fotoProfil || user?.photoURL || ''
   };
 
-  const [posts, setPosts] = useState<FeedPost[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('alumni_user_posts');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(INITIAL_POSTS.map(p => p.id));
-            const newPosts = parsed.filter((p: FeedPost) => !existingIds.has(p.id));
-            return [...newPosts, ...INITIAL_POSTS];
-          }
-        }
-      } catch {
-        // ignore
+  const [posts, setPosts] = useState<FeedPostUI[]>(DEFAULT_POSTS);
+
+  useEffect(() => {
+    const unsub = subscribeToFeedPosts((fetched) => {
+      if (fetched && fetched.length > 0) {
+        const mapped: FeedPostUI[] = fetched.map(p => ({
+          ...p,
+          timeAgo: formatTimeAgo(p.createdAt),
+          isLiked: user ? (p.likedBy?.includes(user.uid) || false) : false,
+          comments: (p.comments || []).map(c => ({
+            ...c,
+            timeAgo: formatTimeAgo(c.createdAt)
+          }))
+        }));
+        setPosts(mapped);
       }
-    }
-    return INITIAL_POSTS;
-  });
+    });
+    return () => unsub();
+  }, [user]);
   const [selectedFilter, setSelectedFilter] = useState<string>('semua');
   
   // Post Creator State
@@ -331,13 +239,19 @@ export default function FeedPage() {
   };
 
   // Handlers
-  const handleCreatePost = (e: React.FormEvent) => {
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContent.trim()) return;
 
+    if (!user) {
+      setPostAlert('⚠️ Anda harus masuk dengan akun alumni untuk mempublikasikan postingan.');
+      setTimeout(() => setPostAlert(''), 4000);
+      return;
+    }
+
     setIsPosting(true);
 
-    setTimeout(() => {
+    try {
       let finalMediaType: 'youtube' | 'image' | 'pdf' | undefined = undefined;
       let finalMediaUrl: string | undefined = undefined;
       let finalMediaTitle: string | undefined = undefined;
@@ -350,7 +264,6 @@ export default function FeedPage() {
       } else if (newMediaType === 'media') {
         if (attachedFile) {
           finalMediaType = attachedFileType;
-          finalMediaUrl = attachedPreview;
           finalMediaTitle = attachedFile.name;
           finalMediaSize = `${(attachedFile.size / (1024 * 1024)).toFixed(1)} MB`;
         } else if (newMediaUrl.trim()) {
@@ -361,35 +274,38 @@ export default function FeedPage() {
         }
       }
 
-      const createdPost: FeedPost = {
-        id: `post-${Date.now()}`,
+      const created = await createFeedPost({
+        authorUid: user.uid,
         authorName: currentUser.name,
         authorProdi: currentUser.prodi,
         authorAngkatan: currentUser.angkatan,
         authorRole: currentUser.role,
         authorAvatar: currentUser.avatar,
-        nomorAlumni: 'MMTC-2020-ANM-001',
-        timeAgo: 'Baru saja',
+        nomorAlumni: profile?.nomorAlumni || 'MMTC-2020-001',
         category: newCategory,
         content: newContent.trim(),
         hashtags: [`#AlumniMMTC`, `#${currentUser.prodi}MMTC`],
         mediaType: finalMediaType,
         mediaUrl: finalMediaUrl,
         mediaTitle: finalMediaTitle,
-        mediaSize: finalMediaSize,
-        likesCount: 1,
-        isLiked: true,
+        mediaSize: finalMediaSize
+      }, attachedFile);
+
+      const optimisticPost: FeedPostUI = {
+        ...created,
+        timeAgo: 'Baru saja',
+        isLiked: false,
+        isFollowing: false,
         comments: []
       };
 
-      const newPostsList = [createdPost, ...posts];
-      setPosts(newPostsList);
+      setPosts(prev => [optimisticPost, ...prev.filter(p => p.id !== optimisticPost.id)]);
 
       // Save to localStorage so profile history immediately shows this post
       try {
         const stored = localStorage.getItem('alumni_user_posts');
         const existing = stored ? JSON.parse(stored) : [];
-        localStorage.setItem('alumni_user_posts', JSON.stringify([createdPost, ...existing]));
+        localStorage.setItem('alumni_user_posts', JSON.stringify([optimisticPost, ...existing]));
       } catch {
         // ignore
       }
@@ -399,43 +315,80 @@ export default function FeedPage() {
       setAttachedFile(null);
       setAttachedPreview('');
       setNewMediaType('none');
-      setIsPosting(false);
       setPostAlert('🎉 Postingan Anda berhasil diterbitkan di Beranda Alumni!');
       setTimeout(() => setPostAlert(''), 4000);
-    }, 400);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
+      console.error('Error creating post:', err);
+      setPostAlert(`❌ Gagal menerbitkan: ${msg}`);
+      setTimeout(() => setPostAlert(''), 4000);
+    } finally {
+      setIsPosting(false);
+    }
   };
 
-  const handleToggleLike = (postId: string) => {
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        const isCurrentlyLiked = post.isLiked;
+  const handleToggleLike = async (postId: string) => {
+    if (!user) {
+      setPostAlert('⚠️ Anda harus masuk dengan akun alumni untuk menyukai postingan.');
+      setTimeout(() => setPostAlert(''), 3000);
+      return;
+    }
+
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    const isCurrentlyLiked = post.isLiked ?? post.likedBy?.includes(user.uid) ?? false;
+
+    setPosts(prev => prev.map(p => {
+      if (p.id === postId) {
+        const newLiked = !isCurrentlyLiked;
+        const newLikedBy = newLiked
+          ? [...(p.likedBy || []), user.uid]
+          : (p.likedBy || []).filter(uid => uid !== user.uid);
         return {
-          ...post,
-          isLiked: !isCurrentlyLiked,
-          likesCount: isCurrentlyLiked ? post.likesCount - 1 : post.likesCount + 1
+          ...p,
+          isLiked: newLiked,
+          likedBy: newLikedBy,
+          likesCount: newLiked ? p.likesCount + 1 : Math.max(0, p.likesCount - 1)
         };
       }
-      return post;
+      return p;
     }));
+
+    try {
+      await toggleLikePost(postId, user.uid, isCurrentlyLiked);
+    } catch (err) {
+      console.warn('Like toggle sync error:', err);
+    }
   };
 
-  const handleAddComment = (postId: string) => {
+  const handleAddComment = async (postId: string) => {
+    if (!user) {
+      setPostAlert('⚠️ Anda harus masuk dengan akun alumni untuk menambahkan tanggapan.');
+      setTimeout(() => setPostAlert(''), 3000);
+      return;
+    }
+
     const text = commentInputs[postId]?.trim();
     if (!text) return;
 
-    const newComment: CommentItem = {
+    const nowIso = new Date().toISOString();
+    const optimisticComment = {
       id: `c-${Date.now()}`,
+      authorUid: user.uid,
       authorName: currentUser.name,
       authorProdi: currentUser.prodi,
+      authorAvatar: currentUser.avatar,
       text,
-      timeAgo: 'Baru saja'
+      timeAgo: 'Baru saja',
+      createdAt: nowIso
     };
 
     setPosts(prev => prev.map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: [...p.comments, newComment]
+          commentsCount: (p.commentsCount || p.comments.length) + 1,
+          comments: [...p.comments, optimisticComment]
         };
       }
       return p;
@@ -443,6 +396,21 @@ export default function FeedPage() {
 
     setCommentInputs(prev => ({ ...prev, [postId]: '' }));
     setExpandedComments(prev => ({ ...prev, [postId]: true }));
+
+    try {
+      await addPostComment(postId, {
+        authorUid: user.uid,
+        authorName: currentUser.name,
+        authorProdi: currentUser.prodi,
+        authorAvatar: currentUser.avatar,
+        text
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
+      console.error('Error adding comment:', err);
+      setPostAlert(`❌ Gagal mengirim komentar: ${msg}`);
+      setTimeout(() => setPostAlert(''), 3000);
+    }
   };
 
   const handleToggleFollow = (authorKey: string) => {
@@ -510,35 +478,65 @@ export default function FeedPage() {
             
             {/* MINI PROFILE CARD */}
             <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs text-center space-y-4">
-              <div className="relative mx-auto w-18 h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xs bg-gradient-to-tr from-sky-500 to-[#0284c7] flex items-center justify-center text-white text-2xl font-bold">
-                <AlumniAvatar src={currentUser.avatar} name={currentUser.name} />
-              </div>
+              {user ? (
+                <>
+                  <div className="relative mx-auto w-18 h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xs bg-gradient-to-tr from-sky-500 to-[#0284c7] flex items-center justify-center text-white text-2xl font-bold">
+                    <AlumniAvatar src={currentUser.avatar} name={currentUser.name} />
+                  </div>
 
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">{currentUser.name}</h3>
-                <p className="text-xs text-[#0284c7] font-semibold mt-0.5">
-                  {currentUser.prodi} • Angkatan {currentUser.angkatan}
-                </p>
-                {currentUser.role && (
-                  <p className="text-[11px] text-slate-600 font-medium mt-1.5 flex items-center justify-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <Briefcase className="w-3 h-3 text-[#0284c7] shrink-0" />
-                    <span className="truncate">{currentUser.role}</span>
-                  </p>
-                )}
-              </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">{currentUser.name}</h3>
+                    <p className="text-xs text-[#0284c7] font-semibold mt-0.5">
+                      {currentUser.prodi} • Angkatan {currentUser.angkatan}
+                    </p>
+                    {currentUser.role && (
+                      <p className="text-[11px] text-slate-600 font-medium mt-1.5 flex items-center justify-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
+                        <Briefcase className="w-3 h-3 text-[#0284c7] shrink-0" />
+                        <span className="truncate">{currentUser.role}</span>
+                      </p>
+                    )}
+                  </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-center">
-                <OpenToWorkBadge />
-              </div>
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-center">
+                    <OpenToWorkBadge />
+                  </div>
 
-              <div className="pt-2 flex flex-col gap-2">
-                <Link
-                  href="/profil"
-                  className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-sky-50 hover:text-[#0284c7] border border-slate-200 text-xs font-semibold text-slate-700 transition"
-                >
-                  Edit Profil Saya
-                </Link>
-              </div>
+                  <div className="pt-2 flex flex-col gap-2">
+                    <Link
+                      href="/profil"
+                      className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-sky-50 hover:text-[#0284c7] border border-slate-200 text-xs font-semibold text-slate-700 transition"
+                    >
+                      Edit Profil Saya
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-sky-100 text-[#0284c7] flex items-center justify-center font-bold text-xl shadow-xs">
+                    <Users className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Portal Alumni MMTC</h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Masuk untuk mempublikasikan showreel, memberi tanggapan, dan terhubung dengan sesama alumni.
+                    </p>
+                  </div>
+                  <div className="pt-2 flex flex-col gap-2">
+                    <Link
+                      href="/login"
+                      className="w-full py-2 px-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-xs"
+                    >
+                      Masuk Akun
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition"
+                    >
+                      Daftar Akun Baru
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* CATEGORY FILTER NAVIGATION */}
@@ -597,12 +595,43 @@ export default function FeedPage() {
           {/* ============================================================== */}
           <div className="lg:col-span-6 space-y-6">
             
-            {/* POST CREATOR CARD */}
-            <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-2xs space-y-3.5">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold">
-                  <AlumniAvatar src={currentUser.avatar} name={currentUser.name} />
+            {/* POST CREATOR CARD / VISITOR BANNER */}
+            {!user ? (
+              <div className="bg-gradient-to-r from-sky-50 via-white to-sky-50 border border-sky-200/90 rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs sm:text-sm font-bold text-slate-900">
+                      Mode Pratinjau Pengunjung (Read-Only)
+                    </h2>
+                    <p className="text-[11px] text-slate-600 mt-0.5">
+                      Masuk atau daftarkan akun alumni STMM MMTC Anda untuk berbagi showreel, update proyek, like, dan berdiskusi.
+                    </p>
+                  </div>
                 </div>
+                <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                  <Link
+                    href="/login"
+                    className="flex-1 sm:flex-initial text-center px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-xs"
+                  >
+                    Masuk Akun
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex-1 sm:flex-initial text-center px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition shadow-2xs"
+                  >
+                    Daftar
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-2xs space-y-3.5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold">
+                    <AlumniAvatar src={currentUser.avatar} name={currentUser.name} />
+                  </div>
                 <div className="flex-1">
                   <textarea
                     rows={2}
@@ -811,6 +840,7 @@ export default function FeedPage() {
                 </div>
               )}
             </div>
+          )}
 
             {/* FEED FILTER TABS (MOBILE & TABLET VISIBLE) */}
             <div className="flex lg:hidden items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -845,7 +875,7 @@ export default function FeedPage() {
                     {/* POST HEADER: AUTHOR INFO & CONNECT/FOLLOW BUTTON */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Link href={`/profil/${encodeURIComponent(post.nomorAlumni)}`} className="shrink-0">
+                        <Link href={`/profil/${encodeURIComponent(post.authorUid || post.nomorAlumni || '')}`} className="shrink-0">
                           <div className="w-11 h-11 rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold text-base shadow-2xs hover:opacity-90 transition">
                             <AlumniAvatar src={post.authorAvatar} name={post.authorName} />
                           </div>
@@ -853,7 +883,7 @@ export default function FeedPage() {
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <Link 
-                              href={`/profil/${encodeURIComponent(post.nomorAlumni)}`}
+                              href={`/profil/${encodeURIComponent(post.authorUid || post.nomorAlumni || '')}`}
                               className="text-xs sm:text-sm font-bold text-slate-900 hover:text-[#0284c7] transition"
                             >
                               {post.authorName}
@@ -963,15 +993,25 @@ export default function FeedPage() {
                             </span>
                           </div>
                         </div>
-                        <a
-                          href={post.mediaUrl || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-sky-300 text-xs font-bold text-[#0284c7] shadow-2xs transition inline-flex items-center gap-1.5 shrink-0"
-                        >
-                          <span>Buka PDF</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                        {(() => {
+                          const rawUrl = (post.mediaUrl || '').trim();
+                          const isSafeRelative = rawUrl.startsWith('/') && !rawUrl.startsWith('//') && !rawUrl.startsWith('/\\');
+                          const safeUrl = isSafeRelative ? rawUrl : (safeHttpUrl(rawUrl) || '#');
+                          const isSafe = safeUrl !== '#';
+
+                          return (
+                            <a
+                              href={safeUrl}
+                              target={isSafe ? '_blank' : undefined}
+                              rel="noopener noreferrer"
+                              onClick={!isSafe ? (e) => e.preventDefault() : undefined}
+                              className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-sky-300 text-xs font-bold text-[#0284c7] shadow-2xs transition inline-flex items-center gap-1.5 shrink-0"
+                            >
+                              <span>Buka PDF</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          );
+                        })()}
                       </div>
                     )}
 

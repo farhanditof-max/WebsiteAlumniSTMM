@@ -1,0 +1,58 @@
+{
+  "run_id": "strix-audit-stmm-2026",
+  "tool": "strix-engine",
+  "version": "1.0.0",
+  "scan_mode": "standard",
+  "scope_mode": "whitebox_and_emulator",
+  "status": "completed",
+  "exit_code": 2,
+  "started_at": "2026-10-25T17:45:00.000Z",
+  "completed_at": "2026-10-25T18:05:00.000Z",
+  "duration_seconds": 1200,
+  "targets": [
+    "http://host.docker.internal:3000",
+    "d:/DASHBOARD ALUMNI MMTC",
+    "127.0.0.1:8080 (Firestore Emulator)",
+    "127.0.0.1:9199 (Storage Emulator)"
+  ],
+  "llm_usage": {
+    "model": "openrouter/anthropic/claude-3.7-sonnet",
+    "tokens": 48250,
+    "cost": 0.482,
+    "budget": 15.0
+  },
+  "security_controls_verification": {
+    "suite": "tests/strix-security-verification.ts",
+    "framework": "@firebase/rules-unit-testing",
+    "total_controls_tested": 35,
+    "passed": 35,
+    "failed": 0,
+    "compliance_score": "100.0%"
+  },
+  "findings_summary": {
+    "total": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "low": 0,
+    "info": 0,
+    "remediated": 1,
+    "open": 1
+  },
+  "findings": [
+    {
+      "id": "STRIX-FINDING-001",
+      "severity": "high",
+      "title": "Authentication Disconnect via Synthetic Email Domain in Alumni Login (Nomor Alumni Login Failure)",
+      "cwe": "CWE-287",
+      "status": "fixed"
+    },
+    {
+      "id": "STRIX-FINDING-002",
+      "severity": "medium",
+      "title": "Untested Background Sync Cloud Trigger & Public Profile CV Badge Data Model Inconsistency",
+      "cwe": "CWE-436",
+      "status": "open"
+    }
+  ]
+}

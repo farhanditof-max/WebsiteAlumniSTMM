@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useAuth } from '@/context/AuthContext';
+import { getUserFeedPosts, deleteFeedPost } from '@/lib/feed';
 import { 
   Heart, 
   MessageSquare, 
@@ -114,6 +115,39 @@ export default function AktivitasPage() {
     return DEFAULT_POSTS;
   });
 
+  useEffect(() => {
+    let isMounted = true;
+    if (user?.uid) {
+      getUserFeedPosts(user.uid).then((userPosts) => {
+        if (!isMounted) return;
+        if (userPosts.length > 0) {
+          const mapped: UserActivityPost[] = userPosts.map(p => ({
+            id: p.id,
+            authorName: p.authorName,
+            authorProdi: p.authorProdi,
+            authorAngkatan: p.authorAngkatan,
+            authorRole: p.authorRole,
+            authorAvatar: p.authorAvatar,
+            timeAgo: p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja',
+            category: p.category,
+            content: p.content,
+            hashtags: p.hashtags,
+            mediaType: p.mediaType,
+            mediaUrl: p.mediaUrl,
+            mediaTitle: p.mediaTitle,
+            mediaSize: p.mediaSize,
+            likesCount: p.likesCount,
+            commentsCount: p.commentsCount
+          }));
+          setPosts(mapped);
+        }
+      }).catch(err => {
+        console.warn('AktivitasPage load user posts error:', err);
+      });
+    }
+    return () => { isMounted = false; };
+  }, [user?.uid]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('semua');
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
@@ -126,7 +160,7 @@ export default function AktivitasPage() {
     }));
   };
 
-  const handleDeletePost = (id: string) => {
+  const handleDeletePost = async (id: string) => {
     const updated = posts.filter(p => p.id !== id);
     setPosts(updated);
     try {
@@ -134,6 +168,15 @@ export default function AktivitasPage() {
     } catch {
       // ignore
     }
+
+    if (user?.uid) {
+      try {
+        await deleteFeedPost(id);
+      } catch (err) {
+        console.warn('AktivitasPage deleteFeedPost sync warning:', err);
+      }
+    }
+
     setActionAlert('Postingan berhasil dihapus dari riwayat aktivitas Anda.');
     setTimeout(() => setActionAlert(''), 3000);
   };

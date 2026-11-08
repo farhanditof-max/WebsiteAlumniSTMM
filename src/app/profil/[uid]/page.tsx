@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { UserProfile, PortfolioItem } from '@/types';
 import { parseYouTubeVideoId, formatWhatsAppUrl } from '@/lib/media';
+import { useAuth } from '@/context/AuthContext';
 import { 
   FileText, 
   ExternalLink, 
@@ -57,10 +58,13 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
   const resolvedParams = use(params);
   const rawUid = resolvedParams.uid;
 
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
+
+  const isOwner = Boolean(user && profile && user.uid === profile.uid);
 
   useEffect(() => {
     async function loadProfile() {
@@ -69,64 +73,83 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
       setLoading(true);
 
       try {
-        // 1. Coba lookup langsung berdasarkan Document ID (UID Firebase Auth)
-        const docRef = doc(db, 'users', cleanUid);
-        const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 4000)
-        );
-        let snap;
-        try {
-          snap = await Promise.race([getDoc(docRef), timeout]);
-        } catch {
-          snap = null;
-        }
+        let loaded = false;
 
-        if (snap && snap.exists()) {
-          setProfile({ uid: snap.id, ...snap.data() } as UserProfile);
-          return;
-        }
-
-        // 2. Coba lookup berdasarkan nomorAlumni
-        const normalizedNomor = cleanUid.replace(/\s+/g, '').replace(/[/._]/g, '-').toUpperCase();
-        const qNomor = query(collection(db, 'users'), where('nomorAlumni', '==', normalizedNomor));
-        const timeoutQ = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Query timeout')), 3500)
-        );
-        const snapNomor = await Promise.race([getDocs(qNomor), timeoutQ]).catch(() => null);
-
-        if (snapNomor && !snapNomor.empty) {
-          const docItem = snapNomor.docs[0];
-          setProfile({ uid: docItem.id, ...docItem.data() } as UserProfile);
-          return;
-        }
-
-        // 3. Coba lookup berdasarkan email jika parameter adalah email
-        if (cleanUid.includes('@')) {
-          const qEmail = query(collection(db, 'users'), where('email', '==', cleanUid.toLowerCase()));
-          const snapEmail = await Promise.race([getDocs(qEmail), timeoutQ]).catch(() => null);
-          if (snapEmail && !snapEmail.empty) {
-            const docItem = snapEmail.docs[0];
-            setProfile({ uid: docItem.id, ...docItem.data() } as UserProfile);
-            return;
+        // 0. Coba ambil dari Server DB (/api/db) terlebih dahulu
+        if (typeof window !== 'undefined') {
+          try {
+            const resUser = await fetch(`/api/db?collection=users&id=${encodeURIComponent(cleanUid)}`, { cache: 'no-store' });
+            if (resUser.ok) {
+              const jsonUser = await resUser.json();
+              if (jsonUser.doc) {
+                setProfile({ uid: cleanUid, ...jsonUser.doc } as UserProfile);
+                loaded = true;
+              }
+            }
+            if (!loaded) {
+              const resPub = await fetch(`/api/db?collection=public_profiles&id=${encodeURIComponent(cleanUid)}`, { cache: 'no-store' });
+              if (resPub.ok) {
+                const jsonPub = await resPub.json();
+                if (jsonPub.doc) {
+                  setProfile({ uid: cleanUid, ...jsonPub.doc } as UserProfile);
+                  loaded = true;
+                }
+              }
+            }
+          } catch {
+            // fallback below
           }
         }
 
-        // 4. Fallback lookup demo atau cache lokal jika sedang mode demo / offline preview
-        if (typeof window !== 'undefined') {
+        // 1. Coba lookup langsung berdasarkan Document ID (UID Firebase Auth)
+        if (!loaded) {
+          try {
+            const docRef = doc(db, 'users', cleanUid);
+            const timeout = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Profile fetch timeout')), 3500)
+            );
+            const snap = await Promise.race([getDoc(docRef), timeout]);
+            if (snap && snap.exists()) {
+              setProfile({ uid: snap.id, ...snap.data() } as UserProfile);
+              loaded = true;
+            }
+          } catch {
+            // users fetch blocked by rules if not owner/admin
+          }
+        }
+
+        // 2. Fallback ke public_profiles whitelist (non-PII publik)
+        if (!loaded) {
+          try {
+            const pubRef = doc(db, 'public_profiles', cleanUid);
+            const pubSnap = await getDoc(pubRef);
+            if (pubSnap && pubSnap.exists()) {
+              setProfile({ uid: pubSnap.id, ...pubSnap.data() } as UserProfile);
+              loaded = true;
+            }
+          } catch (pubErr) {
+            console.warn('public_profiles lookup fallback failed:', pubErr);
+          }
+        }
+
+        // 3. Fallback lookup demo atau cache lokal jika sedang mode demo / offline preview
+        if (!loaded && typeof window !== 'undefined') {
           try {
             const localCached = localStorage.getItem(`mmtc_profile_${cleanUid}`) || 
               (cleanUid === 'demo-alumni-001' || cleanUid.startsWith('demo') ? localStorage.getItem('mmtc_demo_profile') : null);
             if (localCached) {
               const parsed = JSON.parse(localCached);
               setProfile({ uid: cleanUid, ...parsed } as UserProfile);
-              return;
+              loaded = true;
             }
           } catch {
             // ignore
           }
         }
 
-        setProfile(null);
+        if (!loaded) {
+          setProfile(null);
+        }
       } catch (err) {
         console.error('Error loadProfile:', err);
         setProfile(null);
@@ -351,33 +374,41 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
                 Resume &amp; Dokumen
               </h3>
 
-              {profile.cvFileUrl ? (
-                <a 
-                  href={profile.cvFileUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="w-full p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-100 text-[#0284c7] text-xs font-bold flex items-center justify-between transition group"
-                >
-                  <span className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[#0284c7]" />
-                    Buka CV Resmi (PDF)
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
-                </a>
+              {!isOwner && !profile.openToWork ? (
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500">
+                  Dokumen dan resume disembunyikan karena alumni sedang tidak mencari proyek (Open to Work non-aktif).
+                </div>
               ) : (
-                <p className="text-xs text-slate-400">Alumni belum mengunggah file CV PDF.</p>
-              )}
+                <>
+                  {profile.cvFileUrl ? (
+                    <a 
+                      href={profile.cvFileUrl} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="w-full p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-100 text-[#0284c7] text-xs font-bold flex items-center justify-between transition group"
+                    >
+                      <span className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#0284c7]" />
+                        Buka CV Resmi (PDF)
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                    </a>
+                  ) : (
+                    <p className="text-xs text-slate-400">Alumni belum mengunggah file CV PDF.</p>
+                  )}
 
-              {profile.cvExternalLink && (
-                <a 
-                  href={profile.cvExternalLink.startsWith('http') ? profile.cvExternalLink : `https://${profile.cvExternalLink}`} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="w-full p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-between transition group"
-                >
-                  <span>Link Portfolio / Google Drive</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition" />
-                </a>
+                  {profile.cvExternalLink && (
+                    <a 
+                      href={profile.cvExternalLink.startsWith('http') ? profile.cvExternalLink : `https://${profile.cvExternalLink}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="w-full p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-between transition group"
+                    >
+                      <span>Link Portfolio / Google Drive</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition" />
+                    </a>
+                  )}
+                </>
               )}
             </div>
 
@@ -519,6 +550,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
 
             {/* AKTIVITAS & RIWAYAT POSTINGAN ALUMNI (LINKEDIN / FACEBOOK STYLE) */}
             <AlumniActivityHistory 
+              authorUid={rawUid}
               authorName={profile.namaLengkap}
               authorProdi={profile.prodi}
               authorAvatar={profile.fotoProfil}

@@ -1,0 +1,457 @@
+{
+  "alumni_registry": {
+    "MMTC-2018-001": {
+      "nomorAlumni": "MMTC-2018-001",
+      "namaLengkap": "Budi Santoso",
+      "prodi": "Animasi",
+      "angkatan": "2018",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2019-042": {
+      "nomorAlumni": "MMTC-2019-042",
+      "namaLengkap": "Siti Rahma",
+      "prodi": "Game Design",
+      "angkatan": "2019",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2020-103": {
+      "nomorAlumni": "MMTC-2020-103",
+      "namaLengkap": "Andi Pratama",
+      "prodi": "MIK",
+      "angkatan": "2020",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2020-215": {
+      "nomorAlumni": "MMTC-2020-215",
+      "namaLengkap": "Dewi Lestari",
+      "prodi": "Matekstosi",
+      "angkatan": "2020",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2021-088": {
+      "nomorAlumni": "MMTC-2021-088",
+      "namaLengkap": "Rian Hidayat",
+      "prodi": "Manarita",
+      "angkatan": "2021",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2021-120": {
+      "nomorAlumni": "MMTC-2021-120",
+      "namaLengkap": "Fajar Nugraha",
+      "prodi": "Manaprodsi",
+      "angkatan": "2021",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2022-015": {
+      "nomorAlumni": "MMTC-2022-015",
+      "namaLengkap": "Maya Safitri",
+      "prodi": "Animasi",
+      "angkatan": "2022",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2022-064": {
+      "nomorAlumni": "MMTC-2022-064",
+      "namaLengkap": "Dimas Aditya",
+      "prodi": "Game Design",
+      "angkatan": "2022",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2023-031": {
+      "nomorAlumni": "MMTC-2023-031",
+      "namaLengkap": "Kurniawan Eko",
+      "prodi": "MIK",
+      "angkatan": "2023",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2023-095": {
+      "nomorAlumni": "MMTC-2023-095",
+      "namaLengkap": "Nadia Putri",
+      "prodi": "Matekstosi",
+      "angkatan": "2023",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2024-012": {
+      "nomorAlumni": "MMTC-2024-012",
+      "namaLengkap": "Bayu Wicaksono",
+      "prodi": "Manarita",
+      "angkatan": "2024",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "MMTC-2024-055": {
+      "nomorAlumni": "MMTC-2024-055",
+      "namaLengkap": "Salsabila Rahma",
+      "prodi": "Manaprodsi",
+      "angkatan": "2024",
+      "isRegistered": false,
+      "createdAt": "2026-10-01T00:00:00.000Z"
+    }
+  },
+  "users": {},
+  "public_profiles": {
+    "showcase-dimas": {
+      "uid": "showcase-dimas",
+      "nomorAlumni": "MMTC-2022-064",
+      "namaLengkap": "Dimas Aditya",
+      "prodi": "Game Design",
+      "angkatan": "2022",
+      "pekerjaanSaatIni": "Technical Game Designer & Unreal Developer",
+      "domisili": "Yogyakarta",
+      "bio": "Game Designer & Gameplay Programmer dengan fokus pada mekanik combat RPG di Unreal Engine 5 dan Unity 3D.",
+      "openToWork": true,
+      "hasCv": true,
+      "fotoProfil": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "portfolio": [
+        {
+          "id": "p-dimas-1",
+          "title": "Unreal Engine 5 Combat System Prototype",
+          "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "type": "youtube",
+          "createdAt": "2026-10-20T08:00:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-20T08:00:00.000Z",
+      "updatedAt": "2026-10-24T08:00:00.000Z"
+    },
+    "showcase-dewi": {
+      "uid": "showcase-dewi",
+      "nomorAlumni": "MMTC-2020-215",
+      "namaLengkap": "Dewi Lestari",
+      "prodi": "Matekstosi",
+      "angkatan": "2020",
+      "pekerjaanSaatIni": "Acoustic Engineer & Audio Post Specialist",
+      "domisili": "Jakarta Selatan",
+      "bio": "Spesialis tata suara film, foley artist, dan broadcast audio mixing engineer bersertifikasi Dolby Atmos.",
+      "openToWork": true,
+      "hasCv": true,
+      "fotoProfil": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      "portfolio": [
+        {
+          "id": "p-dewi-1",
+          "title": "Showreel Sound Design & Foley Film Pendek",
+          "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "type": "youtube",
+          "createdAt": "2026-10-21T08:00:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-21T08:00:00.000Z",
+      "updatedAt": "2026-10-24T08:00:00.000Z"
+    },
+    "showcase-maya": {
+      "uid": "showcase-maya",
+      "nomorAlumni": "MMTC-2022-015",
+      "namaLengkap": "Maya Safitri",
+      "prodi": "Animasi",
+      "angkatan": "2022",
+      "pekerjaanSaatIni": "3D Character Animator & Storyboard Artist",
+      "domisili": "Yogyakarta",
+      "bio": "3D Character Animator berpengalaman di Blender dan Maya untuk produksi serial animasi dan game cinematic.",
+      "openToWork": true,
+      "hasCv": true,
+      "fotoProfil": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      "portfolio": [
+        {
+          "id": "p-maya-1",
+          "title": "3D Character Acting & Lip Sync Reel 2026",
+          "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "type": "youtube",
+          "createdAt": "2026-10-22T08:00:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-22T08:00:00.000Z",
+      "updatedAt": "2026-10-24T08:00:00.000Z"
+    },
+    "budi_real_uid": {
+      "uid": "budi_real_uid",
+      "id": "budi_real_uid",
+      "nomorAlumni": "MMTC-2018-001"
+    }
+  },
+  "feed_posts": {
+    "seed-post-01": {
+      "id": "seed-post-01",
+      "authorUid": "user-seed-budi",
+      "authorName": "Budi Santoso",
+      "authorProdi": "Animasi",
+      "authorAngkatan": "2018",
+      "authorRole": "Senior 3D Artist & Lead Rigger",
+      "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "nomorAlumni": "MMTC-2018-001",
+      "category": "showreel",
+      "content": "Halo rekan-rekan alumni MMTC! Baru saja merilis breakdown rigging dan animasi karakter untuk project film pendek terbaru kami. Fokus pada expressive facial blendshapes & cloth simulation di Blender. Kritik dan masukan sangat dinantikan!",
+      "hashtags": [
+        "#AnimasiMMTC",
+        "#3DRigging",
+        "#Blender3D",
+        "#ShowreelAlumni"
+      ],
+      "mediaType": "youtube",
+      "mediaUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "mediaTitle": "Breakdown 3D Rigging & Facial Animation 2026",
+      "likesCount": 24,
+      "likedBy": [
+        "user-seed-siti",
+        "user-seed-dimas"
+      ],
+      "commentsCount": 2,
+      "comments": [
+        {
+          "id": "c1",
+          "authorUid": "user-seed-siti",
+          "authorName": "Siti Rahmawati",
+          "authorProdi": "Animasi",
+          "authorAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+          "text": "Keren banget Mas Budi! Deformasi area bibir dan alis sangat natural. Pakai add-on khusus atau manual rig?",
+          "createdAt": "2026-10-24T10:15:00.000Z"
+        },
+        {
+          "id": "c2",
+          "authorUid": "user-seed-budi",
+          "authorName": "Budi Santoso",
+          "authorProdi": "Animasi",
+          "authorAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          "text": "Terima kasih Mbak Siti! Full manual rig digabung corrective shape keys biar gerakannya tajam.",
+          "createdAt": "2026-10-24T10:45:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-24T09:30:00.000Z",
+      "updatedAt": "2026-10-24T10:45:00.000Z"
+    },
+    "seed-post-02": {
+      "id": "seed-post-02",
+      "authorUid": "user-seed-dimas",
+      "authorName": "Dimas Aditya",
+      "authorProdi": "Game Design",
+      "authorAngkatan": "2022",
+      "authorRole": "Technical Game Designer",
+      "authorAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "nomorAlumni": "MMTC-2022-064",
+      "category": "kolaborasi",
+      "content": "Open recruitment untuk project game indie RPG Nusantara (Unreal Engine 5). Kami sedang membutuhkan 1 orang Technical Sound Designer (alumni Matekstosi / MIK) dan 1 orang Concept Artist. Work-from-anywhere, revenue-share based.",
+      "hashtags": [
+        "#GameDevMMTC",
+        "#UnrealEngine5",
+        "#LokerIndie",
+        "#KolaborasiAlumni"
+      ],
+      "mediaType": "image",
+      "mediaUrl": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80",
+      "mediaTitle": "Concept Art & Level Design Preview.jpg",
+      "mediaSize": "1.8 MB",
+      "likesCount": 19,
+      "likedBy": [
+        "user-seed-budi"
+      ],
+      "commentsCount": 1,
+      "comments": [
+        {
+          "id": "c3",
+          "authorUid": "user-seed-dewi",
+          "authorName": "Dewi Lestari",
+          "authorProdi": "Matekstosi",
+          "authorAvatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+          "text": "Tertarik Mas Dimas! Portofolio foley dan dynamic sound cues saya sudah ada di profil.",
+          "createdAt": "2026-10-25T14:20:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-25T11:00:00.000Z",
+      "updatedAt": "2026-10-25T14:20:00.000Z"
+    },
+    "seed-post-03": {
+      "id": "seed-post-03",
+      "authorUid": "user-seed-fajar",
+      "authorName": "Fajar Nugraha",
+      "authorProdi": "Manaprodsi",
+      "authorAngkatan": "2021",
+      "authorRole": "Broadcast Producer & Live Stream Director",
+      "authorAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "nomorAlumni": "MMTC-2021-120",
+      "category": "pencapaian",
+      "content": "Alhamdulillah, tim produksi kami baru saja menyelesaikan siaran langsung Festival Musik Nasional 3 hari non-stop dengan 16 kamera multi-cam setup dan 0 dropped frames. Bangga bisa berkolaborasi dengan sesama alumni MMTC lintas angkatan!",
+      "hashtags": [
+        "#Manaprodsi",
+        "#LiveBroadcast",
+        "#MultiCam",
+        "#ProudMMTC"
+      ],
+      "mediaType": "image",
+      "mediaUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=80",
+      "mediaTitle": "Production Control Room Setup.jpg",
+      "mediaSize": "2.4 MB",
+      "likesCount": 38,
+      "likedBy": [
+        "user-seed-budi",
+        "user-seed-siti",
+        "user-seed-dimas"
+      ],
+      "commentsCount": 1,
+      "comments": [
+        {
+          "id": "c4",
+          "authorUid": "user-seed-rian",
+          "authorName": "Rian Hidayat",
+          "authorProdi": "Manarita",
+          "authorAvatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80",
+          "text": "Mantap Mas Fajar! Liputan dan switching kameranya smooth banget di siaran kemarin.",
+          "createdAt": "2026-10-25T17:05:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-25T16:40:00.000Z",
+      "updatedAt": "2026-10-25T17:05:00.000Z"
+    },
+    "seed-post-04": {
+      "id": "seed-post-04",
+      "authorUid": "user-seed-rian",
+      "authorName": "Rian Hidayat",
+      "authorProdi": "Manarita",
+      "authorAngkatan": "2021",
+      "authorRole": "Digital Journalist & News Anchor",
+      "authorAvatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80",
+      "nomorAlumni": "MMTC-2021-088",
+      "category": "diskusi",
+      "content": "Bagaimana pandangan rekan-rekan mengenai adaptasi AI Generatif dalam penulisan naskah berita investigasi dan automated fact-checking? Di newsroom kami sudah mulai integrasi, tapi etika jurnalistik tetap nomor satu.",
+      "hashtags": [
+        "#JurnalistikDigital",
+        "#AIinMedia",
+        "#ManaritaMMTC",
+        "#DiskusiMedia"
+      ],
+      "likesCount": 15,
+      "likedBy": [
+        "user-seed-fajar"
+      ],
+      "commentsCount": 1,
+      "comments": [
+        {
+          "id": "c5",
+          "authorUid": "user-seed-kurniawan",
+          "authorName": "Kurniawan Eko",
+          "authorProdi": "MIK",
+          "authorAvatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80",
+          "text": "Human-in-the-loop mutlak diperlukan Mas Rian. LLM bagus untuk ringkasan cepat, tapi verifikasi primer harus tangan jurnalis.",
+          "createdAt": "2026-10-26T08:12:00.000Z"
+        }
+      ],
+      "createdAt": "2026-10-26T07:30:00.000Z",
+      "updatedAt": "2026-10-26T08:12:00.000Z"
+    },
+    "seed-post-05": {
+      "id": "seed-post-05",
+      "authorUid": "user-seed-dewi",
+      "authorName": "Dewi Lestari",
+      "authorProdi": "Matekstosi",
+      "authorAngkatan": "2020",
+      "authorRole": "Acoustic Engineer & Audio Post Specialist",
+      "authorAvatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      "nomorAlumni": "MMTC-2020-215",
+      "category": "showreel",
+      "content": "Dokumentasi panduan setup Dolby Atmos 7.1.4 untuk studio pascaproduksi independen. Saya sertakan panduan kalibrasi SPL meter dan diagram akustik ruangan dalam format PDF.",
+      "hashtags": [
+        "#Matekstosi",
+        "#DolbyAtmos",
+        "#AudioEngineering",
+        "#StudioSetup"
+      ],
+      "mediaType": "pdf",
+      "mediaUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      "mediaTitle": "Panduan_Setup_Dolby_Atmos_7.1.4_MMTC.pdf",
+      "mediaSize": "3.1 MB",
+      "likesCount": 29,
+      "likedBy": [
+        "user-seed-budi",
+        "user-seed-fajar",
+        "user-seed-kurniawan"
+      ],
+      "commentsCount": 0,
+      "comments": [],
+      "createdAt": "2026-10-26T09:00:00.000Z",
+      "updatedAt": "2026-10-26T09:00:00.000Z"
+    }
+  },
+  "jobs": {
+    "job-seed-01": {
+      "id": "job-seed-01",
+      "judul": "Senior 3D Character Rigger & Animator",
+      "perusahaan": "Infinite Studios",
+      "lokasi": "Batam / Hybrid Yogyakarta",
+      "tipe": "Full-time",
+      "prodiTarget": [
+        "Animasi",
+        "Game Design"
+      ],
+      "deskripsi": "Bertanggung jawab membangun sistem rigging karakter 3D dan facial blendshapes untuk produksi serial animasi internasional menggunakan Blender & Maya.",
+      "kualifikasi": [
+        "Lulusan D4 Animasi atau Teknologi Permainan STMM MMTC Yogyakarta",
+        "Menguasai rigging karakter, weight painting, dan Python expression di Blender/Maya",
+        "Memiliki showreel animasi/rigging terbaru"
+      ],
+      "kontakEmail": "recruitment@infinitestudios.id",
+      "postedBy": "seed-recruiter-1",
+      "posterName": "Budi Santoso (Alumni 2018)",
+      "status": "active",
+      "createdAt": "2026-10-25T09:00:00.000Z"
+    },
+    "job-seed-02": {
+      "id": "job-seed-02",
+      "judul": "Broadcast Technical Director & Audio Engineer",
+      "perusahaan": "MNC Media Group",
+      "lokasi": "Jakarta Barat (On-site)",
+      "tipe": "Full-time",
+      "prodiTarget": [
+        "Matekstosi",
+        "Manaprodsi"
+      ],
+      "deskripsi": "Mengelola sistem operasional studio penyiaran multi-kamera, vision mixer switcher, dan audio mixing console untuk program siaran langsung nasional.",
+      "kualifikasi": [
+        "Alumni D4 Matekstosi atau Manaprodsi STMM MMTC Yogyakarta",
+        "Memahami sistem routing SDI/NDI, intercom, dan digital audio mixing",
+        "Siap bekerja dalam sistem shift produksi televisi"
+      ],
+      "kontakEmail": "career@mncgroup.com",
+      "postedBy": "seed-recruiter-2",
+      "posterName": "Fajar Nugraha (Alumni 2021)",
+      "status": "active",
+      "createdAt": "2026-10-25T14:30:00.000Z"
+    },
+    "job-seed-03": {
+      "id": "job-seed-03",
+      "judul": "Digital News Producer & Investigative Journalist",
+      "perusahaan": "Kompas TV & Digital Network",
+      "lokasi": "Jakarta Pusat / Yogyakarta Bureau",
+      "tipe": "Full-time",
+      "prodiTarget": [
+        "Manarita",
+        "MIK",
+        "Manaprodsi"
+      ],
+      "deskripsi": "Menyusun riset liputan mendalam, naskah berita multiplatform, serta mengelola distribusi konten jurnalisme visual di kanal televisi dan digital.",
+      "kualifikasi": [
+        "Alumni D3 Manarita, D4 MIK, atau D4 Manaprodsi STMM MMTC",
+        "Memiliki kemampuan jurnalistik, riset data, dan storytelling visual yang kuat",
+        "Menguasai alur kerja newsroom digital modern"
+      ],
+      "kontakEmail": "hrd@kompas.tv",
+      "postedBy": "seed-recruiter-3",
+      "posterName": "Rian Hidayat (Alumni 2021)",
+      "status": "active",
+      "createdAt": "2026-10-26T08:00:00.000Z"
+    }
+  },
+  "applications": {
+    "job1_app1": {
+      "status": "accepted",
+      "id": "job1_app1"
+    }
+  },
+  "conversations": {}
+}

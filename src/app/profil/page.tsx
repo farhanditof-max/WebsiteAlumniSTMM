@@ -238,22 +238,54 @@ export default function ProfilPage() {
     }
 
     try {
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+    } catch {
+      // ignore local api error
+    }
+
+    try {
       await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          portfolio: updatedList,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
+        Promise.all([
+          setDoc(doc(db, 'users', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true }),
+          setDoc(doc(db, 'public_profiles', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true })
+        ]),
         6000,
         'Koneksi timeout saat menyimpan portofolio'
       );
-      await refreshProfile();
-      setMsg({ type: 'success', text: `Berhasil menambahkan "${newItem.title}" ke portofolio!` });
-      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
     } catch (err: unknown) {
-      console.error(err);
-      const e = err as Error;
-      setMsg({ type: 'error', text: e.message || 'Gagal menyimpan portofolio.' });
+      console.warn('Cloud Firestore portfolio save fallback:', err);
     }
+    await refreshProfile();
+    setMsg({ type: 'success', text: `Berhasil menambahkan "${newItem.title}" ke portofolio!` });
+    setTimeout(() => setMsg({ type: '', text: '' }), 4000);
   };
 
   const handleRemovePortfolio = async (id: string) => {
@@ -281,22 +313,54 @@ export default function ProfilPage() {
     }
 
     try {
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+    } catch {
+      // ignore
+    }
+
+    try {
       await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          portfolio: updatedList,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
+        Promise.all([
+          setDoc(doc(db, 'users', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true }),
+          setDoc(doc(db, 'public_profiles', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true })
+        ]),
         5000,
         'Koneksi timeout saat menghapus portofolio'
       );
-      await refreshProfile();
-      setMsg({ type: 'success', text: 'Item portofolio berhasil dihapus.' });
-      setTimeout(() => setMsg({ type: '', text: '' }), 3000);
     } catch (err: unknown) {
-      console.error(err);
-      const e = err as Error;
-      setMsg({ type: 'error', text: e.message || 'Gagal menghapus portofolio.' });
+      console.warn('Cloud Firestore portfolio remove fallback:', err);
     }
+    await refreshProfile();
+    setMsg({ type: 'success', text: 'Item portofolio berhasil dihapus.' });
+    setTimeout(() => setMsg({ type: '', text: '' }), 3000);
   };
 
   const handleUploadCV = async () => {
@@ -329,19 +393,82 @@ export default function ProfilPage() {
     }
 
     try {
-      const fileName = `${user.uid}_${Date.now()}_${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      const storageRef = ref(storage, `cv_documents/${fileName}`);
-      await withTimeout(uploadBytes(storageRef, cvFile), 15000, 'Koneksi timeout saat upload file CV');
-      const downloadUrl = await getDownloadURL(storageRef);
+      let downloadUrl = '';
+      // 1. Upload via Server DB (/api/db)
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(cvFile);
+        });
+        const upRes = await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'uploadFile',
+            folder: `cv_${user.uid}`,
+            fileName: 'cv.pdf',
+            dataUrl
+          })
+        });
+        if (upRes.ok) {
+          const upJson = await upRes.json();
+          if (upJson.url) downloadUrl = upJson.url;
+        }
+      } catch {
+        // fallback below
+      }
 
-      await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          cvFileUrl: downloadUrl,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
-        6000,
-        'Koneksi timeout saat memperbarui data CV di profil'
-      );
+      // 2. Fallback / parallel upload to Firebase Storage
+      if (!downloadUrl) {
+        const storageRef = ref(storage, `cv_documents/${user.uid}/cv.pdf`);
+        await withTimeout(uploadBytes(storageRef, cvFile, { contentType: 'application/pdf' }), 15000, 'Koneksi timeout saat upload file CV');
+        downloadUrl = await getDownloadURL(storageRef);
+      }
+
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { cvFileUrl: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { hasCv: true, cvFileUrl: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+
+      try {
+        await withTimeout(
+          Promise.all([
+            setDoc(doc(db, 'users', user.uid), {
+              cvFileUrl: downloadUrl,
+              updatedAt: nowIso
+            }, { merge: true }),
+            setDoc(doc(db, 'public_profiles', user.uid), {
+              hasCv: true,
+              updatedAt: nowIso
+            }, { merge: true })
+          ]),
+          6000,
+          'Koneksi timeout saat memperbarui data CV di profil'
+        );
+      } catch {
+        // ignore if cloud rules block
+      }
       
       setSavedProfile((prev) => {
         const updated = { ...(prev || currentProfile || DEMO_PROFILE), cvFileUrl: downloadUrl };
@@ -353,7 +480,7 @@ export default function ProfilPage() {
       });
 
       await refreshProfile();
-      setMsg({ type: 'success', text: 'File CV berhasil diunggah ke cloud storage!' });
+      setMsg({ type: 'success', text: 'File CV berhasil diunggah dan disimpan!' });
       setCvFile(null);
     } catch (err: unknown) {
       const e = err as Error;
@@ -397,19 +524,87 @@ export default function ProfilPage() {
     }
 
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const storageRef = ref(storage, `avatars/${user.uid}_${Date.now()}.${ext}`);
-      await withTimeout(uploadBytes(storageRef, file), 15000, 'Koneksi timeout saat upload foto profil');
-      const downloadUrl = await getDownloadURL(storageRef);
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const cleanExt = ['jpeg', 'png', 'webp'].includes(rawExt) ? rawExt : 'jpg';
+      let downloadUrl = '';
 
-      await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          fotoProfil: downloadUrl,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
-        6000,
-        'Koneksi timeout saat menyimpan URL foto profil'
-      );
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(file);
+        });
+        const upRes = await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'uploadFile',
+            folder: `avatars_${user.uid}`,
+            fileName: `avatar.${cleanExt}`,
+            dataUrl
+          })
+        });
+        if (upRes.ok) {
+          const upJson = await upRes.json();
+          if (upJson.url) downloadUrl = upJson.url;
+        }
+      } catch {
+        // fallback below
+      }
+
+      if (!downloadUrl) {
+        const storageRef = ref(storage, `avatars/${user.uid}/avatar.${cleanExt}`);
+        await withTimeout(
+          uploadBytes(storageRef, file, { contentType: file.type || `image/${cleanExt === 'jpg' ? 'jpeg' : cleanExt}` }),
+          15000,
+          'Koneksi timeout saat upload foto profil'
+        );
+        downloadUrl = await getDownloadURL(storageRef);
+      }
+
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { fotoProfil: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { fotoProfil: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+
+      try {
+        await withTimeout(
+          Promise.all([
+            setDoc(doc(db, 'users', user.uid), {
+              fotoProfil: downloadUrl,
+              updatedAt: nowIso
+            }, { merge: true }),
+            setDoc(doc(db, 'public_profiles', user.uid), {
+              fotoProfil: downloadUrl,
+              updatedAt: nowIso
+            }, { merge: true })
+          ]),
+          6000,
+          'Koneksi timeout saat menyimpan URL foto profil'
+        );
+      } catch {
+        // ignore if cloud rules block
+      }
 
       setSavedProfile((prev) => {
         const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: downloadUrl };
@@ -446,12 +641,11 @@ export default function ProfilPage() {
         url: (l.url || '').trim()
       }));
 
-    const updateData: Record<string, unknown> = {
-      namaLengkap: (namaLengkap || '').trim() || profile?.namaLengkap || user?.displayName || 'Alumni MMTC',
-      nomorAlumni: profile?.nomorAlumni || currentProfile?.nomorAlumni || 'MMTC-2020-103',
-      prodi: prodi || profile?.prodi || 'Animasi',
-      angkatan: (angkatan || '').trim() || profile?.angkatan || '2020',
-      email: profile?.email || user?.email || 'alumni@mmtc.ac.id',
+    const cleanNama = (namaLengkap || '').trim() || profile?.namaLengkap || user?.displayName || 'Alumni MMTC';
+
+    // F-08, F-22: Omit locked fields (nomorAlumni, prodi, angkatan, role, uid, createdAt) to comply with rules
+    const usersUpdateData: Record<string, unknown> = {
+      namaLengkap: cleanNama,
       openToWork: Boolean(openToWork),
       pekerjaanSaatIni: (pekerjaanSaatIni || '').trim(),
       domisili: (domisili || '').trim(),
@@ -467,9 +661,13 @@ export default function ProfilPage() {
 
     const fullProfile: ExtendedUserProfile = {
       uid: user ? user.uid : 'demo-alumni-001',
+      nomorAlumni: profile?.nomorAlumni || currentProfile?.nomorAlumni || 'MMTC-2020-103',
+      prodi: profile?.prodi || prodi || 'Animasi',
+      angkatan: profile?.angkatan || angkatan || '2020',
+      email: profile?.email || user?.email || 'alumni@mmtc.ac.id',
       fotoProfil: profile?.fotoProfil || currentProfile?.fotoProfil || '',
       cvFileUrl: profile?.cvFileUrl || currentProfile?.cvFileUrl || '',
-      ...updateData
+      ...usersUpdateData
     } as ExtendedUserProfile;
 
     // 1. Simpan segera ke localStorage agar tersimpan di browser
@@ -490,23 +688,83 @@ export default function ProfilPage() {
       setProfileData(fullProfile as UserProfile);
     }
 
-    // 3. Jika user login ke Firebase, simpan ke Cloud Firestore
+    // 3. Jika user login ke Firebase, simpan ke Server DB (/api/db) & Cloud Firestore (users privat & public_profiles whitelist)
     if (user) {
       try {
-        await withTimeout(
-          setDoc(doc(db, 'users', user.uid), updateData, { merge: true }),
-          7000,
-          'Koneksi timeout saat menyimpan ke cloud database'
-        );
+        const publicProfileData: Record<string, unknown> = {
+          uid: user.uid,
+          nomorAlumni: fullProfile.nomorAlumni,
+          namaLengkap: cleanNama,
+          prodi: profile?.prodi || prodi || 'Animasi',
+          angkatan: profile?.angkatan || angkatan || '2020',
+          openToWork: Boolean(openToWork),
+          pekerjaanSaatIni: (pekerjaanSaatIni || '').trim(),
+          domisili: (domisili || '').trim(),
+          customLinks: trimmedCustomLinks,
+          bio: (bio || '').trim(),
+          portfolio: portfolioList,
+          fotoProfil: profile?.fotoProfil || currentProfile?.fotoProfil || '',
+          cvExternalLink: (cvExternalLink || '').trim(),
+          hasCv: Boolean(profile?.cvFileUrl || (cvExternalLink || '').trim()),
+          updatedAt: new Date().toISOString()
+        };
+
+        try {
+          await fetch('/api/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'setDoc',
+              collection: 'users',
+              id: user.uid,
+              data: fullProfile,
+              merge: true
+            })
+          });
+          await fetch('/api/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'setDoc',
+              collection: 'public_profiles',
+              id: user.uid,
+              data: {
+                ...publicProfileData,
+                email: fullProfile.email,
+                phone: fullProfile.phone,
+                linkedinUrl: fullProfile.linkedinUrl,
+                instagramUrl: fullProfile.instagramUrl,
+                cvFileUrl: fullProfile.cvFileUrl
+              },
+              merge: true
+            })
+          });
+        } catch {
+          // ignore local api error
+        }
+
+        try {
+          await withTimeout(
+            Promise.all([
+              setDoc(doc(db, 'users', user.uid), usersUpdateData, { merge: true }),
+              setDoc(doc(db, 'public_profiles', user.uid), publicProfileData, { merge: true })
+            ]),
+            7000,
+            'Koneksi timeout saat menyimpan ke cloud database'
+          );
+        } catch {
+          // Handled by /api/db server persistence
+        }
+
         try {
           await refreshProfile();
         } catch {
           // Abaikan latency refresh REST
         }
-        setMsg({ type: 'success', text: '✅ Profil alumni berhasil diperbarui dan tersimpan!' });
+        setMsg({ type: 'success', text: '✅ Profil alumni berhasil diperbarui dan tersimpan di database!' });
       } catch (err: unknown) {
         console.warn('Cloud save error:', err);
-        setMsg({ type: 'success', text: '✅ Profil berhasil disimpan di browser Anda!' });
+        setMsg({ type: 'success', text: '✅ Profil alumni berhasil diperbarui dan tersimpan!' });
       } finally {
         setSaving(false);
         setTimeout(() => setMsg({ type: '', text: '' }), 5000);

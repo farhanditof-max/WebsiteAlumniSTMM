@@ -6,8 +6,8 @@
  * Robust YouTube video ID parser
  * Handles raw URLs (watch?v=, embed/, youtu.be/, shorts/, youtube-nocookie) and full <iframe> embed snippets.
  */
-export function parseYouTubeVideoId(input: string): string | null {
-  if (!input) return null;
+export function parseYouTubeVideoId(input?: unknown): string | null {
+  if (typeof input !== 'string' || !input.trim()) return null;
   const raw = input.trim();
   
   // 1. If user pasted a full <iframe> tag, extract src first
@@ -42,8 +42,8 @@ export function parseYouTubeVideoId(input: string): string | null {
  * Formats a phone number for direct WhatsApp wa.me link.
  * Normalizes Indonesian numbers (08... -> 628..., +62... -> 62...).
  */
-export function formatWhatsAppUrl(phone: string): string {
-  if (!phone) return '';
+export function formatWhatsAppUrl(phone?: unknown): string {
+  if (typeof phone !== 'string' || !phone.trim()) return '';
   const digits = phone.replace(/\D/g, '');
   if (!digits) return '';
   if (digits.startsWith('0')) {
@@ -61,12 +61,52 @@ export function formatWhatsAppUrl(phone: string): string {
 /**
  * Ensures an external web link has http:// or https:// protocol.
  */
-export function ensureAbsoluteUrl(url: string): string {
-  if (!url) return '';
+export function ensureAbsoluteUrl(url?: unknown): string {
+  if (typeof url !== 'string' || !url.trim()) return '';
   const trimmed = url.trim();
-  if (!trimmed) return '';
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
   return `https://${trimmed}`;
+}
+
+/**
+ * Validates and sanitizes HTTP/HTTPS URLs (F-07).
+ * Prevents javascript:, data:, and vbscript: XSS injection vectors.
+ */
+export function safeHttpUrl(url: string | null | undefined, allowedHosts?: string[]): string | null {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  // Tolak tegas skema non-HTTP berbahaya (XSS vectors)
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.startsWith('javascript:') ||
+    lower.startsWith('data:') ||
+    lower.startsWith('vbscript:') ||
+    lower.startsWith('file:') ||
+    lower.startsWith('blob:')
+  ) {
+    return null;
+  }
+
+  try {
+    const fullUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') 
+      ? trimmed 
+      : `https://${trimmed}`;
+    const parsed = new URL(fullUrl);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return null;
+    }
+    if (allowedHosts && allowedHosts.length > 0) {
+      const isAllowed = allowedHosts.some(host => 
+        parsed.hostname === host || parsed.hostname.endsWith(`.${host}`)
+      );
+      if (!isAllowed) return null;
+    }
+    return parsed.href;
+  } catch {
+    return null;
+  }
 }

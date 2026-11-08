@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Heart, 
@@ -17,6 +17,7 @@ import {
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { parseYouTubeVideoId } from '@/lib/media';
+import { getUserFeedPosts } from '@/lib/feed';
 
 export interface UserActivityPost {
   id: string;
@@ -73,6 +74,7 @@ const DEFAULT_USER_POSTS: UserActivityPost[] = [
 ];
 
 interface AlumniActivityHistoryProps {
+  authorUid?: string;
   authorName?: string;
   authorProdi?: string;
   authorAvatar?: string;
@@ -80,12 +82,13 @@ interface AlumniActivityHistoryProps {
 }
 
 export default function AlumniActivityHistory({
+  authorUid,
   authorName = 'Budi Santoso',
   authorProdi = 'Animasi',
   authorAvatar = '',
   isOwner = true
 }: AlumniActivityHistoryProps) {
-  const [posts] = useState<UserActivityPost[]>(() => {
+  const [posts, setPosts] = useState<UserActivityPost[]>(() => {
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem('alumni_user_posts');
@@ -105,6 +108,39 @@ export default function AlumniActivityHistory({
     }
     return DEFAULT_USER_POSTS;
   });
+
+  useEffect(() => {
+    let isMounted = true;
+    if (authorUid) {
+      getUserFeedPosts(authorUid).then((userPosts) => {
+        if (!isMounted) return;
+        if (userPosts.length > 0) {
+          const mapped: UserActivityPost[] = userPosts.map(p => ({
+            id: p.id,
+            authorName: p.authorName,
+            authorProdi: p.authorProdi,
+            authorAngkatan: p.authorAngkatan,
+            authorRole: p.authorRole,
+            authorAvatar: p.authorAvatar,
+            timeAgo: p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja',
+            category: p.category,
+            content: p.content,
+            hashtags: p.hashtags,
+            mediaType: p.mediaType,
+            mediaUrl: p.mediaUrl,
+            mediaTitle: p.mediaTitle,
+            mediaSize: p.mediaSize,
+            likesCount: p.likesCount,
+            commentsCount: p.commentsCount
+          }));
+          setPosts(mapped);
+        }
+      }).catch(err => {
+        console.warn('AlumniActivityHistory load posts error:', err);
+      });
+    }
+    return () => { isMounted = false; };
+  }, [authorUid]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('semua');
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});

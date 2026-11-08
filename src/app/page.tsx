@@ -10,7 +10,6 @@ import {
   ArrowRight, 
   ArrowUpRight,
   Compass,
-  Building2, 
   Video, 
   Tv, 
   Sparkles,

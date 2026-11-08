@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:rules": "ts-node --project tests/tsconfig.json tests/run-all-tests.ts",
+    "test:run2": "ts-node --project tests/tsconfig.json -r tsconfig-paths/register tests/test-run2-remediation.ts",
+    "test:strix": "npx firebase-tools emulators:exec --only firestore,storage \"ts-node --project tests/tsconfig.json tests/strix-security-verification.ts\"",
+    "seed:sandbox": "ts-node --project tests/tsconfig.json tests/seed-sandbox-data.ts",
+    "test:registration": "npx firebase-tools emulators:exec --only firestore \"ts-node --project tests/tsconfig.json tests/test-registration-flow.ts\"",
+    "test:profile-update": "npx firebase-tools emulators:exec --only firestore \"ts-node --project tests/tsconfig.json tests/test-profile-update.ts\"",
+    "export:codebase": "ts-node scripts/export-codebase.ts",
+    "deploy:rules": "npx firebase-tools deploy --only firestore:rules,storage",
+    "seed:cloud": "ts-node --project tests/tsconfig.json scripts/seed-cloud-presentation.ts"
   },
   "dependencies": {
     "firebase": "^12.19.0",
@@ -16,6 +25,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -23,6 +33,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.0"
   }
 }
