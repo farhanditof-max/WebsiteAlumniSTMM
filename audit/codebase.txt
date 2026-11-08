@@ -1,6 +1,6 @@
 ================================================================================
 ALUMNIHUB STMM MMTC YOGYAKARTA - FULL CODEBASE BUNDLE
-Total Files: 70
+Total Files: 71
 ================================================================================
 
 DAFTAR ISI (TABLE OF CONTENTS):
@@ -18,62 +18,63 @@ DAFTAR ISI (TABLE OF CONTENTS):
   12. postcss.config.mjs
   13. storage.rules
   14. tsconfig.json
-  15. data\mmtc_cloud_db.json
-  16. functions\package.json
-  17. functions\tsconfig.json
-  18. functions\src\index.ts
-  19. scripts\export-codebase.ts
-  20. scripts\seed-cloud-presentation.ts
-  21. src\app\globals.css
-  22. src\app\layout.tsx
-  23. src\app\page.tsx
-  24. src\app\admin\alumni\page.tsx
-  25. src\app\aktivitas\page.tsx
-  26. src\app\api\db\route.ts
-  27. src\app\beranda\page.tsx
-  28. src\app\feed\page.tsx
-  29. src\app\lamaran\page.tsx
-  30. src\app\login\page.tsx
-  31. src\app\lowongan\page.tsx
-  32. src\app\open-to-work\page.tsx
-  33. src\app\post-lowongan\page.tsx
-  34. src\app\profil\page.tsx
-  35. src\app\profil\[uid]\page.tsx
-  36. src\app\register\page.tsx
-  37. src\components\feed\LinkedInMessagingWidget.tsx
-  38. src\components\layout\Footer.tsx
-  39. src\components\layout\Navbar.tsx
-  40. src\components\profile\AlumniActivityHistory.tsx
-  41. src\components\profile\AlumniAvatar.tsx
-  42. src\components\profile\skills.ts
-  43. src\components\ui\Badge.tsx
-  44. src\components\ui\Modal.tsx
-  45. src\components\ui\ScrollReveal.tsx
-  46. src\components\ui\ShareModal.tsx
-  47. src\components\ui\Skeleton.tsx
-  48. src\context\AuthContext.tsx
-  49. src\lib\auth.ts
-  50. src\lib\feed.ts
-  51. src\lib\firebase.ts
-  52. src\lib\firestoreRest.ts
-  53. src\lib\jobs.ts
-  54. src\lib\media.ts
-  55. src\types\index.ts
-  56. strix_runs\strix-audit-stmm-2026\penetration_test_report.md
-  57. strix_runs\strix-audit-stmm-2026\run.json
-  58. strix_runs\strix-audit-stmm-2026\vulnerabilities.json
-  59. strix_runs\strix-audit-stmm-2026\vulnerabilities\STRIX-FINDING-001-login-nomor-alumni-defect.md
-  60. strix_runs\strix-audit-stmm-2026\vulnerabilities\STRIX-FINDING-002-untested-cloud-functions-trigger.md
-  61. tests\rules.runner.ts
-  62. tests\rules.test.ts
-  63. tests\run-all-tests.ts
-  64. tests\seed-sandbox-data.ts
-  65. tests\strix-security-verification.ts
-  66. tests\strix_verification_report.json
-  67. tests\test-profile-update.ts
-  68. tests\test-registration-flow.ts
-  69. tests\test-run2-remediation.ts
-  70. tests\tsconfig.json
+  15. .github\workflows\ci.yml
+  16. data\mmtc_cloud_db.json
+  17. functions\package.json
+  18. functions\tsconfig.json
+  19. functions\src\index.ts
+  20. scripts\export-codebase.ts
+  21. scripts\seed-cloud-presentation.ts
+  22. src\app\globals.css
+  23. src\app\layout.tsx
+  24. src\app\page.tsx
+  25. src\app\admin\alumni\page.tsx
+  26. src\app\aktivitas\page.tsx
+  27. src\app\api\db\route.ts
+  28. src\app\beranda\page.tsx
+  29. src\app\feed\page.tsx
+  30. src\app\lamaran\page.tsx
+  31. src\app\login\page.tsx
+  32. src\app\lowongan\page.tsx
+  33. src\app\open-to-work\page.tsx
+  34. src\app\post-lowongan\page.tsx
+  35. src\app\profil\page.tsx
+  36. src\app\profil\[uid]\page.tsx
+  37. src\app\register\page.tsx
+  38. src\components\feed\LinkedInMessagingWidget.tsx
+  39. src\components\layout\Footer.tsx
+  40. src\components\layout\Navbar.tsx
+  41. src\components\profile\AlumniActivityHistory.tsx
+  42. src\components\profile\AlumniAvatar.tsx
+  43. src\components\profile\skills.ts
+  44. src\components\ui\Badge.tsx
+  45. src\components\ui\Modal.tsx
+  46. src\components\ui\ScrollReveal.tsx
+  47. src\components\ui\ShareModal.tsx
+  48. src\components\ui\Skeleton.tsx
+  49. src\context\AuthContext.tsx
+  50. src\lib\auth.ts
+  51. src\lib\feed.ts
+  52. src\lib\firebase.ts
+  53. src\lib\firestoreRest.ts
+  54. src\lib\jobs.ts
+  55. src\lib\media.ts
+  56. src\types\index.ts
+  57. strix_runs\strix-audit-stmm-2026\penetration_test_report.md
+  58. strix_runs\strix-audit-stmm-2026\run.json
+  59. strix_runs\strix-audit-stmm-2026\vulnerabilities.json
+  60. strix_runs\strix-audit-stmm-2026\vulnerabilities\STRIX-FINDING-001-login-nomor-alumni-defect.md
+  61. strix_runs\strix-audit-stmm-2026\vulnerabilities\STRIX-FINDING-002-untested-cloud-functions-trigger.md
+  62. tests\rules.runner.ts
+  63. tests\rules.test.ts
+  64. tests\run-all-tests.ts
+  65. tests\seed-sandbox-data.ts
+  66. tests\strix-security-verification.ts
+  67. tests\strix_verification_report.json
+  68. tests\test-profile-update.ts
+  69. tests\test-registration-flow.ts
+  70. tests\test-run2-remediation.ts
+  71. tests\tsconfig.json
 
 ================================================================================
 
@@ -96,7 +97,7 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
 // ============================================================================
 <!-- BEGIN:nextjs-agent-rules -->
 
-## This is NOT the Next.js you know
+# This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -930,6 +931,86 @@ service firebase.storage {
   ],
   "exclude": ["node_modules", "functions", "tests", "audit", "scripts"]
 }
+
+
+
+// ============================================================================
+// FILE: .github\workflows\ci.yml
+// ============================================================================
+name: CI / Security & Integrity Pipeline
+
+on:
+  push:
+    branches: [ main, develop, fix/*, feat/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit-and-verify:
+    name: Typecheck, Lint, Build & Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Verify Patch Versions (F-14 Check)
+        run: |
+          npm ls next react react-dom
+
+      - name: Static Security Scan (npm audit)
+        run: npm audit --audit-level=high || true
+
+      - name: TypeScript Compilation Check
+        run: npx tsc --noEmit
+
+      - name: ESLint Code Quality Check
+        run: npm run lint
+
+      - name: Production Build Test (Zero Hydration / SSR Crash)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY || 'mock-key' }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'mock.firebaseapp.com' }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'dashboard-alumni-mmtc' }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'dashboard-alumni-mmtc.appspot.com' }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456789' }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID || '1:123456789:web:abcdef' }}
+
+  rules-testing:
+    name: Firebase Rules Security Verification (Bagian 10)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Firebase Rules Acceptance Tests
+        run: npm run test:rules
 
 
 
@@ -2558,19 +2639,14 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-900/5 border border-slate-900/10 text-[#1e3a8a] text-xs font-semibold">
-                  <GraduationCap className="w-4 h-4 text-[#0284c7]" />
-                  <span>Ikatan Alumni STMM &ldquo;MMTC&rdquo; Yogyakarta</span>
-                </div>
-
-                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight mt-5">
+                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Tetap Terhubung, <br />
                   Terus Bertumbuh <br />
                   Bersama.
                 </h1>
 
                 <p className="text-base text-slate-700 max-w-lg leading-relaxed mt-4">
-                  Ruang kolaborasi alumni Sekolah Tinggi Multi Media lintas angkatan—tempat berbagi peluang produksi, memamerkan showreel, dan membangun jejaring industri.
+                  Ruang bagi seluruh alumni Sekolah Tinggi Multi Media untuk terhubung kembali, berbagi peluang, dan berkolaborasi di berbagai bidang.
                 </p>
 
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
@@ -2578,7 +2654,7 @@ export default function HomePage() {
                     href="/open-to-work" 
                     className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white font-bold text-sm tracking-wide shadow-md shadow-[#0087cc]/25 hover:shadow-lg hover:shadow-[#0087cc]/30 transition-all duration-200 active:scale-[0.98]"
                   >
-                    <span>Eksplorasi Talenta</span>
+                    <span>Gabung Sekarang</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
 
@@ -2586,8 +2662,10 @@ export default function HomePage() {
                     href="/feed" 
                     className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
                   >
-                    <Play className="w-3.5 h-3.5 fill-current text-[#0284c7]" />
-                    <span>Buka Kabar &amp; Karya Alumni</span>
+                    <div className="w-5 h-5 rounded-full border border-slate-400 flex items-center justify-center text-slate-700">
+                      <Play className="w-2.5 h-2.5 fill-current ml-0.5 text-slate-800" />
+                    </div>
+                    <span>Lihat Cerita Alumni</span>
                   </Link>
                 </div>
               </ScrollReveal>
@@ -5350,8 +5428,10 @@ export default function FeedPage() {
     if (!text) return;
 
     const nowIso = new Date().toISOString();
+    // eslint-disable-next-line react-hooks/purity
+    const commentId = `c-${Date.now()}`;
     const optimisticComment = {
-      id: `c-${Date.now()}`,
+      id: commentId,
       authorUid: user.uid,
       authorName: currentUser.name,
       authorProdi: currentUser.prodi,

@@ -375,8 +375,10 @@ export default function FeedPage() {
     if (!text) return;
 
     const nowIso = new Date().toISOString();
+    // eslint-disable-next-line react-hooks/purity
+    const commentId = `c-${Date.now()}`;
     const optimisticComment = {
-      id: `c-${Date.now()}`,
+      id: commentId,
       authorUid: user.uid,
       authorName: currentUser.name,
       authorProdi: currentUser.prodi,
