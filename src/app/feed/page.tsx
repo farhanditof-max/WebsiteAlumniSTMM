@@ -315,12 +315,12 @@ export default function FeedPage() {
       setAttachedFile(null);
       setAttachedPreview('');
       setNewMediaType('none');
-      setPostAlert('🎉 Postingan Anda berhasil diterbitkan di Beranda Alumni!');
+      setPostAlert('Kiriman berhasil tayang di beranda komunitas.');
       setTimeout(() => setPostAlert(''), 4000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
       console.error('Error creating post:', err);
-      setPostAlert(`❌ Gagal menerbitkan: ${msg}`);
+      setPostAlert(`Gagal menerbitkan kiriman: ${msg}`);
       setTimeout(() => setPostAlert(''), 4000);
     } finally {
       setIsPosting(false);
@@ -329,7 +329,7 @@ export default function FeedPage() {
 
   const handleToggleLike = async (postId: string) => {
     if (!user) {
-      setPostAlert('⚠️ Anda harus masuk dengan akun alumni untuk menyukai postingan.');
+      setPostAlert('Silakan masuk dengan akun alumni untuk menyukai kiriman.');
       setTimeout(() => setPostAlert(''), 3000);
       return;
     }
@@ -363,7 +363,7 @@ export default function FeedPage() {
 
   const handleAddComment = async (postId: string) => {
     if (!user) {
-      setPostAlert('⚠️ Anda harus masuk dengan akun alumni untuk menambahkan tanggapan.');
+      setPostAlert('Silakan masuk dengan akun alumni untuk ikut berdiskusi.');
       setTimeout(() => setPostAlert(''), 3000);
       return;
     }
@@ -415,7 +415,7 @@ export default function FeedPage() {
 
   const handleToggleFollow = (authorKey: string) => {
     if (!user) {
-      setPostAlert('⚠️ Masuk dengan akun alumni untuk mulai mengikuti sesama rekan MMTC.');
+      setPostAlert('Silakan masuk dengan akun alumni untuk mulai mengikuti.');
       setTimeout(() => setPostAlert(''), 3000);
       return;
     }
@@ -427,7 +427,7 @@ export default function FeedPage() {
 
   const handleToggleConnect = (userId: string) => {
     if (!user) {
-      setPostAlert('⚠️ Masuk dengan akun alumni untuk mulai terhubung dengan sesama rekan MMTC.');
+      setPostAlert('Silakan masuk dengan akun alumni untuk mulai terhubung.');
       setTimeout(() => setPostAlert(''), 3000);
       return;
     }

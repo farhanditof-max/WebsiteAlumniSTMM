@@ -113,7 +113,7 @@ export default function OpenToWorkPage() {
             Alumni MMTC <span className="text-emerald-600">Open to Work</span>
           </h1>
           <p className="text-slate-600 text-sm max-w-2xl leading-relaxed">
-            Daftar talenta alumni yang siap direkrut untuk proyek lepas (freelance), full-time studio, maupun kolaborasi kreatif. Tinjau karya showreel 2-kolom dan hubungi langsung via WhatsApp atau Email.
+            Direktori rekan alumni yang siap bergabung untuk produksi lepas (freelance), posisi penuh waktu di studio, maupun kolaborasi lintas prodi. Tonton showreel karya mereka dan hubungi langsung.
           </p>
         </div>
 

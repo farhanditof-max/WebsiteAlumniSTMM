@@ -139,7 +139,7 @@ function LowonganContent() {
     }
 
     if (applyingJob.postedBy === user.uid) {
-      setApplyError('Anda tidak dapat melamar ke lowongan yang Anda terbitkan sendiri.');
+      setApplyError('Kamu tidak bisa melamar pada lowongan yang kamu pasang sendiri.');
       return;
     }
 
@@ -462,7 +462,7 @@ function LowonganContent() {
                   </div>
                   <h4 className="text-base font-bold text-slate-900">Lamaran Berhasil Dikirimkan!</h4>
                   <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                    Data profil dan portofolio kamu telah diteruskan ke alumni pembuka lowongan.
+                    Profil dan portofoliomu sudah diteruskan ke rekan pengunggah lowongan.
                   </p>
                 </div>
               ) : (
@@ -505,7 +505,7 @@ function LowonganContent() {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Pesan Singkat / Cover Letter ke Pembuka Lowongan *
+                      Pengantar Singkat untuk Perekrut *
                     </label>
                     <textarea
                       rows={4}
@@ -527,7 +527,7 @@ function LowonganContent() {
                       className="mt-0.5 w-4 h-4 rounded text-[#0284c7] border-slate-300 focus:ring-[#0284c7] cursor-pointer"
                     />
                     <label htmlFor="sharePhoneCheck" className="text-[11px] leading-relaxed cursor-pointer select-none">
-                      Bagikan nomor WhatsApp saya (<code>{profile?.phone || 'belum diisi'}</code>) kepada poster lowongan ini untuk keperluan komunikasi lanjutan.
+                      Sertakan nomor WhatsApp saya pada lamaran ini agar perekrut dapat menghubungi langsung.
                     </label>
                   </div>
 

@@ -54,6 +54,26 @@ interface ExtendedUserProfile extends UserProfile {
   customLinks?: CustomLinkItem[];
 }
 
+// Komponen pratinjau portofolio gambar di luar fungsi render (React 19 pattern)
+function PortfolioImagePreview({ url, title }: { url: string; title: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-64 flex items-center justify-center p-2">
+      {hasError ? (
+        <span className="text-xs text-slate-400 py-6">Gambar tidak dapat dimuat</span>
+      ) : (
+        <img 
+          src={url} 
+          alt={title} 
+          className="w-full h-full max-h-60 object-contain rounded-lg" 
+          onError={() => setHasError(true)}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function PublicProfilePage({ params }: { params: Promise<{ uid: string }> }) {
   const resolvedParams = use(params);
   const rawUid = resolvedParams.uid;
@@ -160,24 +180,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
     loadProfile();
   }, [rawUid]);
 
-  const PortfolioImagePreview = ({ url, title }: { url: string; title: string }) => {
-    const [hasError, setHasError] = useState(false);
-
-    return (
-      <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-64 flex items-center justify-center p-2">
-        {hasError ? (
-          <span className="text-xs text-slate-400 py-6">Gambar tidak dapat dimuat</span>
-        ) : (
-          <img 
-            src={url} 
-            alt={title} 
-            className="w-full h-full max-h-60 object-contain rounded-lg" 
-            onError={() => setHasError(true)}
-          />
-        )}
-      </div>
-    );
-  };
 
   const renderEmbed = (item: PortfolioItem) => {
     if (item.type === 'youtube') {

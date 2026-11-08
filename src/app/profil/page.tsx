@@ -124,6 +124,26 @@ const getLocalProfile = (uid?: string): ExtendedUserProfile | null => {
   return null;
 };
 
+// Komponen pratinjau portofolio gambar di luar fungsi render ProfilPage (React 19 pattern)
+function PortfolioImagePreview({ url, title }: { url: string; title: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-60 flex items-center justify-center p-2">
+      {hasError ? (
+        <span className="text-xs text-slate-500 py-6">Pratinjau gambar tidak dapat dimuat</span>
+      ) : (
+        <img 
+          src={url} 
+          alt={title} 
+          className="w-full h-full max-h-56 object-contain rounded-lg" 
+          onError={() => setHasError(true)}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function ProfilPage() {
   const { user, profile, loading: authLoading, refreshProfile, setProfileData } = useAuth();
   const isDemo = !user;
@@ -446,7 +466,7 @@ export default function ProfilPage() {
           action: 'setDoc',
           collection: 'public_profiles',
           id: user.uid,
-          data: { hasCv: true, cvFileUrl: downloadUrl, updatedAt: nowIso },
+          data: { hasCv: true, updatedAt: nowIso },
           merge: true
         })
       });
@@ -729,12 +749,7 @@ export default function ProfilPage() {
               collection: 'public_profiles',
               id: user.uid,
               data: {
-                ...publicProfileData,
-                email: fullProfile.email,
-                phone: fullProfile.phone,
-                linkedinUrl: fullProfile.linkedinUrl,
-                instagramUrl: fullProfile.instagramUrl,
-                cvFileUrl: fullProfile.cvFileUrl
+                ...publicProfileData
               },
               merge: true
             })
@@ -761,10 +776,10 @@ export default function ProfilPage() {
         } catch {
           // Abaikan latency refresh REST
         }
-        setMsg({ type: 'success', text: '✅ Profil alumni berhasil diperbarui dan tersimpan di database!' });
+        setMsg({ type: 'success', text: 'Profil alumni berhasil diperbarui dan tersimpan di database.' });
       } catch (err: unknown) {
         console.warn('Cloud save error:', err);
-        setMsg({ type: 'success', text: '✅ Profil alumni berhasil diperbarui dan tersimpan!' });
+        setMsg({ type: 'success', text: 'Profil alumni berhasil diperbarui dan tersimpan.' });
       } finally {
         setSaving(false);
         setTimeout(() => setMsg({ type: '', text: '' }), 5000);
@@ -772,31 +787,12 @@ export default function ProfilPage() {
     } else {
       setTimeout(() => {
         setSaving(false);
-        setMsg({ type: 'success', text: '✅ Perubahan profil, kontak & portofolio berhasil disimpan!' });
+        setMsg({ type: 'success', text: 'Perubahan profil, kontak, dan portofolio berhasil disimpan.' });
         setTimeout(() => setMsg({ type: '', text: '' }), 5000);
       }, 400);
     }
   };
 
-  // Embed Renderer Helper
-  const PortfolioImagePreview = ({ url, title }: { url: string; title: string }) => {
-    const [hasError, setHasError] = useState(false);
-
-    return (
-      <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-60 flex items-center justify-center p-2">
-        {hasError ? (
-          <span className="text-xs text-slate-400 py-6">Gambar tidak dapat dimuat</span>
-        ) : (
-          <img 
-            src={url} 
-            alt={title} 
-            className="w-full h-full max-h-56 object-contain rounded-lg" 
-            onError={() => setHasError(true)}
-          />
-        )}
-      </div>
-    );
-  };
 
   const renderEmbed = (item: PortfolioItem) => {
     if (item.type === 'youtube') {
@@ -974,8 +970,8 @@ export default function ProfilPage() {
                 onChange={(e) => setOpenToWork(e.target.checked)}
                 className="w-4 h-4 text-[#0284c7] rounded bg-white border-slate-300 focus:ring-[#0284c7]"
               />
-              <span className={openToWork ? 'text-emerald-700 font-bold' : 'text-slate-500'}>
-                {openToWork ? '🟢 Status: Open to Work' : '⚪ Status: Tidak Mencari'}
+              <span className={openToWork ? 'text-emerald-700 font-bold flex items-center gap-1.5' : 'text-slate-500 flex items-center gap-1.5'}>
+                {openToWork ? 'Status: Open to Work' : 'Status: Tidak Mencari'}
               </span>
             </label>
           </div>
@@ -1228,7 +1224,7 @@ export default function ProfilPage() {
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                   <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
-                  Sedang Bekerja di Mana / Posisi Pekerjaan Saat Ini
+                  Posisi & Studio / Tempat Kerja Saat Ini
                 </label>
                 <input
                   type="text"
@@ -1257,7 +1253,7 @@ export default function ProfilPage() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
-                      Skill &amp; Software Otomatis Terdeteksi:
+                      Keahlian &amp; Software (Disarikan dari Bio):
                     </span>
                     <span className="text-[10px] text-slate-400">Tampil di katalog Open to Work</span>
                   </div>
@@ -1281,10 +1277,10 @@ export default function ProfilPage() {
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Video className="w-4 h-4 text-[#0284c7]" />
-                    Galeri Portofolio &amp; Showreel (Layout 2-Kolom)
+                    Karya &amp; Showreel Pilihan
                   </h3>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Embed video YouTube, karya Behance, atau link portfolio tersusun responsif 2 kolom di desktop
+                    Tambahkan video YouTube, karya visual, atau tautan portofolio eksternal Anda
                   </p>
                 </div>
               </div>
