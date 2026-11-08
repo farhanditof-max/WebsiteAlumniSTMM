@@ -548,26 +548,25 @@ export default function FeedPage() {
               </h4>
               
               {[
-                { id: 'semua', label: 'Semua Postingan', icon: Sparkles },
-                { id: 'showreel', label: '🎬 Karya & Showreel', icon: Video },
-                { id: 'kolaborasi', label: '🤝 Cari Crew & Kolaborasi', icon: Users },
-                { id: 'pencapaian', label: '🏆 Prestasi & Berita', icon: Flame },
-                { id: 'diskusi', label: '💡 Tips & Diskusi', icon: MessageSquare },
+                { id: 'semua', label: 'Semua Postingan' },
+                { id: 'showreel', label: 'Karya & Showreel' },
+                { id: 'kolaborasi', label: 'Cari Crew & Kolaborasi' },
+                { id: 'pencapaian', label: 'Prestasi & Berita' },
+                { id: 'diskusi', label: 'Tips & Diskusi' },
               ].map(cat => {
-                const IconComponent = cat.icon;
                 const active = selectedFilter === cat.id;
                 return (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedFilter(cat.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition cursor-pointer text-left ${
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold transition cursor-pointer text-left ${
                       active
-                        ? 'bg-sky-50 text-[#0284c7] font-bold shadow-2xs'
+                        ? 'bg-sky-50 text-[#0087cc] font-bold shadow-2xs'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <IconComponent className={`w-4 h-4 ${active ? 'text-[#0284c7]' : 'text-slate-400'}`} />
                     <span>{cat.label}</span>
+                    {active && <span className="w-1.5 h-1.5 rounded-full bg-[#0087cc]" />}
                   </button>
                 );
               })}
