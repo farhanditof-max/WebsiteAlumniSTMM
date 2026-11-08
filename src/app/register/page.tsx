@@ -7,7 +7,7 @@ import { registerAlumni, VERIFIED_ALUMNI_LIST, getRegisteredNomorAlumni } from '
 import { PRODI_LIST, ProdiType } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { UserPlus, AlertCircle, Loader2, Info, CheckCircle2, Lock, Mail, User, Hash, Calendar, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, AlertCircle, Loader2, CheckCircle2, Lock, Mail, User, Hash, Calendar, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterPage() {
@@ -130,44 +130,6 @@ export default function RegisterPage() {
               </div>
             </div>
           )}
-
-          {/* HINT MVP NOMOR ALUMNI */}
-          <div className="p-4 rounded-2xl bg-sky-50/80 border border-sky-100 text-xs text-[#0284c7]">
-            <div className="flex items-center gap-1.5 font-bold mb-2">
-              <Info className="w-4 h-4 text-[#0284c7] shrink-0" />
-              <span>Pilih / Klik Nomor Alumni Terverifikasi (Database MVP):</span>
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {VERIFIED_ALUMNI_LIST.map((item) => {
-                const cleanItemNo = item.nomorAlumni.toUpperCase();
-                const isSelected = nomorAlumni.toUpperCase() === cleanItemNo;
-                const isTaken = registeredNumbers.includes(cleanItemNo);
-                return (
-                  <button
-                    type="button"
-                    key={item.nomorAlumni}
-                    disabled={isTaken}
-                    onClick={() => handleNomorAlumniChange(item.nomorAlumni)}
-                    className={`text-[11px] font-mono px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#0284c7] text-white border-[#0284c7] font-bold shadow-2xs'
-                        : isTaken
-                        ? 'bg-slate-100 text-slate-400 border-slate-200 line-through cursor-not-allowed opacity-60'
-                        : 'bg-white hover:bg-sky-100/70 border-sky-200 text-sky-900 shadow-2xs'
-                    }`}
-                    title={isTaken ? `${item.nomorAlumni} (${item.nama}) - Sudah terdaftar` : `Gunakan ${item.nomorAlumni}`}
-                  >
-                    <span>{item.nomorAlumni}</span>
-                    <span className="text-[10px] opacity-80">({item.nama})</span>
-                    {isTaken && <span className="text-[9px] bg-red-100 text-red-600 px-1 rounded no-underline font-semibold">Terpakai</span>}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-2.5">
-              * Tips: Anda juga bisa mengetik nomor alumni kustom dengan format <span className="font-mono font-bold text-slate-700">MMTC-YYYY-XXX</span> (contoh: MMTC-2023-555).
-            </p>
-          </div>
 
           {successMsg && (
             <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5 animate-fade-in">
