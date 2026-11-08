@@ -381,95 +381,95 @@
   "jobs": {
     "job-seed-01": {
       "id": "job-seed-01",
-      "judul": "Senior 3D Character Rigger & Animator",
+      "judul": "3D Character Rigger & Animator",
       "perusahaan": "Infinite Studios",
       "lokasi": "Batam / Hybrid Yogyakarta",
+      "tipeKerja": "Full-time",
       "tipe": "Full-time",
+      "gajiRange": "Rp 8.000.000 - 12.000.000 / bulan",
       "prodiTarget": [
         "Animasi",
         "Game Design"
       ],
-      "deskripsi": "Bertanggung jawab membangun sistem rigging karakter 3D dan facial blendshapes untuk produksi serial animasi internasional menggunakan Blender & Maya.",
+      "deskripsi": "Membangun sistem rigging karakter 3D dan facial blendshapes untuk produksi serial animasi menggunakan Blender dan Maya.",
       "kualifikasi": [
-        "Lulusan D4 Animasi atau Teknologi Permainan STMM MMTC Yogyakarta",
-        "Menguasai rigging karakter, weight painting, dan Python expression di Blender/Maya",
+        "Alumni D4 Animasi atau Teknologi Permainan STMM MMTC",
+        "Menguasai rigging karakter, weight painting, dan facial rig di Blender/Maya",
         "Memiliki showreel animasi/rigging terbaru"
       ],
       "kontakEmail": "recruitment@infinitestudios.id",
       "postedBy": "seed-recruiter-1",
       "posterName": "Budi Santoso (Alumni 2018)",
       "status": "active",
-      "createdAt": "2026-10-25T09:00:00.000Z",
-      "tipeKerja": "Full-time",
-      "gajiRange": "Rp 8.000.000 - Rp 14.000.000"
+      "createdAt": "2026-10-25T09:00:00.000Z"
     },
     "job-seed-02": {
       "id": "job-seed-02",
-      "judul": "Broadcast Technical Director & Audio Engineer",
+      "judul": "Broadcast Technical Director",
       "perusahaan": "MNC Media Group",
       "lokasi": "Jakarta Barat (On-site)",
+      "tipeKerja": "Full-time",
       "tipe": "Full-time",
+      "gajiRange": "Rp 7.000.000 - 10.000.000 / bulan",
       "prodiTarget": [
         "Matekstosi",
         "Manaprodsi"
       ],
-      "deskripsi": "Mengelola sistem operasional studio penyiaran multi-kamera, vision mixer switcher, dan audio mixing console untuk program siaran langsung nasional.",
+      "deskripsi": "Mengelola sistem operasional studio penyiaran multi-kamera, vision mixer, dan audio console untuk program siaran langsung televisi.",
       "kualifikasi": [
-        "Alumni D4 Matekstosi atau Manaprodsi STMM MMTC Yogyakarta",
-        "Memahami sistem routing SDI/NDI, intercom, dan digital audio mixing",
-        "Siap bekerja dalam sistem shift produksi televisi"
+        "Alumni D4 Matekstosi atau Manaprodsi STMM MMTC",
+        "Memahami sistem routing SDI/NDI dan digital audio mixing",
+        "Siap bekerja dalam sistem shift produksi penyiaran"
       ],
       "kontakEmail": "career@mncgroup.com",
       "postedBy": "seed-recruiter-2",
       "posterName": "Fajar Nugraha (Alumni 2021)",
       "status": "active",
-      "createdAt": "2026-10-25T14:30:00.000Z",
-      "tipeKerja": "Full-time",
-      "gajiRange": "Rp 7.000.000 - Rp 11.000.000"
+      "createdAt": "2026-10-25T14:30:00.000Z"
     },
     "job-seed-03": {
       "id": "job-seed-03",
-      "judul": "Digital News Producer & Investigative Journalist",
-      "perusahaan": "Kompas TV & Digital Network",
-      "lokasi": "Jakarta Pusat / Yogyakarta Bureau",
+      "judul": "News Producer & Video Journalist",
+      "perusahaan": "Kompas TV",
+      "lokasi": "Yogyakarta Bureau",
+      "tipeKerja": "Full-time",
       "tipe": "Full-time",
+      "gajiRange": "Rp 6.000.000 - 8.500.000 / bulan",
       "prodiTarget": [
         "Manarita",
         "MIK",
         "Manaprodsi"
       ],
-      "deskripsi": "Menyusun riset liputan mendalam, naskah berita multiplatform, serta mengelola distribusi konten jurnalisme visual di kanal televisi dan digital.",
+      "deskripsi": "Melakukan riset liputan mendalam, penulisan naskah berita, serta mengelola produksi konten jurnalisme visual digital.",
       "kualifikasi": [
         "Alumni D3 Manarita, D4 MIK, atau D4 Manaprodsi STMM MMTC",
-        "Memiliki kemampuan jurnalistik, riset data, dan storytelling visual yang kuat",
-        "Menguasai alur kerja newsroom digital modern"
+        "Memiliki kemampuan riset berita dan storytelling visual yang kuat",
+        "Terbiasa dengan alur kerja newsroom modern"
       ],
       "kontakEmail": "hrd@kompas.tv",
       "postedBy": "seed-recruiter-3",
       "posterName": "Rian Hidayat (Alumni 2021)",
       "status": "active",
-      "createdAt": "2026-10-26T08:00:00.000Z",
-      "tipeKerja": "Full-time",
-      "gajiRange": "Rp 6.500.000 - Rp 10.000.000"
+      "createdAt": "2026-10-26T08:00:00.000Z"
     },
     "job-seed-04": {
       "id": "job-seed-04",
-      "judul": "Freelance Motion Graphic & Virtual Production Artist",
+      "judul": "Motion Graphic Designer",
       "perusahaan": "Lumina Visual Studio",
-      "lokasi": "Remote / Yogyakarta",
+      "lokasi": "Yogyakarta (Remote)",
       "tipeKerja": "Freelance",
       "tipe": "Freelance",
-      "gajiRange": "Rp 4.500.000 - Rp 9.000.000 / Project",
+      "gajiRange": "Rp 3.500.000 - 6.000.000 / proyek",
       "prodiTarget": [
         "Animasi",
         "Game Design",
         "Matekstosi"
       ],
-      "deskripsi": "Mengerjakan asset motion graphic 2D/3D, intro bumper televisi, dan background virtual set Unreal Engine untuk project komersial brand.",
+      "deskripsi": "Mengerjakan aset motion graphic 2D/3D, bumper program, dan visual asset untuk kebutuhan promosi brand mitra.",
       "kualifikasi": [
         "Alumni atau mahasiswa tingkat akhir STMM MMTC",
-        "Menguasai After Effects & Blender / Unreal Engine",
-        "Portofolio motion graphic aktif"
+        "Menguasai After Effects dan Blender",
+        "Memiliki portofolio motion graphic aktif"
       ],
       "kontakEmail": "project@luminastudio.id",
       "postedBy": "seed-recruiter-4",
@@ -479,22 +479,22 @@
     },
     "job-seed-05": {
       "id": "job-seed-05",
-      "judul": "Magang Creative Content Producer & Social Media Specialist",
+      "judul": "Content Creator & Video Editor",
       "perusahaan": "Narasi Media Lab",
-      "lokasi": "Yogyakarta Bureau",
+      "lokasi": "Sleman, DIY",
       "tipeKerja": "Magang",
       "tipe": "Magang",
-      "gajiRange": "Uang Saku & Mentorship Industri",
+      "gajiRange": "Rp 1.500.000 - 2.500.000 / bulan",
       "prodiTarget": [
         "Manarita",
         "Manaprodsi",
         "MIK"
       ],
-      "deskripsi": "Peluang magang berbayar untuk alumni baru dan mahasiswa tingkat akhir dalam memproduksi konten video dokumenter pendek dan reels edukasi kreatif.",
+      "deskripsi": "Program magang produksi konten kreatif, editing video pendek edukasi, dan liputan event komunitas.",
       "kualifikasi": [
-        "Lulusan baru atau tingkat akhir Manarita / Manaprodsi / MIK STMM MMTC",
-        "Kreatif, komunikatif, dan terbiasa dengan camera workflow",
-        "Komitmen minimal 3 bulan"
+        "Lulusan baru atau tingkat akhir Manarita, Manaprodsi, atau MIK STMM MMTC",
+        "Komunikatif dan menguasai dasar editing video Premiere / DaVinci Resolve",
+        "Komitmen magang minimal 3 bulan"
       ],
       "kontakEmail": "internship@narasimedia.id",
       "postedBy": "seed-recruiter-5",
@@ -504,21 +504,21 @@
     },
     "job-seed-06": {
       "id": "job-seed-06",
-      "judul": "Part-time UI/UX Designer & Web Media Developer",
+      "judul": "UI/UX & Web Designer",
       "perusahaan": "Studio Kinetik Jogja",
-      "lokasi": "Hybrid Sleman, DIY",
+      "lokasi": "Yogyakarta (Hybrid)",
       "tipeKerja": "Part-time",
       "tipe": "Part-time",
-      "gajiRange": "Rp 3.500.000 - Rp 6.000.000 / Bulan",
+      "gajiRange": "Rp 3.000.000 - 4.500.000 / bulan",
       "prodiTarget": [
         "MIK",
         "Game Design"
       ],
-      "deskripsi": "Mendesain antarmuka web aplikasi interaktif dan media digital kampus/brand mitra secara fleksibel 20 jam per minggu.",
+      "deskripsi": "Mendesain tampilan antarmuka situs web interaktif dan prototipe aplikasi media digital kampus/mitra.",
       "kualifikasi": [
-        "Alumni D4 MIK atau Teknologi Permainan",
-        "Figma, Tailwind CSS, dan basic Next.js",
-        "Komunikasi tim solid"
+        "Alumni D4 MIK atau Teknologi Permainan STMM MMTC",
+        "Menguasai Figma dan pemahaman dasar layout responsif",
+        "Dapat bekerja 20 jam per minggu secara fleksibel"
       ],
       "kontakEmail": "career@studiokinetik.id",
       "postedBy": "seed-recruiter-6",
