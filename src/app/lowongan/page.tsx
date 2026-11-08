@@ -276,6 +276,16 @@ function LowonganContent() {
               ))}
             </div>
 
+            <label className="flex items-center gap-2 text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={onlyWithSalary}
+                onChange={(e) => setOnlyWithSalary(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-[#0284c7] focus:ring-[#0284c7]"
+              />
+              <span className="font-medium text-xs">Hanya yang mencantumkan gaji</span>
+            </label>
+
           </div>
         </div>
 

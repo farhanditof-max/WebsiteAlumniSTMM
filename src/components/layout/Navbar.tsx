@@ -16,7 +16,6 @@ import {
   Users,
   ChevronDown,
   Settings,
-  Sparkles,
   Bell,
   Heart,
   MessageSquare,
@@ -426,7 +425,7 @@ export default function Navbar() {
                           className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
                         >
                           <div className="flex items-center gap-3">
-                            <Sparkles className="w-4 h-4 text-emerald-500" />
+                            <Briefcase className="w-4 h-4 text-slate-400" />
                             <span>Status Open to Work</span>
                           </div>
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-2xs" />

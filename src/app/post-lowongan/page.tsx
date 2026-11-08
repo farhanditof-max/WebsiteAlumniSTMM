@@ -16,10 +16,10 @@ import {
   Building2, 
   MapPin, 
   Calendar, 
-  DollarSign, 
+  Banknote, 
+  Briefcase,
   FileText, 
-  GraduationCap,
-  Sparkles
+  GraduationCap
 } from 'lucide-react';
 
 export default function PostLowonganPage() {
@@ -150,21 +150,23 @@ export default function PostLowonganPage() {
         
         {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
         {isDemo && (
-          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-sky-500 to-[#0284c7] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-sky-500/10 animate-fade-in">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-amber-300 shrink-0" />
+          <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                <Briefcase className="w-4 h-4" />
+              </div>
               <div>
-                <p className="text-xs font-bold leading-tight">Mode Pratinjau Form Pasang Lowongan (Preview Tanpa Login)</p>
-                <p className="text-[11px] text-sky-100">
-                  Anda dapat mencoba menginput judul, multi-select prodi, dan simulasi publikasi loker secara langsung.
+                <p className="text-xs font-bold text-slate-900 leading-tight">Masuk untuk Memasang Lowongan Resmi</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Gunakan akun alumni agar informasi lowongan kerja atau rekrutmen kru langsung tayang di bursa karir.
                 </p>
               </div>
             </div>
             <Link
               href="/login"
-              className="px-4 py-1.5 rounded-full bg-white text-[#0284c7] text-xs font-bold hover:bg-sky-50 transition shrink-0 text-center shadow-xs"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shrink-0 text-center"
             >
-              Masuk Akun Asli
+              Masuk Akun
             </Link>
           </div>
         )}
@@ -266,7 +268,7 @@ export default function PostLowonganPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
-                    <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                    <Banknote className="w-3.5 h-3.5 text-slate-400" />
                     Perkiraan Gaji (Opsional)
                   </label>
                   <input
@@ -274,8 +276,8 @@ export default function PostLowonganPage() {
                     value={gajiRange}
                     onChange={(e) => setGajiRange(e.target.value)}
                     onBlur={handleGajiBlur}
-                    placeholder="e.g. 7.500.000 atau 5jt - 8jt"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-bold text-emerald-700"
+                    placeholder="Contoh: Rp 7.500.000 atau Rp 5.000.000 - Rp 8.000.000"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium text-slate-900"
                   />
                 </div>
               </div>

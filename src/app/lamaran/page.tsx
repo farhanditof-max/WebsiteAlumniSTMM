@@ -18,8 +18,7 @@ import {
   AlertCircle,
   Phone,
   User,
-  Calendar,
-  Sparkles
+  Calendar
 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/Badge';
 
@@ -185,21 +184,23 @@ export default function LamaranPage() {
         
         {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
         {isDemo && (
-          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-sky-500 to-[#0284c7] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-sky-500/10 animate-fade-in">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-amber-300 shrink-0" />
+          <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4" />
+              </div>
               <div>
-                <p className="text-xs font-bold leading-tight">Mode Pratinjau Dashboard Pelamar (Preview Tanpa Login)</p>
-                <p className="text-[11px] text-sky-100">
-                  Menampilkan contoh daftar lamaran terkirim dan pelamar yang masuk lengkap dengan kontrol tindakan status.
+                <p className="text-xs font-bold text-slate-900 leading-tight">Pratinjau Riwayat Lamaran</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Masuk dengan akun alumni untuk memantau status lamaran aktifmu dan mengelola pelamar yang masuk.
                 </p>
               </div>
             </div>
             <Link
               href="/login"
-              className="px-4 py-1.5 rounded-full bg-white text-[#0284c7] text-xs font-bold hover:bg-sky-50 transition shrink-0 text-center shadow-xs"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shrink-0 text-center"
             >
-              Masuk Akun Asli
+              Masuk Akun
             </Link>
           </div>
         )}

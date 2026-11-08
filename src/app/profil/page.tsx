@@ -25,10 +25,10 @@ import {
   Globe,
   Phone,
   Eye,
-  Sparkles,
   Maximize2,
   Briefcase,
-  MapPin
+  MapPin,
+  User
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
@@ -873,21 +873,23 @@ export default function ProfilPage() {
         
         {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
         {isDemo && (
-          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-sky-500 to-[#0284c7] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-sky-500/10 animate-fade-in">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-amber-300 shrink-0" />
+          <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                <User className="w-4 h-4" />
+              </div>
               <div>
-                <p className="text-xs font-bold leading-tight">Mode Pratinjau Dashboard Alumni (Preview Tanpa Login)</p>
-                <p className="text-[11px] text-sky-100">
-                  Anda sedang meninjau form profil, avatar uploader visual, showreel 2-kolom, dan pengaturan CV secara langsung.
+                <p className="text-xs font-bold text-slate-900 leading-tight">Pratinjau Halaman Profil</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Masuk dengan akun alumni untuk menyimpan perubahan biodata, unggahan CV, dan daftar karya showreel.
                 </p>
               </div>
             </div>
             <Link
               href="/login"
-              className="px-4 py-1.5 rounded-full bg-white text-[#0284c7] text-xs font-bold hover:bg-sky-50 transition shrink-0 text-center shadow-xs"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shrink-0 text-center"
             >
-              Masuk Akun Asli
+              Masuk Akun
             </Link>
           </div>
         )}
@@ -1252,7 +1254,6 @@ export default function ProfilPage() {
                 <div className="mt-2.5 p-3 rounded-2xl bg-sky-50/50 border border-sky-100">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
                       Keahlian &amp; Software (Disarikan dari Bio):
                     </span>
                     <span className="text-[10px] text-slate-400">Tampil di katalog Open to Work</span>

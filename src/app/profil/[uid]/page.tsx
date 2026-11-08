@@ -20,7 +20,6 @@ import {
   User,
   Share2,
   Maximize2,
-  Sparkles,
   Briefcase,
   MapPin
 } from 'lucide-react';
@@ -344,7 +343,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
                     key={skill}
                     className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[11px] font-medium text-[#0284c7]"
                   >
-                    <Sparkles className="w-2.5 h-2.5 opacity-70" />
                     {skill}
                   </span>
                 ))}

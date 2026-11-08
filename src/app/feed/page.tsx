@@ -10,7 +10,7 @@ import {
   MessageSquare, 
   Share2, 
   Send, 
-  Sparkles, 
+  LayoutGrid,
   Video, 
   Paperclip,
   FileText,
@@ -19,7 +19,7 @@ import {
   ExternalLink,
   UserPlus, 
   Check, 
-  Flame, 
+  Award,
   Hash, 
   Users, 
   Calendar, 
@@ -144,10 +144,10 @@ const TRENDING_TOPICS = [
 ];
 
 const POST_CATEGORIES = [
-  { id: 'diskusi' as const, label: 'Diskusi', icon: '💡', desc: 'Tanya jawab, opini & wawasan alumni' },
-  { id: 'showreel' as const, label: 'Showreel', icon: '🎬', desc: 'Karya video, animasi, 3D & portofolio' },
-  { id: 'kolaborasi' as const, label: 'Kolaborasi', icon: '🤝', desc: 'Ajak project, tim freelance & riset' },
-  { id: 'pencapaian' as const, label: 'Prestasi', icon: '🏆', desc: 'Penghargaan, sertifikasi & karir' }
+  { id: 'diskusi' as const, label: 'Obrolan & Diskusi', icon: MessageSquare, desc: 'Tanya jawab, opini & wawasan produksi' },
+  { id: 'showreel' as const, label: 'Karya & Showreel', icon: Video, desc: 'Karya video, animasi, 3D & portofolio' },
+  { id: 'kolaborasi' as const, label: 'Kolaborasi & Kru', icon: Users, desc: 'Ajak proyek, tim lepas & riset bersama' },
+  { id: 'pencapaian' as const, label: 'Kabar & Capaian', icon: Award, desc: 'Rilis karya, penghargaan & kabar karir' }
 ];
 
 export default function FeedPage() {
@@ -244,7 +244,7 @@ export default function FeedPage() {
     if (!newContent.trim()) return;
 
     if (!user) {
-      setPostAlert('⚠️ Anda harus masuk dengan akun alumni untuk mempublikasikan postingan.');
+      setPostAlert('Silakan masuk dengan akun alumni untuk menerbitkan kiriman.');
       setTimeout(() => setPostAlert(''), 4000);
       return;
     }
@@ -408,7 +408,7 @@ export default function FeedPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem';
       console.error('Error adding comment:', err);
-      setPostAlert(`❌ Gagal mengirim komentar: ${msg}`);
+      setPostAlert(`Gagal mengirim komentar: ${msg}`);
       setTimeout(() => setPostAlert(''), 3000);
     }
   };
@@ -455,14 +455,11 @@ export default function FeedPage() {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-                Beranda &amp; Jejaring Sosial Alumni STMM MMTC
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500 text-white font-bold">
-                  Community Feed
-                </span>
+              <h1 className="text-sm sm:text-base font-bold text-slate-900">
+                Ruang Komunitas Alumni MMTC
               </h1>
-              <p className="text-xs text-slate-500">
-                Tempat alumni lintas angkatan saling berbagi showreel, update produksi, dan terhubung satu sama lain.
+              <p className="text-xs text-slate-600">
+                Bagikan progres produksi, rilis showreel terbaru, atau cari kru lintas angkatan.
               </p>
             </div>
           </div>
@@ -552,15 +549,15 @@ export default function FeedPage() {
             {/* CATEGORY FILTER NAVIGATION */}
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-1 text-xs">
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
-                Kategori Beranda
+                Topik Kiriman
               </h4>
               
               {[
-                { id: 'semua', label: 'Semua Postingan', icon: Sparkles },
-                { id: 'showreel', label: '🎬 Karya & Showreel', icon: Video },
-                { id: 'kolaborasi', label: '🤝 Cari Crew & Kolaborasi', icon: Users },
-                { id: 'pencapaian', label: '🏆 Prestasi & Berita', icon: Flame },
-                { id: 'diskusi', label: '💡 Tips & Diskusi', icon: MessageSquare },
+                { id: 'semua', label: 'Semua Kiriman', icon: LayoutGrid },
+                { id: 'showreel', label: 'Karya & Showreel', icon: Video },
+                { id: 'kolaborasi', label: 'Kolaborasi & Kru', icon: Users },
+                { id: 'pencapaian', label: 'Kabar & Capaian', icon: Award },
+                { id: 'diskusi', label: 'Obrolan & Diskusi', icon: MessageSquare },
               ].map(cat => {
                 const IconComponent = cat.icon;
                 const active = selectedFilter === cat.id;
@@ -607,17 +604,17 @@ export default function FeedPage() {
             
             {/* POST CREATOR CARD / VISITOR BANNER */}
             {!user ? (
-              <div className="bg-gradient-to-r from-sky-50 via-white to-sky-50 border border-sky-200/90 rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5" />
                   </div>
                   <div>
                     <h2 className="text-xs sm:text-sm font-bold text-slate-900">
-                      Mode Pratinjau Pengunjung (Read-Only)
+                      Ikut Berbagi Karya &amp; Diskusi
                     </h2>
                     <p className="text-[11px] text-slate-600 mt-0.5">
-                      Masuk atau daftarkan akun alumni STMM MMTC Anda untuk berbagi showreel, update proyek, like, dan berdiskusi.
+                      Masuk dengan akun alumni untuk mengunggah showreel, mencari kru produksi, atau mengomentari kiriman rekan.
                     </p>
                   </div>
                 </div>
@@ -777,8 +774,11 @@ export default function FeedPage() {
                       aria-expanded={categoryDropdownOpen}
                       aria-haspopup="listbox"
                     >
-                      <span>
-                        {POST_CATEGORIES.find(c => c.id === newCategory)?.icon || '💡'}
+                      <span className="text-[#0284c7]">
+                        {(() => {
+                          const ActiveIcon = POST_CATEGORIES.find(c => c.id === newCategory)?.icon || MessageSquare;
+                          return <ActiveIcon className="w-3.5 h-3.5" />;
+                        })()}
                       </span>
                       <span>
                         {POST_CATEGORIES.find(c => c.id === newCategory)?.label || 'Diskusi'}
@@ -813,8 +813,11 @@ export default function FeedPage() {
                                 }`}
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="text-base flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 shrink-0">
-                                    {cat.icon}
+                                  <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-[#0284c7] shrink-0">
+                                    {(() => {
+                                      const ItemIcon = cat.icon;
+                                      return <ItemIcon className="w-3.5 h-3.5" />;
+                                    })()}
                                   </span>
                                   <div>
                                     <p className="text-xs font-bold leading-tight">{cat.label}</p>
