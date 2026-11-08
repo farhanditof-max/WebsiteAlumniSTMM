@@ -527,18 +527,9 @@ export default function FeedPage() {
 
               {/* PROFILE INFO */}
               <div className="space-y-1 px-1">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
-                    {currentUser.name}
-                  </h3>
-                  {/* Verified Green Check Badge (Seperti Gambar 2) */}
-                  <span 
-                    title="Alumni Terverifikasi MMTC" 
-                    className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-2xs"
-                  >
-                    ✓
-                  </span>
-                </div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
+                  {currentUser.name}
+                </h3>
 
                 <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
                   {currentUser.role || `${currentUser.prodi} • Angkatan ${currentUser.angkatan}`}
