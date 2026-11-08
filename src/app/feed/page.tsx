@@ -25,7 +25,8 @@ import {
   Calendar, 
   Maximize2, 
   Briefcase,
-  ChevronDown
+  ChevronDown,
+  MapPin
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
@@ -37,6 +38,7 @@ import { UserProfile } from '@/types';
 
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
+  domisili?: string;
 }
 
 interface CommentItem {
@@ -261,6 +263,7 @@ export default function FeedPage() {
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
     role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
+    domisili: (profile as ExtendedUserProfile | null)?.domisili || 'Sleman, D.I. Yogyakarta',
     avatar: profile?.fotoProfil || ''
   };
 
@@ -533,14 +536,27 @@ export default function FeedPage() {
                 </div>
               </div>
 
-              {/* PROFILE INFO */}
-              <div className="space-y-1 px-1">
+              {/* PROFILE INFO: Nama, Pekerjaan, Domisili, Jurusan & Angkatan */}
+              <div className="space-y-1.5 px-1">
+                {/* 1. Nama */}
                 <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
                   {currentUser.name}
                 </h3>
 
-                <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
-                  {currentUser.role || `${currentUser.prodi} • Angkatan ${currentUser.angkatan}`}
+                {/* 2. Pekerjaan Dimana */}
+                <p className="text-xs text-slate-700 font-semibold leading-snug truncate">
+                  {currentUser.role}
+                </p>
+
+                {/* 3. Domisili */}
+                <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate">
+                  <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span>{currentUser.domisili}</span>
+                </p>
+
+                {/* 4. Jurusan dan Angkatan */}
+                <p className="text-[11px] font-bold text-[#0087cc] pt-0.5">
+                  {currentUser.prodi} • Angkatan {currentUser.angkatan}
                 </p>
               </div>
 
