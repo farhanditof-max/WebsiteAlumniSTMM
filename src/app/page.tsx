@@ -301,7 +301,7 @@ export default function HomePage() {
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <Link 
                     href="/open-to-work" 
-                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#1e3a8a] hover:bg-[#172554] text-white font-bold text-sm tracking-wide shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-bold text-sm tracking-wide shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
                   >
                     <span>Gabung Sekarang</span>
                     <ArrowRight className="w-4 h-4" />
@@ -309,7 +309,7 @@ export default function HomePage() {
 
                   <Link 
                     href="/feed" 
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
                   >
                     <div className="w-5 h-5 rounded-full border border-slate-400 flex items-center justify-center text-slate-700">
                       <Play className="w-2.5 h-2.5 fill-current ml-0.5 text-slate-800" />
@@ -330,7 +330,7 @@ export default function HomePage() {
         {/* BOTTOM FEATURE DOCK: Headline Only, No Sub-headline, Clean Solid Icon Without Pill Effect */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl sm:rounded-full py-4 px-6 sm:px-10 shadow-lg shadow-slate-200/50 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div className="max-w-5xl mx-auto py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70">
               
               {/* Feature 1: Jaringan Alumni */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
@@ -383,7 +383,7 @@ export default function HomePage() {
           <ScrollReveal direction="up" delayMs={60} durationMs={650}>
             {/* Header with Navigation Arrows — Centered */}
             <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#0284c7] bg-sky-50 px-4 py-1.5 rounded-full border border-sky-100 shadow-2xs mb-3">
+              <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#0284c7] mb-2.5">
                 PILIHAN PROGRAM STUDI
               </span>
               <h2 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-slate-900 leading-tight">
@@ -585,7 +585,7 @@ export default function HomePage() {
                   
                   {/* Top Badge */}
                   <div className="flex justify-center">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700 shadow-2xs">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       Akses Komunitas Resmi MMTC
                     </span>
