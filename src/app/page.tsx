@@ -241,7 +241,7 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto z-10">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto z-10 pb-8 lg:pb-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
@@ -255,7 +255,16 @@ export default function HomePage() {
                   Ruang bagi seluruh alumni Sekolah Tinggi Multi Media untuk terhubung kembali, berbagi peluang, dan berkolaborasi di berbagai bidang.
                 </p>
 
-                <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+                {/* HERO FOTO (HP & tablet): Ditata di atas tombol CTA */}
+                <div className="relative lg:hidden w-full mt-6 mb-6 overflow-hidden rounded-2xl shadow-sm border border-slate-100 pointer-events-none select-none">
+                  <img
+                    src="/landing_hero_mobile.jpg"
+                    alt="Komunitas Alumni STMM MMTC Yogyakarta"
+                    className="block w-full h-auto max-h-[380px] object-cover object-[50%_15%]"
+                  />
+                </div>
+
+                <div className="pt-2 lg:pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <Link 
                     href="/open-to-work" 
                     className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white font-bold text-sm tracking-wide shadow-md shadow-[#0087cc]/25 hover:shadow-lg hover:shadow-[#0087cc]/30 transition-all duration-200 active:scale-[0.98]"
@@ -279,16 +288,6 @@ export default function HomePage() {
 
             <div className="lg:col-span-6 hidden lg:block min-h-[380px] pointer-events-none" />
           </div>
-        </div>
-
-        {/* HERO FOTO (HP & tablet): potongan foto alumni dengan dasar biru yang menyambung ke dock */}
-        <div className="relative lg:hidden w-full mt-6 sm:mt-8 pointer-events-none select-none">
-          <img
-            src="/landing_hero_mobile.jpg"
-            alt="Komunitas Alumni STMM MMTC Yogyakarta"
-            className="block w-full h-auto sm:h-[400px] md:h-[440px] sm:object-cover sm:object-[62%_100%]"
-          />
-          <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white to-transparent" />
         </div>
 
         {/* BOTTOM FEATURE DOCK: ikon & teks putih di atas dasar biru artwork */}
