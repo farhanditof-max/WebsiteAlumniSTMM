@@ -5,6 +5,11 @@ import { AuthProvider } from '@/context/AuthContext';
 export const metadata: Metadata = {
   title: 'Dashboard Alumni MMTC Yogyakarta - Portal Karir & Jejaring',
   description: 'Platform karir, portofolio kreatif, dan jejaring resmi alumni STMM "MMTC" Yogyakarta.',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
+  },
 };
 
 export default function RootLayout({
