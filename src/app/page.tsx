@@ -258,33 +258,38 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col selection:bg-[#0284c7] selection:text-white font-sans overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION — 1:1 REPLICATION OF ALUMNICONNECT REFERENCE */}
-      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-between pt-10 sm:pt-14 pb-4 overflow-hidden bg-white">
+      {/* HERO SECTION — FULL UNTRUNCATED HERO GRAPHIC AS NATIVE BACKGROUND */}
+      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-between py-10 sm:py-14 lg:py-16 overflow-hidden bg-white border-b border-sky-100/60">
         
-        {/* Soft Organic Background Pastel Wave Accents (Exact Reference) */}
-        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-gradient-to-tr from-sky-100/60 to-indigo-100/40 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-bl from-amber-100/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-16 right-1/4 w-96 h-96 bg-purple-100/40 rounded-full blur-3xl pointer-events-none" />
+        {/* The Entire Uncut 8K Master Graphic Set as Absolute Background Layer */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+          <img 
+            src="/landing_page_hero_raw.jpg" 
+            alt="Hero Background Komunitas Alumni STMM MMTC" 
+            className="w-full h-full object-cover object-[center_top] sm:object-[68%_center] lg:object-[center_center]"
+          />
+          {/* Subtle gradient overlay to guarantee perfect contrast and text readability on mobile / tablet */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent sm:via-white/50 lg:via-transparent pointer-events-none" />
+        </div>
 
-        {/* Main Content Area */}
+        {/* Content Container (Layered Directly On Top) */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* LEFT COLUMN: Badge, Big Headline, Description, Dual CTA Buttons */}
-            <div className="lg:col-span-6 space-y-6 text-left pr-0 lg:pr-4">
+            {/* LEFT CONTENT: Heading, Copy, Buttons aligned over the left graphic area */}
+            <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
                 
                 {/* 1. Badge Pill with Graduation Cap */}
-                <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#e8f1fd] text-[#1e3a8a] text-xs font-bold tracking-wide shadow-2xs">
+                <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#e8f1fd]/90 backdrop-blur-sm text-[#1e3a8a] text-xs font-bold tracking-wide shadow-2xs">
                   <GraduationCap className="w-4 h-4 text-[#1e3a8a]" />
-                  <span>Komunitas Alumni</span>
+                  <span>Komunitas Alumni MMTC</span>
                 </div>
 
-                {/* 2. Headline: Exact Text, Font Weight, and Highlight Stroke */}
-                <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-black text-slate-900 leading-[1.12] tracking-tight mt-5">
+                {/* 2. Headline: Exact Text & Highlight Stroke */}
+                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight mt-5">
                   Tetap Terhubung, <br />
                   <span className="relative inline-block mt-1">
-                    {/* Organic Brush Highlight Under 'Terus Bertumbuh' */}
                     <span className="absolute inset-x-[-8px] bottom-1 sm:bottom-2 h-4 sm:h-5 bg-gradient-to-r from-sky-200/80 via-blue-200/70 to-indigo-200/60 -rotate-1 rounded-md -z-10" />
                     Terus Bertumbuh
                   </span> <br />
@@ -292,11 +297,11 @@ export default function HomePage() {
                 </h1>
 
                 {/* 3. Description Copy */}
-                <p className="text-sm sm:text-base text-slate-600 max-w-lg font-normal leading-relaxed mt-4">
-                  Ruang bagi seluruh alumni untuk terhubung kembali, berbagi peluang, dan berkolaborasi di berbagai bidang.
+                <p className="text-sm sm:text-base text-slate-700 max-w-lg font-medium leading-relaxed mt-4 drop-shadow-2xs">
+                  Ruang bagi seluruh alumni Sekolah Tinggi Multi Media untuk terhubung kembali, berbagi peluang, dan berkolaborasi di berbagai bidang.
                 </p>
 
-                {/* 4. Action Buttons (Solid Blue Button & Transparent Pill with Play Icon) */}
+                {/* 4. Action Buttons */}
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <Link 
                     href="/open-to-work" 
@@ -308,7 +313,7 @@ export default function HomePage() {
 
                   <Link 
                     href="/feed" 
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
                   >
                     <div className="w-5 h-5 rounded-full border border-slate-400 flex items-center justify-center text-slate-700">
                       <Play className="w-2.5 h-2.5 fill-current ml-0.5 text-slate-800" />
@@ -320,24 +325,14 @@ export default function HomePage() {
               </ScrollReveal>
             </div>
 
-            {/* RIGHT COLUMN: The Exact Artwork (Character Collage with Blobs, 3D Toga, Polaroid, and Floating Card) */}
-            <div className="lg:col-span-6 relative flex items-center justify-center w-full">
-              <ScrollReveal direction="left" delayMs={140} durationMs={800} className="w-full max-w-lg lg:max-w-xl">
-                <div className="relative w-full rounded-2xl overflow-hidden">
-                  <img 
-                    src="/hero_reference_artwork.png" 
-                    alt="Komunitas Alumni STMM MMTC" 
-                    className="w-full h-auto object-contain drop-shadow-md select-none pointer-events-none"
-                  />
-                </div>
-              </ScrollReveal>
-            </div>
+            {/* RIGHT SIDE: Kept clear so the native artwork in the background is fully showcased */}
+            <div className="lg:col-span-6 hidden lg:block min-h-[380px] pointer-events-none" />
 
           </div>
         </div>
 
-        {/* BOTTOM STATS DOCK: Exact Floating Island with 4 Metrics and Clean Outline Icons */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-6 pb-2 z-10">
+        {/* BOTTOM STATS DOCK: Rounded White Floating Island (Persis Layout Referensi Bawah) */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
             <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl sm:rounded-full py-4 px-6 sm:px-10 shadow-lg shadow-slate-200/50 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
               
