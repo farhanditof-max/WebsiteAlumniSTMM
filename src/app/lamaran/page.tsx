@@ -205,10 +205,6 @@ export default function LamaranPage() {
         )}
 
         <div className="mb-8 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0284c7] text-xs font-bold">
-            <FileText className="w-3.5 h-3.5" />
-            Dashboard Tracking Lamaran
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Manajemen Lamaran Kerja
           </h1>

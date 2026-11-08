@@ -399,7 +399,9 @@
       "postedBy": "seed-recruiter-1",
       "posterName": "Budi Santoso (Alumni 2018)",
       "status": "active",
-      "createdAt": "2026-10-25T09:00:00.000Z"
+      "createdAt": "2026-10-25T09:00:00.000Z",
+      "tipeKerja": "Full-time",
+      "gajiRange": "Rp 8.000.000 - Rp 14.000.000"
     },
     "job-seed-02": {
       "id": "job-seed-02",
@@ -421,7 +423,9 @@
       "postedBy": "seed-recruiter-2",
       "posterName": "Fajar Nugraha (Alumni 2021)",
       "status": "active",
-      "createdAt": "2026-10-25T14:30:00.000Z"
+      "createdAt": "2026-10-25T14:30:00.000Z",
+      "tipeKerja": "Full-time",
+      "gajiRange": "Rp 7.000.000 - Rp 11.000.000"
     },
     "job-seed-03": {
       "id": "job-seed-03",
@@ -444,7 +448,83 @@
       "postedBy": "seed-recruiter-3",
       "posterName": "Rian Hidayat (Alumni 2021)",
       "status": "active",
-      "createdAt": "2026-10-26T08:00:00.000Z"
+      "createdAt": "2026-10-26T08:00:00.000Z",
+      "tipeKerja": "Full-time",
+      "gajiRange": "Rp 6.500.000 - Rp 10.000.000"
+    },
+    "job-seed-04": {
+      "id": "job-seed-04",
+      "judul": "Freelance Motion Graphic & Virtual Production Artist",
+      "perusahaan": "Lumina Visual Studio",
+      "lokasi": "Remote / Yogyakarta",
+      "tipeKerja": "Freelance",
+      "tipe": "Freelance",
+      "gajiRange": "Rp 4.500.000 - Rp 9.000.000 / Project",
+      "prodiTarget": [
+        "Animasi",
+        "Game Design",
+        "Matekstosi"
+      ],
+      "deskripsi": "Mengerjakan asset motion graphic 2D/3D, intro bumper televisi, dan background virtual set Unreal Engine untuk project komersial brand.",
+      "kualifikasi": [
+        "Alumni atau mahasiswa tingkat akhir STMM MMTC",
+        "Menguasai After Effects & Blender / Unreal Engine",
+        "Portofolio motion graphic aktif"
+      ],
+      "kontakEmail": "project@luminastudio.id",
+      "postedBy": "seed-recruiter-4",
+      "posterName": "Sarah Pradipta (Alumni 2020)",
+      "status": "active",
+      "createdAt": "2026-10-27T10:00:00.000Z"
+    },
+    "job-seed-05": {
+      "id": "job-seed-05",
+      "judul": "Magang Creative Content Producer & Social Media Specialist",
+      "perusahaan": "Narasi Media Lab",
+      "lokasi": "Yogyakarta Bureau",
+      "tipeKerja": "Magang",
+      "tipe": "Magang",
+      "gajiRange": "Uang Saku & Mentorship Industri",
+      "prodiTarget": [
+        "Manarita",
+        "Manaprodsi",
+        "MIK"
+      ],
+      "deskripsi": "Peluang magang berbayar untuk alumni baru dan mahasiswa tingkat akhir dalam memproduksi konten video dokumenter pendek dan reels edukasi kreatif.",
+      "kualifikasi": [
+        "Lulusan baru atau tingkat akhir Manarita / Manaprodsi / MIK STMM MMTC",
+        "Kreatif, komunikatif, dan terbiasa dengan camera workflow",
+        "Komitmen minimal 3 bulan"
+      ],
+      "kontakEmail": "internship@narasimedia.id",
+      "postedBy": "seed-recruiter-5",
+      "posterName": "Dimas Aditya (Alumni 2022)",
+      "status": "active",
+      "createdAt": "2026-10-28T11:00:00.000Z"
+    },
+    "job-seed-06": {
+      "id": "job-seed-06",
+      "judul": "Part-time UI/UX Designer & Web Media Developer",
+      "perusahaan": "Studio Kinetik Jogja",
+      "lokasi": "Hybrid Sleman, DIY",
+      "tipeKerja": "Part-time",
+      "tipe": "Part-time",
+      "gajiRange": "Rp 3.500.000 - Rp 6.000.000 / Bulan",
+      "prodiTarget": [
+        "MIK",
+        "Game Design"
+      ],
+      "deskripsi": "Mendesain antarmuka web aplikasi interaktif dan media digital kampus/brand mitra secara fleksibel 20 jam per minggu.",
+      "kualifikasi": [
+        "Alumni D4 MIK atau Teknologi Permainan",
+        "Figma, Tailwind CSS, dan basic Next.js",
+        "Komunikasi tim solid"
+      ],
+      "kontakEmail": "career@studiokinetik.id",
+      "postedBy": "seed-recruiter-6",
+      "posterName": "Kurniawan Eko (Alumni 2023)",
+      "status": "active",
+      "createdAt": "2026-10-29T09:30:00.000Z"
     }
   },
   "applications": {

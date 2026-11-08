@@ -20,7 +20,6 @@ import {
 import { fetchOpenToWorkRest } from '@/lib/firestoreRest';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { TalentCardSkeleton } from '@/components/ui/Skeleton';
-import { OpenToWorkBadge } from '@/components/ui/Badge';
 import { extractSkills } from '@/components/profile/skills';
 import { useAuth } from '@/context/AuthContext';
 
@@ -110,10 +109,6 @@ export default function OpenToWorkPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* HEADER SECTION */}
         <div className="mb-8 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 text-emerald-700 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Katalog Talenta Kreatif &amp; Penyiaran
-          </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
             Alumni MMTC <span className="text-emerald-600">Open to Work</span>
           </h1>
@@ -243,7 +238,6 @@ export default function OpenToWorkPage() {
                       </div>
                     </div>
 
-                    <OpenToWorkBadge pulse={false} />
                   </div>
 
                   {/* BIO */}

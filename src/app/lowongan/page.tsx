@@ -110,7 +110,8 @@ function LowonganContent() {
       job.lokasi.toLowerCase().includes(q) ||
       job.prodiTarget?.some(p => p.toLowerCase().includes(q));
 
-    const matchesTipe = selectedTipeKerja === 'ALL' || job.tipeKerja === selectedTipeKerja;
+    const jobTipe = job.tipeKerja || (job as unknown as { tipe?: string }).tipe || '';
+    const matchesTipe = selectedTipeKerja === 'ALL' || jobTipe === selectedTipeKerja;
     const matchesSalary = !onlyWithSalary || Boolean(job.gajiRange && job.gajiRange.trim().length > 0);
 
     return matchesSearch && matchesTipe && matchesSalary;
@@ -190,10 +191,6 @@ function LowonganContent() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* HEADER SECTION */}
         <div className="mb-8 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0284c7] text-xs font-semibold">
-            <Briefcase className="w-3.5 h-3.5" />
-            Bursa Karir Resmi MMTC
-          </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
             Portal Lowongan Kerja Alumni
           </h1>
@@ -331,7 +328,7 @@ function LowonganContent() {
                     <div>
                       <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
                         <span className="inline-block px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-100 text-[#0284c7] text-[11px] font-bold">
-                          {job.tipeKerja}
+                          {job.tipeKerja || (job as unknown as { tipe?: string }).tipe}
                         </span>
                         {job.deadline && !isNaN(Date.parse(job.deadline)) && (
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${

@@ -414,6 +414,11 @@ export default function FeedPage() {
   };
 
   const handleToggleFollow = (authorKey: string) => {
+    if (!user) {
+      setPostAlert('⚠️ Masuk dengan akun alumni untuk mulai mengikuti sesama rekan MMTC.');
+      setTimeout(() => setPostAlert(''), 3000);
+      return;
+    }
     setFollowedAlumni(prev => ({
       ...prev,
       [authorKey]: !prev[authorKey]
@@ -421,6 +426,11 @@ export default function FeedPage() {
   };
 
   const handleToggleConnect = (userId: string) => {
+    if (!user) {
+      setPostAlert('⚠️ Masuk dengan akun alumni untuk mulai terhubung dengan sesama rekan MMTC.');
+      setTimeout(() => setPostAlert(''), 3000);
+      return;
+    }
     setConnectedUsers(prev => ({
       ...prev,
       [userId]: !prev[userId]
@@ -1219,11 +1229,13 @@ export default function FeedPage() {
         shareUrl={shareData?.url || ''}
       />
 
-      {/* LINKEDIN-STYLE FLOATING MESSAGING DRAWER */}
-      <LinkedInMessagingWidget 
-        userAvatar={currentUser.avatar}
-        userName={currentUser.name}
-      />
+      {/* LINKEDIN-STYLE FLOATING MESSAGING DRAWER (Hanya untuk pengguna login) */}
+      {user && (
+        <LinkedInMessagingWidget 
+          userAvatar={currentUser.avatar}
+          userName={currentUser.name}
+        />
+      )}
     </div>
   );
 }
