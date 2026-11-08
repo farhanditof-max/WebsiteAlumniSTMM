@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="space-y-4 md:col-span-2">
             <div className="space-y-2">
               <img 
-                src="/logo_alumnihub.webp" 
+                src="/logo_alumnihub.png" 
                 alt="AlumniHub Sekolah Tinggi Multi Media" 
                 className="h-11 sm:h-12 w-auto object-contain"
               />

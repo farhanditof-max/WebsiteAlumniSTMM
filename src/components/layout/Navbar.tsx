@@ -276,7 +276,7 @@ export default function Navbar() {
           {/* Brand Logo - Official AlumniHub Graphic (-10px to h-[52px] sm:h-[57px]) */}
           <Link href="/" className="flex items-center group focus:outline-none py-0.5 shrink-0">
             <img 
-              src="/logo_alumnihub.webp" 
+              src="/logo_alumnihub.png" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
               className="h-[52px] sm:h-[57px] w-auto object-contain group-hover:opacity-90 transition-opacity"
             />

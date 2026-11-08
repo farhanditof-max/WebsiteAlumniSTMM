@@ -102,7 +102,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-xl bg-white border border-slate-200/90 p-8 sm:p-9 rounded-3xl shadow-sm space-y-6">
           <div className="text-center space-y-2">
             <img 
-              src="/logo_alumnihub.webp" 
+              src="/logo_alumnihub.png" 
               alt="AlumniHub Sekolah Tinggi Multi Media" 
               className="h-11 w-auto mx-auto object-contain mb-3"
             />
