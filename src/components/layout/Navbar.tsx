@@ -282,50 +282,50 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop Navigation - Clean Rounded Pill Links */}
-          <div className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-full border border-slate-200/80">
+          {/* Desktop Navigation - Clean Text Navigation without pill containers */}
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             <Link 
               href="/" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 pathname === '/' 
-                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-[#0284c7] font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Compass className="w-3.5 h-3.5 text-slate-400" />
+              <Compass className={`w-4 h-4 ${pathname === '/' ? 'text-[#0284c7]' : 'text-slate-400'}`} />
               <span>Beranda</span>
             </Link>
 
             <Link 
               href="/feed" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 isActive('/feed') || isActive('/beranda')
-                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-[#0284c7] font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Users className="w-3.5 h-3.5 text-[#0284c7]" />
+              <Users className={`w-4 h-4 ${isActive('/feed') || isActive('/beranda') ? 'text-[#0284c7]' : 'text-slate-400'}`} />
               <span>Feed</span>
             </Link>
 
             <Link 
               href="/lowongan" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 isActive('/lowongan') 
-                  ? 'bg-white text-[#0284c7] shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-[#0284c7] font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
+              <Briefcase className={`w-4 h-4 ${isActive('/lowongan') ? 'text-[#0284c7]' : 'text-slate-400'}`} />
               <span>Lowongan</span>
             </Link>
 
             <Link 
               href="/open-to-work" 
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                 isActive('/open-to-work') 
-                  ? 'bg-white text-emerald-700 shadow-xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'text-emerald-600 font-bold' 
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
