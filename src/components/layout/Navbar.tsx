@@ -407,6 +407,11 @@ export default function Navbar() {
                             <p className="text-xs text-slate-600 font-medium leading-relaxed mt-0.5 line-clamp-2">
                               {displayProfile?.pekerjaanSaatIni || `${displayProfile?.prodi || 'Animasi'} • Angkatan ${displayProfile?.angkatan || '2020'}`}
                             </p>
+                            <p className="text-[11px] font-semibold text-[#0087cc] mt-1 flex items-center gap-1.5">
+                              <span>{displayProfile?.prodi || 'Animasi'} MMTC</span>
+                              <span className="text-slate-300">•</span>
+                              <span>Angkatan {displayProfile?.angkatan || '2020'}</span>
+                            </p>
                           </div>
                         </div>
                       </div>
