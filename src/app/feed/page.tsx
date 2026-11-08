@@ -508,35 +508,63 @@ export default function FeedPage() {
           {/* ============================================================== */}
           <div className="hidden lg:block lg:col-span-3 space-y-5 sticky top-24">
             
-            {/* MINI PROFILE CARD */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs text-center space-y-4">
-              <div className="relative mx-auto w-18 h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xs bg-gradient-to-tr from-sky-500 to-[#0284c7] flex items-center justify-center text-white text-2xl font-bold">
-                <AlumniAvatar src={currentUser.avatar} name={currentUser.name} />
+            {/* AESTHETIC PROFILE CARD (STYLE GAMBAR 2) */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-3.5 shadow-sm space-y-3">
+              {/* TOP PORTRAIT PHOTO */}
+              <div className="w-full aspect-[4/4.2] rounded-[22px] overflow-hidden bg-slate-100 relative group">
+                <img
+                  src={currentUser.avatar || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80'}
+                  alt={currentUser.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-sky-400 via-sky-500 to-[#0087cc] flex items-center justify-center text-white text-5xl font-black">
+                  {currentUser.name.charAt(0)}
+                </div>
               </div>
 
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">{currentUser.name}</h3>
-                <p className="text-xs text-[#0284c7] font-semibold mt-0.5">
-                  {currentUser.prodi} • Angkatan {currentUser.angkatan}
+              {/* PROFILE INFO */}
+              <div className="space-y-1 px-1">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
+                    {currentUser.name}
+                  </h3>
+                  {/* Verified Green Check Badge (Seperti Gambar 2) */}
+                  <span 
+                    title="Alumni Terverifikasi MMTC" 
+                    className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-2xs"
+                  >
+                    ✓
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                  {currentUser.role || `${currentUser.prodi} • Angkatan ${currentUser.angkatan}`}
                 </p>
-                {currentUser.role && (
-                  <p className="text-[11px] text-slate-600 font-medium mt-1.5 flex items-center justify-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <Briefcase className="w-3 h-3 text-[#0284c7] shrink-0" />
-                    <span className="truncate">{currentUser.role}</span>
-                  </p>
-                )}
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-center">
-                <OpenToWorkBadge />
-              </div>
+              {/* STATS & ACTION BUTTON (SEPERTI GAMBAR 2) */}
+              <div className="pt-2 flex items-center justify-between border-t border-slate-100/80 px-1">
+                {/* Stats */}
+                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                  <div className="flex items-center gap-1" title="312 Koneksi Alumni">
+                    <Users className="w-3.5 h-3.5 text-slate-400" />
+                    <span>312</span>
+                  </div>
+                  <div className="flex items-center gap-1" title="48 Karya & Postingan">
+                    <FileText className="w-3.5 h-3.5 text-slate-400" />
+                    <span>48</span>
+                  </div>
+                </div>
 
-              <div className="pt-2 flex flex-col gap-2">
+                {/* Action Button */}
                 <Link
                   href="/profil"
-                  className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-sky-50 hover:text-[#0284c7] border border-slate-200 text-xs font-semibold text-slate-700 transition"
+                  className="py-1.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition active:scale-95 shadow-2xs"
                 >
-                  Edit Profil Saya
+                  Edit Profil
                 </Link>
               </div>
             </div>
