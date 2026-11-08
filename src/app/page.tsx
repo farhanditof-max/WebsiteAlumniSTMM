@@ -334,26 +334,26 @@ export default function HomePage() {
               
               {/* Feature 1: Jaringan Alumni */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
-                <Users className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
-                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Jaringan Alumni</h4>
+                <Users className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Jaringan Alumni</h4>
               </div>
 
               {/* Feature 2: Peluang Karier */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <Handshake className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
-                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Peluang Karier</h4>
+                <Handshake className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Peluang Karier</h4>
               </div>
 
               {/* Feature 3: Kegiatan & Reuni */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <Calendar className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
-                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Kegiatan &amp; Reuni</h4>
+                <Calendar className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Kegiatan &amp; Reuni</h4>
               </div>
 
               {/* Feature 4: Berita & Cerita Alumni */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <BookOpen className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
-                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-xs">Berita &amp; Cerita Alumni</h4>
+                <BookOpen className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Berita &amp; Cerita Alumni</h4>
               </div>
 
             </div>
