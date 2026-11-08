@@ -330,7 +330,7 @@ export default function HomePage() {
         {/* BOTTOM FEATURE DOCK: Headline Only, No Sub-headline, Clean Solid Icon Without Pill Effect */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-5xl mx-auto py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70">
+            <div className="max-w-5xl mx-auto bg-white border border-slate-200/80 rounded-2xl py-4 px-6 sm:px-10 shadow-lg shadow-slate-900/5 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
               
               {/* Feature 1: Jaringan Alumni */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
