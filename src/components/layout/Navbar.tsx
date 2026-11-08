@@ -345,10 +345,10 @@ export default function Navbar() {
                       setNotificationOpen(!notificationOpen);
                       setProfileDropdownOpen(false);
                     }}
-                    className={`relative p-2.5 rounded-full border transition cursor-pointer select-none flex items-center justify-center ${
+                    className={`relative p-2 rounded-lg transition-colors cursor-pointer select-none flex items-center justify-center ${
                       notificationOpen
-                        ? 'bg-sky-50 border-sky-300 text-[#0284c7] shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900'
+                        ? 'text-[#0284c7]'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                     }`}
                     aria-label="Lihat Notifikasi"
                     aria-expanded={notificationOpen}
@@ -541,10 +541,10 @@ export default function Navbar() {
                     setNotificationOpen(!notificationOpen);
                     setMobileMenuOpen(false);
                   }}
-                  className={`relative p-2 rounded-xl border transition flex items-center justify-center cursor-pointer ${
+                  className={`relative p-2 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
                     notificationOpen
-                      ? 'bg-sky-50 border-sky-300 text-[#0284c7]'
-                      : 'bg-white border-slate-200 text-slate-700'
+                      ? 'text-[#0284c7]'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                   }`}
                   aria-label="Notifikasi"
                 >
