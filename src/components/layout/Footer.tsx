@@ -6,10 +6,10 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-slate-200/80 text-slate-500 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
           
           {/* Brand Info */}
-          <div className="space-y-4 md:col-span-2">
+          <div className="space-y-4 md:col-span-5">
             <div className="space-y-2">
               <img 
                 src="/logo_alumnihub.png" 
@@ -24,40 +24,39 @@ export default function Footer() {
               Platform karir dan jejaring resmi alumni Sekolah Tinggi Multi Media (MMTC) Yogyakarta. Wadah terpadu kolaborasi profesional industri penyiaran, animasi, game, dan teknologi informasi.
             </p>
             <div className="pt-1 flex items-center gap-2 text-[11px] text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Portal Terintegrasi Alumni & Industri Kreatif</span>
+              <span>Portal Terintegrasi Alumni &amp; Industri Kreatif</span>
             </div>
           </div>
 
-          {/* Program Studi */}
-          <div className="lg:col-span-2">
+          {/* Program Studi: 1 Baris Vertikal ke Bawah */}
+          <div className="md:col-span-4">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
-              Program Studi & Keahlian
+              Program Studi &amp; Keahlian
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> Animasi
+            <div className="flex flex-col space-y-2 text-xs text-slate-600">
+              <span className="hover:text-slate-900 transition cursor-default">
+                Animasi
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> Game Design
+              <span className="hover:text-slate-900 transition cursor-default">
+                Game Design
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Manajemen Informasi & Komunikasi (MIK)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Informasi &amp; Komunikasi (MIK)
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> Manajemen Teknik Studio (Matekstosi)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Teknik Studio (Matekstosi)
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Manajemen Pemberitaan (Manarita)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Pemberitaan (Manarita)
               </span>
-              <span className="hover:text-slate-900 transition flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Manajemen Produksi Siaran (Manaprodsi)
+              <span className="hover:text-slate-900 transition cursor-default">
+                Manajemen Produksi Siaran (Manaprodsi)
               </span>
             </div>
           </div>
 
           {/* Tautan Navigasi */}
-          <div>
+          <div className="md:col-span-3">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
               Tautan Navigasi
             </h4>

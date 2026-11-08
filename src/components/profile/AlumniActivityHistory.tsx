@@ -43,7 +43,7 @@ export interface UserActivityPost {
 const DEFAULT_USER_POSTS: UserActivityPost[] = [
   {
     id: 'user-post-1',
-    authorName: 'Budi Santoso',
+    authorName: 'Dary Halim',
     authorProdi: 'Animasi',
     authorAngkatan: '2020',
     authorRole: '3D Animator di Infinite Studios',
@@ -59,7 +59,7 @@ const DEFAULT_USER_POSTS: UserActivityPost[] = [
   },
   {
     id: 'user-post-2',
-    authorName: 'Budi Santoso',
+    authorName: 'Dary Halim',
     authorProdi: 'Animasi',
     authorAngkatan: '2020',
     authorRole: '3D Animator di Infinite Studios',
@@ -85,7 +85,7 @@ interface AlumniActivityHistoryProps {
 
 export default function AlumniActivityHistory({
   authorUid,
-  authorName = 'Budi Santoso',
+  authorName = 'Dary Halim',
   authorProdi = 'Animasi',
   authorAvatar = '',
   isOwner = true

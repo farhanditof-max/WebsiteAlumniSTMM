@@ -251,10 +251,9 @@ export default function HomePage() {
                   <span>Ikatan Alumni STMM &ldquo;MMTC&rdquo; Yogyakarta</span>
                 </div>
 
-                {/* Headline bersih tanpa stabilo miring -rotate-1 ala AI */}
-                <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-slate-900 leading-[1.12] tracking-tight mt-5">
+                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight mt-5">
                   Tetap Terhubung, <br />
-                  <span className="text-[#0284c7]">Terus Berkarya</span> <br />
+                  Terus Bertumbuh <br />
                   Bersama.
                 </h1>
 
@@ -265,7 +264,7 @@ export default function HomePage() {
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <Link 
                     href="/open-to-work" 
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#024E82] hover:bg-[#1e3a8a] text-white font-semibold text-sm shadow-sm transition-all duration-200 active:scale-[0.99]"
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white font-bold text-sm tracking-wide shadow-md shadow-[#0087cc]/25 hover:shadow-lg hover:shadow-[#0087cc]/30 transition-all duration-200 active:scale-[0.98]"
                   >
                     <span>Eksplorasi Talenta</span>
                     <ArrowRight className="w-4 h-4" />
@@ -273,7 +272,7 @@ export default function HomePage() {
 
                   <Link 
                     href="/feed" 
-                    className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-white/95 hover:bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-300 transition-all duration-200 active:scale-[0.99]"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
                   >
                     <Play className="w-3.5 h-3.5 fill-current text-[#0284c7]" />
                     <span>Buka Kabar &amp; Karya Alumni</span>
@@ -286,51 +285,50 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* BOTTOM FEATURE BAR */}
+        {/* BOTTOM FEATURE DOCK: No badge container, clean white icons & text over blue hero artwork */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl py-4 px-6 sm:px-8 shadow-sm grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70">
-              <div className="flex items-center gap-3.5 px-2 py-1 sm:py-0">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-sm font-bold text-slate-900 leading-tight">Jejaring Lintas Angkatan</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">Koneksi rekan seprofesi</p>
-                </div>
+            <div className="max-w-5xl mx-auto py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/25">
+              
+              {/* Feature 1: Jaringan Alumni */}
+              <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
+                <Users className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Jaringan Alumni</h4>
               </div>
 
-              <div className="flex items-center gap-3.5 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <Handshake className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-sm font-bold text-slate-900 leading-tight">Bursa Kerja &amp; Kru</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">Lowongan studio &amp; proyek</p>
-                </div>
+              {/* Feature 2: Peluang Karier */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <Handshake className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Peluang Karier</h4>
               </div>
 
-              <div className="flex items-center gap-3.5 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-sm font-bold text-slate-900 leading-tight">Agenda &amp; Screening</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">Jadwal temu &amp; pameran</p>
-                </div>
+              {/* Feature 3: Kegiatan & Reuni */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <Calendar className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Kegiatan &amp; Reuni</h4>
               </div>
 
-              <div className="flex items-center gap-3.5 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-sm font-bold text-slate-900 leading-tight">Kabar Produksi</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">Diskusi alur kerja &amp; riset</p>
-                </div>
+              {/* Feature 4: Berita & Cerita Alumni */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <BookOpen className="w-5 h-5 text-white shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]" />
+                <h4 className="text-xs sm:text-sm font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">Berita &amp; Cerita Alumni</h4>
               </div>
             </div>
           </ScrollReveal>
+
+          {/* Scroll Cue */}
+          <div className="flex justify-center pt-2">
+            <a 
+              href="#prodi-section" 
+              className="inline-flex flex-col items-center gap-1 text-white/80 hover:text-white transition-colors group cursor-pointer"
+              title="Scroll untuk melihat Program Studi Unggulan"
+            >
+              <span className="text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Eksplorasi Program Studi</span>
+              <div className="w-4 h-7 sm:w-5 sm:h-8 rounded-full border-2 border-white/60 group-hover:border-white flex items-start justify-center p-1 transition-colors">
+                <div className="w-1 h-2 rounded-full bg-white/80 group-hover:bg-white animate-bounce" />
+              </div>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -338,18 +336,17 @@ export default function HomePage() {
       <section id="prodi-section" className="py-20 sm:py-24 bg-slate-50 border-b border-slate-200/70 scroll-mt-12 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal direction="up" delayMs={60} durationMs={650}>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
-              <div className="text-left max-w-2xl">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#0284c7] block mb-2">
-                  6 Program Studi STMM MMTC
-                </span>
-                <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 leading-tight">
-                  Telusuri Talenta Berdasarkan Keahlian
-                </h2>
-                <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-                  Pilih program studi untuk melihat direktori alumni dan lowongan kerja yang relevan dengan bidang produksi.
-                </p>
-              </div>
+            {/* Header with Navigation Arrows — Centered */}
+            <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+              <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#0284c7] mb-2.5">
+                PILIHAN PROGRAM STUDI
+              </span>
+              <h2 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-slate-900 leading-tight">
+                Temukan Talenta Sesuai Bidang Studi
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-2.5 leading-relaxed mx-auto">
+                Geser kartu untuk menemukan talenta alumni dan lowongan berdasarkan spesialisasi bidang studi
+              </p>
 
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -440,7 +437,7 @@ export default function HomePage() {
                   <div className="pt-2">
                     <Link
                       href="/open-to-work"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[#024E82] font-bold text-sm hover:bg-sky-50 transition"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[#0284c7] font-bold text-xs sm:text-sm hover:bg-sky-50 transition shadow-sm"
                     >
                       Lihat Direktori Talenta
                       <ArrowRight className="w-4 h-4" />
@@ -526,7 +523,7 @@ export default function HomePage() {
                   <div className="space-y-3">
                     <Link
                       href="/register"
-                      className="w-full py-3.5 px-6 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold text-sm shadow-2xs transition flex items-center justify-center gap-2"
+                      className="group/btn relative w-full py-4 px-6 rounded-xl bg-gradient-to-r from-sky-500 via-[#0284c7] to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden"
                     >
                       <span>Verifikasi &amp; Buat Akun</span>
                       <ArrowRight className="w-4 h-4" />
@@ -534,7 +531,7 @@ export default function HomePage() {
 
                     <Link
                       href="/post-lowongan"
-                      className="w-full py-3.5 px-6 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold text-sm border border-slate-200 transition flex items-center justify-center gap-2"
+                      className="group/btn2 w-full py-3.5 px-6 rounded-xl bg-slate-50/90 hover:bg-sky-50/80 text-slate-800 hover:text-[#0284c7] font-bold text-xs sm:text-sm border border-slate-200 hover:border-sky-300 shadow-2xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
                     >
                       <Briefcase className="w-4 h-4 text-slate-600" />
                       <span>Pasang Info Lowongan / Kru</span>

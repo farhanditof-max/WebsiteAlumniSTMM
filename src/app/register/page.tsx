@@ -200,7 +200,7 @@ export default function RegisterPage() {
                 required
                 value={namaLengkap}
                 onChange={(e) => setNamaLengkap(e.target.value)}
-                placeholder="Budi Santoso"
+                placeholder="Dary Halim"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
               />
             </div>

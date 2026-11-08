@@ -25,7 +25,8 @@ import {
   Calendar, 
   Maximize2, 
   Briefcase,
-  ChevronDown
+  ChevronDown,
+  MapPin
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
@@ -44,6 +45,7 @@ import { UserProfile, FeedCategory } from '@/types';
 
 interface ExtendedUserProfile extends UserProfile {
   pekerjaanSaatIni?: string;
+  domisili?: string;
 }
 
 export interface FeedPostUI {
@@ -111,7 +113,7 @@ const DEFAULT_POSTS: FeedPostUI[] = INITIAL_CURATED_POSTS.map(p => ({
 const SUGGESTED_CONNECTIONS = [
   {
     id: 's-1',
-    name: 'Gilang Ramadhan',
+    name: 'Tito Ari Pratama',
     prodi: 'Game',
     angkatan: '2021',
     role: 'Unity Gameplay Programmer',
@@ -119,7 +121,7 @@ const SUGGESTED_CONNECTIONS = [
   },
   {
     id: 's-2',
-    name: 'Jessica Meliana',
+    name: 'Via Ruby',
     prodi: 'MIK',
     angkatan: '2020',
     role: 'Product Designer / UI UX',
@@ -127,7 +129,7 @@ const SUGGESTED_CONNECTIONS = [
   },
   {
     id: 's-3',
-    name: 'Rahmat Hidayat',
+    name: 'Adam Narotama',
     prodi: 'Matekstosi',
     angkatan: '2019',
     role: 'Audio Post & Sound Designer',
@@ -155,12 +157,13 @@ export default function FeedPage() {
 
   // Simulated logged-in user profile
   const currentUser = {
-    uid: user?.uid || '',
-    name: profile?.namaLengkap || user?.displayName || (user ? 'Alumni STMM' : 'Pengunjung Tamu'),
+    name: profile?.namaLengkap || user?.displayName || 'Dary Halim',
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
-    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || (user ? 'Alumni STMM MMTC' : 'Pengunjung Tamu'),
-    avatar: profile?.fotoProfil || user?.photoURL || ''
+    bio: profile?.bio || 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
+    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
+    domisili: (profile as ExtendedUserProfile | null)?.domisili || 'Sleman, D.I. Yogyakarta',
+    avatar: profile?.fotoProfil || '/profile_dary.jpg'
   };
 
   const [posts, setPosts] = useState<FeedPostUI[]>(DEFAULT_POSTS);
@@ -484,67 +487,80 @@ export default function FeedPage() {
           <div className="hidden lg:block lg:col-span-3 space-y-5 sticky top-24">
             
             {/* MINI PROFILE CARD */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs text-center space-y-4">
-              {user ? (
-                <>
-                  <div className="relative mx-auto w-18 h-18 rounded-2xl overflow-hidden border-2 border-white shadow-xs bg-gradient-to-tr from-sky-500 to-[#0284c7] flex items-center justify-center text-white text-2xl font-bold">
-                    <AlumniAvatar src={currentUser.avatar} name={currentUser.name} />
+            {user ? (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-3.5 shadow-sm space-y-3">
+                {/* TOP PORTRAIT PHOTO */}
+                <div className="w-full aspect-[4/4.2] rounded-[22px] overflow-hidden bg-slate-100 relative group">
+                  <img
+                    src={currentUser.avatar || '/profile_dary.jpg'}
+                    alt={currentUser.name}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-sky-400 via-sky-500 to-[#0087cc] flex items-center justify-center text-white text-5xl font-black">
+                    {currentUser.name.charAt(0)}
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">{currentUser.name}</h3>
-                    <p className="text-xs text-[#0284c7] font-semibold mt-0.5">
-                      {currentUser.prodi} • Angkatan {currentUser.angkatan}
-                    </p>
-                    {currentUser.role && (
-                      <p className="text-[11px] text-slate-600 font-medium mt-1.5 flex items-center justify-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
-                        <Briefcase className="w-3 h-3 text-[#0284c7] shrink-0" />
-                        <span className="truncate">{currentUser.role}</span>
-                      </p>
-                    )}
-                  </div>
+                {/* PROFILE INFO */}
+                <div className="space-y-1.5 px-1">
+                  <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
+                    {currentUser.name}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed line-clamp-3">
+                    {currentUser.bio}
+                  </p>
+                  <p className="text-xs text-slate-700 font-semibold leading-snug truncate pt-0.5">
+                    {currentUser.role}
+                  </p>
+                  <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate">
+                    <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                    <span>{currentUser.domisili}</span>
+                  </p>
+                  <p className="text-[11px] font-bold text-[#0087cc] pt-0.5">
+                    {currentUser.prodi} • Angkatan {currentUser.angkatan}
+                  </p>
+                </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-center">
-                    <OpenToWorkBadge />
-                  </div>
-
-                  <div className="pt-2 flex flex-col gap-2">
-                    <Link
-                      href="/profil"
-                      className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-sky-50 hover:text-[#0284c7] border border-slate-200 text-xs font-semibold text-slate-700 transition"
-                    >
-                      Edit Profil Saya
-                    </Link>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-sky-100 text-[#0284c7] flex items-center justify-center font-bold text-xl shadow-xs">
-                    <Users className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">Portal Alumni MMTC</h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Masuk untuk mempublikasikan showreel, memberi tanggapan, dan terhubung dengan sesama alumni.
-                    </p>
-                  </div>
-                  <div className="pt-2 flex flex-col gap-2">
-                    <Link
-                      href="/login"
-                      className="w-full py-2 px-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-xs"
-                    >
-                      Masuk Akun
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition"
-                    >
-                      Daftar Akun Baru
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
+                {/* ACTION BUTTON */}
+                <div className="pt-2 border-t border-slate-100/80">
+                  <Link
+                    href="/profil"
+                    className="w-full py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition active:scale-[0.98] shadow-2xs block text-center"
+                  >
+                    Edit Profil
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-sky-100 text-[#0284c7] flex items-center justify-center font-bold text-xl shadow-xs">
+                  <Users className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Portal Alumni MMTC</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Masuk untuk mempublikasikan karya, memberi tanggapan, dan terhubung dengan sesama alumni.
+                  </p>
+                </div>
+                <div className="pt-2 flex flex-col gap-2">
+                  <Link
+                    href="/login"
+                    className="w-full py-2 px-3 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white text-xs font-bold transition shadow-xs"
+                  >
+                    Masuk Akun
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition"
+                  >
+                    Daftar Akun Baru
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* CATEGORY FILTER NAVIGATION */}
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-1 text-xs">
@@ -553,26 +569,25 @@ export default function FeedPage() {
               </h4>
               
               {[
-                { id: 'semua', label: 'Semua Kiriman', icon: LayoutGrid },
-                { id: 'showreel', label: 'Karya & Showreel', icon: Video },
-                { id: 'kolaborasi', label: 'Kolaborasi & Kru', icon: Users },
-                { id: 'pencapaian', label: 'Kabar & Capaian', icon: Award },
-                { id: 'diskusi', label: 'Obrolan & Diskusi', icon: MessageSquare },
+                { id: 'semua', label: 'Semua Postingan' },
+                { id: 'showreel', label: 'Karya & Showreel' },
+                { id: 'kolaborasi', label: 'Cari Crew & Kolaborasi' },
+                { id: 'pencapaian', label: 'Prestasi & Berita' },
+                { id: 'diskusi', label: 'Tips & Diskusi' },
               ].map(cat => {
-                const IconComponent = cat.icon;
                 const active = selectedFilter === cat.id;
                 return (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedFilter(cat.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl font-semibold transition cursor-pointer text-left ${
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold transition cursor-pointer text-left ${
                       active
-                        ? 'bg-sky-50 text-[#0284c7] font-bold shadow-2xs'
+                        ? 'bg-sky-50 text-[#0087cc] font-bold shadow-2xs'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <IconComponent className={`w-4 h-4 ${active ? 'text-[#0284c7]' : 'text-slate-400'}`} />
                     <span>{cat.label}</span>
+                    {active && <span className="w-1.5 h-1.5 rounded-full bg-[#0087cc]" />}
                   </button>
                 );
               })}

@@ -250,7 +250,7 @@ export default function OpenToWorkPage() {
                     {extractSkills(alumni.bio, alumni.prodi).map((skill) => (
                       <span 
                         key={skill} 
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/60"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/60"
                       >
                         {skill}
                       </span>

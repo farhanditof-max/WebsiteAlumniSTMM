@@ -36,7 +36,7 @@ import { CinemaLightbox } from '@/components/ui/Modal';
 import { extractSkills } from '@/components/profile/skills';
 import { UserProfile } from '@/types';
 
-const InstagramIcon = ({ className = "w-3.5 h-3.5 text-pink-600" }: { className?: string }) => (
+const InstagramIcon = ({ className = "w-3.5 h-3.5 text-[#0087cc]" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
@@ -67,29 +67,29 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
 // Data Dummy Demo untuk Preview Mode Tanpa Login
 const DEMO_PROFILE = {
   uid: 'demo-alumni-001',
-  namaLengkap: 'Budi Santoso',
-  fotoProfil: '',
+  namaLengkap: 'Dary Halim',
+  fotoProfil: '/profile_dary.jpg',
   prodi: 'Animasi' as ProdiType,
   angkatan: '2020',
   nomorAlumni: 'MMTC-2020-103',
-  email: 'budi.santoso@alumni.mmtc.ac.id',
+  email: 'dary.halim@alumni.mmtc.ac.id',
   openToWork: true,
   pekerjaanSaatIni: '3D Animator di Infinite Studios',
   domisili: 'Sleman, D.I. Yogyakarta',
-  bio: '3D Character Animator & Rigger lulusan STMM MMTC Yogyakarta. Terbiasa menangani pipeline produksi animasi 3D studio, motion graphics penyiaran, serta asset 3D untuk game engine.',
+  bio: 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
   phone: '081234567890',
-  linkedinUrl: 'https://linkedin.com/in/budi-santoso-mmtc',
-  instagramUrl: 'https://instagram.com/budisantoso.art',
+  linkedinUrl: 'https://linkedin.com/in/dary-halim-mmtc',
+  instagramUrl: 'https://instagram.com/daryhalim.art',
   customLinks: [
     {
       id: 'demo-link-1',
       title: 'Channel YouTube / Vimeo Showreel',
-      url: 'https://youtube.com/@budisantosoanim'
+      url: 'https://youtube.com/@daryhalimanim'
     },
     {
       id: 'demo-link-2',
       title: 'Website / Behance / ArtStation',
-      url: 'https://behance.net/budisantoso'
+      url: 'https://behance.net/daryhalim'
     }
   ],
   cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',
@@ -939,13 +939,13 @@ export default function ProfilPage() {
               </p>
               {pekerjaanSaatIni && (
                 <p className="text-xs text-slate-700 font-semibold mt-1 flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
+                  <Briefcase className="w-3.5 h-3.5 text-[#0087cc]" />
                   <span>{pekerjaanSaatIni}</span>
                 </p>
               )}
               {domisili && (
                 <p className="text-xs text-slate-600 font-medium mt-1 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-[#0087cc] shrink-0" />
                   <span>{domisili}</span>
                 </p>
               )}
@@ -1064,7 +1064,7 @@ export default function ProfilPage() {
               {/* DOMISILI SAAT INI */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                  <MapPin className="w-3.5 h-3.5 text-[#0087cc]" />
                   Kota Domisili Saat Ini
                 </label>
                 <input
@@ -1079,7 +1079,7 @@ export default function ProfilPage() {
               {/* WHATSAPP */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                  <Phone className="w-3.5 h-3.5 text-[#0087cc]" />
                   Nomor WhatsApp / HP
                 </label>
                 <input
@@ -1094,7 +1094,7 @@ export default function ProfilPage() {
               {/* LINKEDIN */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-[#0284c7]" />
+                  <Globe className="w-3.5 h-3.5 text-[#0087cc]" />
                   LinkedIn Profil URL
                 </label>
                 <input
@@ -1109,7 +1109,7 @@ export default function ProfilPage() {
               {/* INSTAGRAM */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
+                  <InstagramIcon className="w-3.5 h-3.5 text-[#0087cc]" />
                   Instagram Portofolio / Akun
                 </label>
                 <input
@@ -1125,7 +1125,7 @@ export default function ProfilPage() {
               <div className="pt-3 border-t border-slate-100 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <ExternalLink className="w-3.5 h-3.5 text-sky-600" />
+                    <ExternalLink className="w-3.5 h-3.5 text-[#0087cc]" />
                     Tautan Tambahan ({customLinks.length})
                   </span>
                   <button
@@ -1225,8 +1225,8 @@ export default function ProfilPage() {
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
-                  Posisi & Studio / Tempat Kerja Saat Ini
+                  <Briefcase className="w-3.5 h-3.5 text-[#0087cc]" />
+                  Sedang Bekerja di Mana / Posisi Pekerjaan Saat Ini
                 </label>
                 <input
                   type="text"
