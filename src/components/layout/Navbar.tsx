@@ -374,10 +374,10 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className={`flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full border transition cursor-pointer select-none ${
+                    className={`flex items-center gap-2 p-1.5 rounded-lg transition-colors cursor-pointer select-none ${
                       profileDropdownOpen || isActive('/profil')
-                        ? 'bg-sky-50 border-sky-300 text-[#0284c7] shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
+                        ? 'text-[#0284c7]'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/60'
                     }`}
                     aria-expanded={profileDropdownOpen}
                     aria-haspopup="true"
@@ -385,14 +385,9 @@ export default function Navbar() {
                     <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
                       <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
                     </div>
-                    <div className="text-left hidden lg:block">
-                      <p className="text-xs font-bold text-slate-900 truncate max-w-[100px] leading-tight">
-                        {displayProfile?.namaLengkap || 'Alumni MMTC'}
-                      </p>
-                      <p className="text-[10px] text-[#0284c7] font-semibold leading-tight">
-                        {displayProfile?.prodi || 'Alumni'}
-                      </p>
-                    </div>
+                    <span className="text-sm font-semibold text-slate-700 hidden lg:inline">
+                      Me
+                    </span>
                     <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#0284c7]' : ''}`} />
                   </button>
 
