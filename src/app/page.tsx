@@ -232,14 +232,13 @@ export default function HomePage() {
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-between py-10 sm:py-14 lg:py-16 overflow-hidden bg-white border-b border-slate-200/80">
-        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+      <section className="relative w-full lg:min-h-[calc(100vh-80px)] flex flex-col justify-between pt-8 sm:pt-12 lg:py-16 overflow-hidden bg-white border-b border-slate-200/80">
+        <div className="hidden lg:block absolute inset-0 pointer-events-none select-none overflow-hidden">
           <img 
             src="/landing_page_hero_raw.jpg" 
             alt="Komunitas Alumni STMM MMTC Yogyakarta" 
-            className="w-full h-full object-cover object-[center_top] sm:object-[68%_center] lg:object-[center_center]"
+            className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-transparent sm:via-white/55 lg:via-transparent pointer-events-none" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto z-10">
@@ -282,10 +281,21 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* BOTTOM FEATURE DOCK: No badge container, clean white icons & text over blue hero artwork */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
+        {/* HERO FOTO (HP & tablet): potongan foto alumni dengan dasar biru yang menyambung ke dock */}
+        <div className="relative lg:hidden w-full mt-6 sm:mt-8 pointer-events-none select-none">
+          <img
+            src="/landing_hero_mobile.jpg"
+            alt="Komunitas Alumni STMM MMTC Yogyakarta"
+            className="block w-full h-auto sm:h-[400px] md:h-[440px] sm:object-cover sm:object-[62%_100%]"
+          />
+          <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white to-transparent" />
+        </div>
+
+        {/* BOTTOM FEATURE DOCK: ikon & teks putih di atas dasar biru artwork */}
+        <div className="relative w-full bg-[#0188cc] lg:bg-transparent -mt-px lg:mt-0 pb-5 lg:pb-2 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-2 sm:pt-4 lg:pt-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-5xl mx-auto py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/25">
+            <div className="max-w-5xl mx-auto py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 sm:divide-x divide-white/25">
               
               {/* Feature 1: Jaringan Alumni */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
@@ -326,6 +336,7 @@ export default function HomePage() {
               </div>
             </a>
           </div>
+        </div>
         </div>
       </section>
 
