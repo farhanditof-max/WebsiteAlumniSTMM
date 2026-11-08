@@ -246,19 +246,14 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-900/5 border border-slate-900/10 text-[#1e3a8a] text-xs font-semibold">
-                  <GraduationCap className="w-4 h-4 text-[#0284c7]" />
-                  <span>Ikatan Alumni STMM &ldquo;MMTC&rdquo; Yogyakarta</span>
-                </div>
-
-                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight mt-5">
+                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Tetap Terhubung, <br />
                   Terus Bertumbuh <br />
                   Bersama.
                 </h1>
 
                 <p className="text-base text-slate-700 max-w-lg leading-relaxed mt-4">
-                  Ruang kolaborasi alumni Sekolah Tinggi Multi Media lintas angkatan—tempat berbagi peluang produksi, memamerkan showreel, dan membangun jejaring industri.
+                  Ruang bagi seluruh alumni Sekolah Tinggi Multi Media untuk terhubung kembali, berbagi peluang, dan berkolaborasi di berbagai bidang.
                 </p>
 
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
@@ -266,7 +261,7 @@ export default function HomePage() {
                     href="/open-to-work" 
                     className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white font-bold text-sm tracking-wide shadow-md shadow-[#0087cc]/25 hover:shadow-lg hover:shadow-[#0087cc]/30 transition-all duration-200 active:scale-[0.98]"
                   >
-                    <span>Eksplorasi Talenta</span>
+                    <span>Gabung Sekarang</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
 
@@ -274,8 +269,10 @@ export default function HomePage() {
                     href="/feed" 
                     className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98]"
                   >
-                    <Play className="w-3.5 h-3.5 fill-current text-[#0284c7]" />
-                    <span>Buka Kabar &amp; Karya Alumni</span>
+                    <div className="w-5 h-5 rounded-full border border-slate-400 flex items-center justify-center text-slate-700">
+                      <Play className="w-2.5 h-2.5 fill-current ml-0.5 text-slate-800" />
+                    </div>
+                    <span>Lihat Cerita Alumni</span>
                   </Link>
                 </div>
               </ScrollReveal>
