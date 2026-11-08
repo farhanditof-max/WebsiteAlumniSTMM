@@ -154,20 +154,11 @@ export default function Navbar() {
     }
   }, [demoStorageRaw]);
 
-  // Simulasi tampilan user login untuk seluruh halaman (kecuali halaman login/register)
-  const isAuthPage = pathname === '/login' || pathname === '/register';
-  const effectiveUser = user || (!isAuthPage ? { uid: 'demo-user', email: 'budi.santoso@alumni.mmtc.ac.id' } : null);
+  // User login state (hanya aktif jika user benar-benar login)
+  const effectiveUser = user;
   const displayProfile: ExtendedProfile | null = profile 
     ? (profile as unknown as ExtendedProfile)
-    : demoStorageProfile
-    ? demoStorageProfile
-    : (!isAuthPage ? { 
-        namaLengkap: 'Budi Santoso', 
-        prodi: 'Animasi', 
-        angkatan: '2020',
-        pekerjaanSaatIni: '3D Animator & Rigger di Infinite Studios',
-        fotoProfil: '' 
-      } : null);
+    : (user && demoStorageProfile ? demoStorageProfile : null);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
