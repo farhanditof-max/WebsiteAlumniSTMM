@@ -509,7 +509,7 @@ export default function HomePage() {
                   <div className="pt-2">
                     <Link
                       href="/open-to-work"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-[#0284c7] font-bold text-xs sm:text-sm hover:bg-sky-50 transition shadow-sm"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[#0284c7] font-bold text-xs sm:text-sm hover:bg-sky-50 transition shadow-sm"
                     >
                       Jelajahi Portofolio Alumni
                       <ArrowRight className="w-4 h-4 text-[#0284c7]" />
@@ -583,14 +583,6 @@ export default function HomePage() {
 
                 <div className="relative bg-white/95 backdrop-blur-xl border border-sky-200/90 rounded-[32px] p-7 sm:p-9 text-center space-y-6 shadow-xl shadow-sky-500/10 transition-all duration-300 hover:-translate-y-1">
                   
-                  {/* Top Badge */}
-                  <div className="flex justify-center">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Akses Komunitas Resmi MMTC
-                    </span>
-                  </div>
-
                   {/* Pricing / Headline */}
                   <div className="space-y-1.5">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">
@@ -609,7 +601,7 @@ export default function HomePage() {
                     {/* Primary Button with Shimmer & Sliding Arrow */}
                     <Link
                       href="/register"
-                      className="group/btn relative w-full py-4 px-6 rounded-full bg-gradient-to-r from-sky-500 via-[#0284c7] to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden"
+                      className="group/btn relative w-full py-4 px-6 rounded-xl bg-gradient-to-r from-sky-500 via-[#0284c7] to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden"
                     >
                       {/* Shimmer light sweep */}
                       <span 
@@ -623,7 +615,7 @@ export default function HomePage() {
                     {/* Secondary Button */}
                     <Link
                       href="/post-lowongan"
-                      className="group/btn2 w-full py-3.5 px-6 rounded-full bg-slate-50/90 hover:bg-sky-50/80 text-slate-800 hover:text-[#0284c7] font-bold text-xs sm:text-sm border border-slate-200 hover:border-sky-300 shadow-2xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+                      className="group/btn2 w-full py-3.5 px-6 rounded-xl bg-slate-50/90 hover:bg-sky-50/80 text-slate-800 hover:text-[#0284c7] font-bold text-xs sm:text-sm border border-slate-200 hover:border-sky-300 shadow-2xs hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
                     >
                       <Briefcase className="w-4 h-4 text-slate-500 group-hover/btn2:text-[#0284c7] group-hover/btn2:-rotate-6 transition-transform" />
                       <span>Pasang Lowongan Studio / Proyek</span>
