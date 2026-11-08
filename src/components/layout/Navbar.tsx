@@ -374,18 +374,18 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className={`flex items-center gap-2 p-1.5 rounded-lg transition-colors cursor-pointer select-none ${
+                    className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer select-none ${
                       profileDropdownOpen || isActive('/profil')
-                        ? 'text-[#0284c7]'
-                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/60'
+                        ? 'text-[#0284c7] font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                     aria-expanded={profileDropdownOpen}
                     aria-haspopup="true"
                   >
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-xs font-bold overflow-hidden shadow-2xs">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-[11px] font-bold overflow-hidden shadow-2xs">
                       <AlumniAvatar src={displayProfile?.fotoProfil} name={displayProfile?.namaLengkap} />
                     </div>
-                    <span className="text-sm font-semibold text-slate-700 hidden lg:inline">
+                    <span className="hidden lg:inline leading-none">
                       Me
                     </span>
                     <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#0284c7]' : ''}`} />
