@@ -262,6 +262,7 @@ export default function FeedPage() {
     name: profile?.namaLengkap || user?.displayName || 'Dary Halim',
     prodi: profile?.prodi || 'Animasi',
     angkatan: profile?.angkatan || '2020',
+    bio: profile?.bio || 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
     role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
     domisili: (profile as ExtendedUserProfile | null)?.domisili || 'Sleman, D.I. Yogyakarta',
     avatar: profile?.fotoProfil || ''
@@ -536,25 +537,30 @@ export default function FeedPage() {
                 </div>
               </div>
 
-              {/* PROFILE INFO: Nama, Pekerjaan, Domisili, Jurusan & Angkatan */}
+              {/* PROFILE INFO: Nama, Bio Singkat, Pekerjaan, Domisili, Jurusan & Angkatan */}
               <div className="space-y-1.5 px-1">
                 {/* 1. Nama */}
                 <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
                   {currentUser.name}
                 </h3>
 
-                {/* 2. Pekerjaan Dimana */}
-                <p className="text-xs text-slate-700 font-semibold leading-snug truncate">
+                {/* 2. Bio Singkat (Tepat di Bawah Nama) */}
+                <p className="text-[11px] text-slate-500 font-medium leading-relaxed line-clamp-3">
+                  {currentUser.bio}
+                </p>
+
+                {/* 3. Pekerjaan Dimana */}
+                <p className="text-xs text-slate-700 font-semibold leading-snug truncate pt-0.5">
                   {currentUser.role}
                 </p>
 
-                {/* 3. Domisili */}
+                {/* 4. Domisili */}
                 <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate">
                   <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                   <span>{currentUser.domisili}</span>
                 </p>
 
-                {/* 4. Jurusan dan Angkatan */}
+                {/* 5. Jurusan dan Angkatan */}
                 <p className="text-[11px] font-bold text-[#0087cc] pt-0.5">
                   {currentUser.prodi} • Angkatan {currentUser.angkatan}
                 </p>

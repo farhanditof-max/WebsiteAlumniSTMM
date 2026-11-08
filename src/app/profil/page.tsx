@@ -76,7 +76,7 @@ const DEMO_PROFILE = {
   openToWork: true,
   pekerjaanSaatIni: '3D Animator di Infinite Studios',
   domisili: 'Sleman, D.I. Yogyakarta',
-  bio: '3D Character Animator & Rigger lulusan STMM MMTC Yogyakarta. Terbiasa menangani pipeline produksi animasi 3D studio, motion graphics penyiaran, serta asset 3D untuk game engine.',
+  bio: 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
   phone: '081234567890',
   linkedinUrl: 'https://linkedin.com/in/dary-halim-mmtc',
   instagramUrl: 'https://instagram.com/daryhalim.art',
