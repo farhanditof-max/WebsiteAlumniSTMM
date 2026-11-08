@@ -282,13 +282,10 @@ export default function HomePage() {
             <div className="lg:col-span-6 space-y-6 text-left">
               <ScrollReveal direction="up" delayMs={60} durationMs={700}>
                 
-                {/* Headline: Exact Text & Highlight Stroke */}
+                {/* Headline: Clean Text Without Background Shapes */}
                 <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Tetap Terhubung, <br />
-                  <span className="relative inline-block mt-1">
-                    <span className="absolute inset-x-[-8px] bottom-1 sm:bottom-2 h-4 sm:h-5 bg-gradient-to-r from-sky-200/80 via-blue-200/70 to-indigo-200/60 -rotate-1 rounded-md -z-10" />
-                    Terus Bertumbuh
-                  </span> <br />
+                  Terus Bertumbuh <br />
                   Bersama.
                 </h1>
 
@@ -301,7 +298,7 @@ export default function HomePage() {
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <Link 
                     href="/open-to-work" 
-                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-bold text-sm tracking-wide shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#0087cc] hover:bg-[#0077b5] text-white font-bold text-sm tracking-wide shadow-md shadow-[#0087cc]/25 hover:shadow-lg hover:shadow-[#0087cc]/30 transition-all duration-200 active:scale-[0.98]"
                   >
                     <span>Gabung Sekarang</span>
                     <ArrowRight className="w-4 h-4" />
