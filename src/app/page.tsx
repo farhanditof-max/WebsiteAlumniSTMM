@@ -9,14 +9,10 @@ import { PRODI_LIST } from '@/types';
 import { 
   ArrowRight, 
   ArrowUpRight,
-  Compass,
-  Building2, 
   Video, 
   Tv, 
-  Sparkles,
-  Users,
+  Users, 
   Briefcase,
-  Star,
   CheckCircle2,
   Award,
   ShieldCheck,
@@ -256,128 +252,85 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col selection:bg-[#0284c7] selection:text-white font-sans overflow-x-hidden">
       <Navbar />
 
-      {/* HERO SECTION — AIRY, SKY-BLUE LIGHT AESTHETIC PERSIS REFERENSI (FULL VIEWPORT FIRST SCREEN) */}
-      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-between py-8 sm:py-10 lg:py-12 overflow-hidden bg-gradient-to-b from-[#eef8ff] via-[#f7fbff] to-white border-b border-sky-100/60">
+      {/* HERO SECTION — OPSI A: LIGHT EDITORIAL FULL CAMPUS BACKGROUND */}
+      <section className="relative w-full min-h-[calc(100vh-74px)] sm:min-h-[calc(100vh-80px)] flex flex-col justify-between py-10 sm:py-14 lg:py-16 overflow-hidden border-b border-slate-200/80 bg-white">
         
-        {/* Soft Organic Floating Pastel Accents */}
-                <div className="absolute -top-32 right-0 w-[550px] h-[550px] bg-sky-200/35 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -left-32 w-[450px] h-[450px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
+        {/* Full-bleed Campus Background Image */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+          <img 
+            src="/kampus_stmm.jpg" 
+            alt="Gedung Transformasi Digital STMM MMTC Yogyakarta" 
+            className="w-full h-full object-cover object-[75%_center] lg:object-[80%_center] scale-105"
+          />
+          {/* Light Editorial Side Gradient Mask: Pekat di kiri (supaya teks terbaca sempurna), menyatu ke gedung di kanan */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 sm:via-white/85 to-transparent sm:to-white/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+        </div>
 
+        {/* Content Container (Left Side Content with High Editorial Contrast) */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            
-            {/* LEFT CONTENT: Heading, Copy, Pill Buttons, Social Proof with ScrollReveal */}
-            <div className="lg:col-span-6 space-y-6 text-left">
-              <ScrollReveal direction="up" delayMs={60} durationMs={700}>
-                {/* Top Tag Pill */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-100/80 border border-sky-200 text-xs font-bold text-[#0284c7]">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
-                  <span>Portal Karir &amp; Portofolio Resmi MMTC</span>
-                </div>
+          <div className="max-w-2xl text-left space-y-6">
+            <ScrollReveal direction="up" delayMs={60} durationMs={700}>
+              
+              {/* Official Institutional Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold tracking-wide shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                <span>Portal Karir &amp; Portofolio Alumni STMM MMTC</span>
+              </div>
 
-                {/* Big Bold Headline */}
-                <h1 className="text-4xl sm:text-6xl lg:text-[60px] font-bold text-slate-900 leading-[1.12] mt-4">
-                  Portal Karir &amp; <br />
-                  Karya Alumni <span className="inline-flex items-center gap-2 text-[#0284c7]">
-                    MMTC
-                  </span>
-                </h1>
+              {/* Editorial Big Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-slate-950 leading-[1.12] tracking-tight mt-4">
+                Menghubungkan <br />
+                <span className="text-[#024E82]">Talenta Kreatif</span> <br />
+                dengan Industri Media.
+              </h1>
 
-                {/* Copywriting */}
-                <p className="text-base sm:text-lg text-slate-600 max-w-xl font-normal leading-relaxed mt-4">
-                  Wadah terpadu menghubungkan alumni Sekolah Tinggi Multi Media Yogyakarta dengan industri penyiaran, animasi, game studio, dan teknologi kreatif nasional.
+              {/* Authentic Institutional Copywriting */}
+              <p className="text-base sm:text-lg text-slate-700 max-w-xl font-normal leading-relaxed mt-4">
+                Wadah terpadu direktori karya, penyiaran televisi, radio, animasi, game development, dan teknologi multimedia Yogyakarta.
+              </p>
+
+              {/* Action Buttons: Solid High-Affordance */}
+              <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Link 
+                  href="/open-to-work" 
+                  className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#024E82] hover:bg-[#023b63] text-white font-bold text-sm tracking-wide shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                >
+                  <span>Katalog Talenta Siap Kerja</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+
+                <Link 
+                  href="/lowongan" 
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/95 hover:bg-white text-slate-800 font-bold text-sm border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-200 active:scale-[0.98] backdrop-blur-sm"
+                >
+                  <span>Bursa Lowongan Kerja</span>
+                </Link>
+              </div>
+
+              {/* Real Industry Presence Strip */}
+              <div className="pt-6 border-t border-slate-200/80">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                  Lulusan Berkarir di Studio &amp; Media Terkemuka:
                 </p>
-
-                {/* Action Buttons (Pill Shapes) */}
-                <div className="pt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
-                  <div className="relative inline-flex group">
-                    {/* Ambient Glow Aura on Hover */}
-                    <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-sky-400 to-blue-600 opacity-30 group-hover:opacity-75 blur-md transition-all duration-500 group-hover:duration-200" />
-                    
-                    <Link 
-                      href="/feed" 
-                      className="relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-sky-600 via-[#0284c7] to-sky-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/30 group-hover:shadow-sky-500/50 group-hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 overflow-hidden"
-                    >
-                      {/* Shimmer Light Beam Effect */}
-                      <span 
-                        aria-hidden="true" 
-                        className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none animate-shimmer" 
-                      />
-
-                      {/* Interactive Rotating Compass Badge */}
-                      <span className="w-6 h-6 rounded-full bg-white/15 group-hover:bg-white/25 flex items-center justify-center transition-all duration-300">
-                        <Compass className="w-4 h-4 text-white transition-transform duration-700 ease-out group-hover:rotate-[360deg]" />
-                      </span>
-
-                      {/* Label */}
-                      <span className="tracking-wide">Jelajahi Alumni Hub</span>
-
-                      {/* Smooth Sliding Arrow */}
-                      <ArrowRight className="w-4 h-4 text-white/80 group-hover:text-white transition-transform duration-300 ease-out group-hover:translate-x-1" />
-                    </Link>
-                  </div>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-700">
+                  <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xs">NET. Mediatama</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xs">MNC Media</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xs">Infinite Studios</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xs">Narasi TV</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xs">Visinema</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm border border-slate-200 shadow-2xs">Agate Games</span>
                 </div>
+              </div>
 
-                {/* Social Proof Strip with Avatars & Stars */}
-                <div className="pt-6 flex flex-col sm:flex-row sm:items-center gap-3.5">
-                  <div className="flex -space-x-2.5 overflow-hidden">
-                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                      FA
-                    </div>
-                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-amber-400 to-amber-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                      RD
-                    </div>
-                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-indigo-400 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                      AN
-                    </div>
-                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-emerald-400 to-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                      ST
-                    </div>
-                    <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                      +2k
-                    </div>
-                  </div>
-
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-1 text-amber-400">
-                      <Star className="w-4 h-4 fill-current" />
-                      <Star className="w-4 h-4 fill-current" />
-                      <Star className="w-4 h-4 fill-current" />
-                      <Star className="w-4 h-4 fill-current" />
-                      <Star className="w-4 h-4 fill-current" />
-                    </div>
-                    <p className="text-xs font-semibold text-slate-700">
-                      Bergabung dengan <strong className="text-slate-900 font-bold">2.500+ alumni MMTC</strong> di industri kreatif
-                    </p>
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
-
-            {/* RIGHT CONTENT: Foto Gedung Kampus STMM MMTC */}
-            <div className="lg:col-span-6 relative flex items-center justify-center w-full">
-              <ScrollReveal direction="left" delayMs={140} durationMs={800} className="w-full max-w-xl">
-                <div className="relative w-full">
-                  {/* Foto Gedung */}
-                  <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl shadow-sky-900/10 border-2 border-white/90 group max-h-[360px] sm:max-h-[400px] lg:max-h-[440px]">
-                    <img 
-                      src="/kampus_stmm.jpg" 
-                      alt="Gedung Transformasi Digital STMM MMTC Yogyakarta" 
-                      className="w-full h-full max-h-[360px] sm:max-h-[400px] lg:max-h-[440px] object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
-                    />
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
-
+            </ScrollReveal>
           </div>
         </div>
 
         {/* BOTTOM HERO SECTION: STATS BAR & SCROLL CUE */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 space-y-4">
-          {/* Quick Metrics Bar (Frosted Glass Pill) */}
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-4xl mx-auto py-2 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70">
+            <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-2xl py-3 px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70 shadow-xs">
               
               {/* Metric 1 */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
