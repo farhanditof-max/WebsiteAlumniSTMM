@@ -560,24 +560,11 @@ export default function FeedPage() {
                 </p>
               </div>
 
-              {/* STATS & ACTION BUTTON (SEPERTI GAMBAR 2) */}
-              <div className="pt-2 flex items-center justify-between border-t border-slate-100/80 px-1">
-                {/* Stats */}
-                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                  <div className="flex items-center gap-1" title="312 Koneksi Alumni">
-                    <Users className="w-3.5 h-3.5 text-slate-400" />
-                    <span>312</span>
-                  </div>
-                  <div className="flex items-center gap-1" title="48 Karya & Postingan">
-                    <FileText className="w-3.5 h-3.5 text-slate-400" />
-                    <span>48</span>
-                  </div>
-                </div>
-
-                {/* Action Button */}
+              {/* ACTION BUTTON */}
+              <div className="pt-2 border-t border-slate-100/80">
                 <Link
                   href="/profil"
-                  className="py-1.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition active:scale-95 shadow-2xs"
+                  className="w-full py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition active:scale-[0.98] shadow-2xs block text-center"
                 >
                   Edit Profil
                 </Link>
