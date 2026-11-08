@@ -377,49 +377,41 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 space-y-4">
           {/* Quick Metrics Bar (Frosted Glass Pill) */}
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-4xl mx-auto bg-white/85 backdrop-blur-md border border-sky-100/90 rounded-2xl sm:rounded-full p-2.5 sm:px-6 sm:py-3.5 shadow-lg shadow-sky-500/5 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-sky-100">
+            <div className="max-w-4xl mx-auto py-2 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70">
               
               {/* Metric 1 */}
               <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
-                <div className="w-9 h-9 rounded-xl bg-sky-100/70 flex items-center justify-center text-[#0284c7] shrink-0">
-                  <Users className="w-4 h-4" />
-                </div>
+                <Users className="w-5 h-5 text-[#0284c7] shrink-0" />
                 <div>
                   <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">2.500+</h4>
-                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Alumni Terkoneksi</p>
+                  <p className="text-[11px] font-medium text-slate-500 mt-1">Alumni Terkoneksi</p>
                 </div>
               </div>
 
               {/* Metric 2 */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100/70 flex items-center justify-center text-indigo-600 shrink-0">
-                  <Tv className="w-4 h-4" />
-                </div>
+                <Tv className="w-5 h-5 text-[#0284c7] shrink-0" />
                 <div>
                   <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">6 Prodi</h4>
-                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Spesialisasi Media</p>
+                  <p className="text-[11px] font-medium text-slate-500 mt-1">Spesialisasi Media</p>
                 </div>
               </div>
 
               {/* Metric 3 */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100/70 flex items-center justify-center text-emerald-600 shrink-0">
-                  <Video className="w-4 h-4" />
-                </div>
+                <Video className="w-5 h-5 text-[#0284c7] shrink-0" />
                 <div>
                   <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">150+</h4>
-                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Showreel Karya</p>
+                  <p className="text-[11px] font-medium text-slate-500 mt-1">Showreel Karya</p>
                 </div>
               </div>
 
               {/* Metric 4 */}
               <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-9 h-9 rounded-xl bg-amber-100/70 flex items-center justify-center text-amber-600 shrink-0">
-                  <Award className="w-4 h-4" />
-                </div>
+                <Award className="w-5 h-5 text-[#0284c7] shrink-0" />
                 <div>
                   <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">94%</h4>
-                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Karir Industri Kreatif</p>
+                  <p className="text-[11px] font-medium text-slate-500 mt-1">Karir Industri Kreatif</p>
                 </div>
               </div>
 
