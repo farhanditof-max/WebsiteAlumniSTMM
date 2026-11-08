@@ -96,11 +96,10 @@ export default function OpenToWorkPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* HEADER SECTION */}
-        <div className="mb-8 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 text-emerald-700 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="mb-8 space-y-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block">
             Katalog Talenta Kreatif &amp; Penyiaran
-          </div>
+          </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
             Alumni MMTC <span className="text-emerald-600">Open to Work</span>
           </h1>
@@ -243,7 +242,7 @@ export default function OpenToWorkPage() {
                     {extractSkills(alumni.bio, alumni.prodi).map((skill) => (
                       <span 
                         key={skill} 
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/60"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/60"
                       >
                         {skill}
                       </span>

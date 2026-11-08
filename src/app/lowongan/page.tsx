@@ -188,10 +188,9 @@ function LowonganContent() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* HEADER SECTION */}
         <div className="mb-8 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0284c7] text-xs font-semibold">
-            <Briefcase className="w-3.5 h-3.5" />
+          <span className="text-xs font-bold uppercase tracking-wider text-[#0087cc] block">
             Bursa Karir Resmi MMTC
-          </div>
+          </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
             Portal Lowongan Kerja Alumni
           </h1>
