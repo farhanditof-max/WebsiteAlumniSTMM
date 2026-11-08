@@ -87,7 +87,7 @@ function LowonganContent() {
           setJobs(data);
         }
       } catch (err) {
-        console.error('Error in fetchJobs:', err);
+        console.warn('Notice in fetchJobs:', err);
       } finally {
         if (!ignore) {
           setLoading(false);

@@ -170,7 +170,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
           setProfile(null);
         }
       } catch (err) {
-        console.error('Error loadProfile:', err);
+        console.warn('Notice loadProfile:', err);
         setProfile(null);
       } finally {
         setLoading(false);

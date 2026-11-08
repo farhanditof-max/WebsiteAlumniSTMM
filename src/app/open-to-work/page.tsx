@@ -66,7 +66,7 @@ export default function OpenToWorkPage() {
           setAlumniList(list);
         }
       } catch (err) {
-        console.error('Error fetching open to work alumni from public_profiles:', err);
+        console.warn('Notice: Firestore public_profiles query returned unauthenticated note:', err);
       } finally {
         if (isMounted) {
           setLoading(false);

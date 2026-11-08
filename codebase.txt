@@ -795,7 +795,7 @@ export default nextConfig;
   "dependencies": {
     "firebase": "^12.19.0",
     "lucide-react": "^1.45.0",
-    "next": "16.3.5",
+    "next": "16.4.3",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
@@ -806,7 +806,7 @@ export default nextConfig;
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.4.3",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"
@@ -7053,7 +7053,7 @@ function LowonganContent() {
           setJobs(data);
         }
       } catch (err) {
-        console.error('Error in fetchJobs:', err);
+        console.warn('Notice in fetchJobs:', err);
       } finally {
         if (!ignore) {
           setLoading(false);
@@ -7630,7 +7630,7 @@ export default function OpenToWorkPage() {
           setAlumniList(list);
         }
       } catch (err) {
-        console.error('Error fetching open to work alumni from public_profiles:', err);
+        console.warn('Notice: Firestore public_profiles query returned unauthenticated note:', err);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -9870,7 +9870,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
           setProfile(null);
         }
       } catch (err) {
-        console.error('Error loadProfile:', err);
+        console.warn('Notice loadProfile:', err);
         setProfile(null);
       } finally {
         setLoading(false);
