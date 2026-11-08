@@ -333,53 +333,33 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* BOTTOM FEATURE PILL DOCK: 4 Feature Pillars Persis Sesuai Gambar Referensi */}
+        {/* BOTTOM FEATURE DOCK: Headline Only, No Sub-headline, Clean Solid Icon Without Pill Effect */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-10 pb-2 z-10">
           <ScrollReveal direction="up" delayMs={180} durationMs={700}>
-            <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl sm:rounded-full py-4 px-6 sm:px-8 shadow-lg shadow-slate-200/50 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl sm:rounded-full py-4 px-6 sm:px-10 shadow-lg shadow-slate-200/50 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
               
-              {/* Feature 1: Jaringan Alumni - Terhubung lintas angkatan */}
-              <div className="flex items-center gap-3.5 px-2 py-1 sm:py-0">
-                <div className="w-11 h-11 rounded-full bg-sky-100/70 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Jaringan Alumni</h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 font-medium">Terhubung lintas angkatan</p>
-                </div>
+              {/* Feature 1: Jaringan Alumni */}
+              <div className="flex items-center gap-3 px-2 py-1 sm:py-0">
+                <Users className="w-5 h-5 text-[#0284c7] shrink-0" />
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Jaringan Alumni</h4>
               </div>
 
-              {/* Feature 2: Peluang Karier - Temukan informasi lowongan */}
-              <div className="flex items-center gap-3.5 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-11 h-11 rounded-full bg-sky-100/70 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <Handshake className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Peluang Karier</h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 font-medium">Temukan informasi lowongan</p>
-                </div>
+              {/* Feature 2: Peluang Karier */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <Handshake className="w-5 h-5 text-[#0284c7] shrink-0" />
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Peluang Karier</h4>
               </div>
 
-              {/* Feature 3: Kegiatan & Reuni - Ikuti agenda alumni terkini */}
-              <div className="flex items-center gap-3.5 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-11 h-11 rounded-full bg-sky-100/70 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Kegiatan &amp; Reuni</h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 font-medium">Ikuti agenda alumni terkini</p>
-                </div>
+              {/* Feature 3: Kegiatan & Reuni */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <Calendar className="w-5 h-5 text-[#0284c7] shrink-0" />
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Kegiatan &amp; Reuni</h4>
               </div>
 
-              {/* Feature 4: Berita & Cerita Alumni - Update kabar dan inspirasi */}
-              <div className="flex items-center gap-3.5 px-2 sm:pl-6 py-1 sm:py-0">
-                <div className="w-11 h-11 rounded-full bg-sky-100/70 text-[#0284c7] flex items-center justify-center shrink-0">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Berita &amp; Cerita Alumni</h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 font-medium">Update kabar dan inspirasi</p>
-                </div>
+              {/* Feature 4: Berita & Cerita Alumni */}
+              <div className="flex items-center gap-3 px-2 sm:pl-6 py-1 sm:py-0">
+                <BookOpen className="w-5 h-5 text-[#0284c7] shrink-0" />
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Berita &amp; Cerita Alumni</h4>
               </div>
 
             </div>
