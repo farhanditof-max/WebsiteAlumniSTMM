@@ -407,11 +407,6 @@ export default function Navbar() {
                             <p className="text-xs text-slate-600 font-medium leading-relaxed mt-0.5 line-clamp-2">
                               {displayProfile?.pekerjaanSaatIni || `${displayProfile?.prodi || 'Animasi'} • Angkatan ${displayProfile?.angkatan || '2020'}`}
                             </p>
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 mt-2 rounded-lg bg-sky-50 text-[11px] font-bold text-[#0284c7] border border-sky-100">
-                              <span>{displayProfile?.prodi || 'Animasi'} MMTC</span>
-                              <span>•</span>
-                              <span>Angkatan {displayProfile?.angkatan || '2020'}</span>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -512,13 +507,13 @@ export default function Navbar() {
               <div className="flex items-center gap-2.5">
                 <Link 
                   href="/login" 
-                  className="text-sm font-bold text-slate-700 hover:text-[#0284c7] px-4 py-2.5 rounded-full hover:bg-slate-50 transition"
+                  className="text-sm font-bold text-slate-700 hover:text-[#0284c7] px-4 py-2.5 rounded-xl hover:bg-slate-50 transition"
                 >
                   Masuk
                 </Link>
                 <Link 
                   href="/register" 
-                  className="text-sm font-bold px-6 py-2.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white shadow-md shadow-sky-500/25 transition active:scale-[0.98]"
+                  className="text-sm font-bold px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white shadow-md shadow-sky-500/25 transition active:scale-[0.98]"
                 >
                   Daftar Alumni
                 </Link>
@@ -670,14 +665,14 @@ export default function Navbar() {
               <Link 
                 href="/login" 
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 rounded-full border border-slate-200 text-slate-800 font-bold hover:bg-slate-50 text-sm transition"
+                className="w-full text-center py-3 rounded-xl border border-slate-200 text-slate-800 font-bold hover:bg-slate-50 text-sm transition"
               >
                 Masuk
               </Link>
               <Link 
                 href="/register" 
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] text-white font-bold text-sm shadow-md shadow-sky-500/25 transition"
+                className="w-full text-center py-3 rounded-xl bg-gradient-to-r from-sky-500 to-[#0284c7] text-white font-bold text-sm shadow-md shadow-sky-500/25 transition"
               >
                 Daftar Alumni
               </Link>
