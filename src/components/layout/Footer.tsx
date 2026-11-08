@@ -6,10 +6,10 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-slate-200/80 text-slate-500 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
           
           {/* Brand Info */}
-          <div className="space-y-4 md:col-span-2">
+          <div className="space-y-4 md:col-span-5">
             <div className="space-y-2">
               <img 
                 src="/logo_alumnihub.png" 
@@ -28,12 +28,12 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Program Studi */}
-          <div className="lg:col-span-2">
+          {/* Program Studi: 1 Baris Vertikal ke Bawah */}
+          <div className="md:col-span-4">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
               Program Studi &amp; Keahlian
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-600">
+            <div className="flex flex-col space-y-2 text-xs text-slate-600">
               <span className="hover:text-slate-900 transition cursor-default">
                 Animasi
               </span>
@@ -56,7 +56,7 @@ export default function Footer() {
           </div>
 
           {/* Tautan Navigasi */}
-          <div>
+          <div className="md:col-span-3">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3.5">
               Tautan Navigasi
             </h4>
