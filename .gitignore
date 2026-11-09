@@ -67,3 +67,5 @@ desktop.ini
 
 # Local binaries
 bin/
+
+firebase-debug.log
