@@ -551,7 +551,7 @@ export default function HomePage() {
                   </div>
 
                   <p className="text-sm text-slate-600 leading-relaxed">
-                    Gunakan Nomor Alumni resmi (format <code className="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">MMTC-YYYY-XXX</code>) untuk memverifikasi profilmu secara instan.
+                    Gunakan Nomor Alumni resmi untuk memverifikasi profilmu secara instan.
                   </p>
 
                   <div className="space-y-3">

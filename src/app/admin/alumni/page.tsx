@@ -8,8 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { 
   getAllAlumniRegistry, 
   addAlumniToRegistry, 
-  deleteAlumniFromRegistry,
-  normalizeNomorAlumni
+  deleteAlumniFromRegistry 
 } from '@/lib/auth';
 import { PRODI_LIST, ProdiType, AlumniRegistryItem } from '@/types';
 import { 
@@ -84,11 +83,6 @@ export default function AdminAlumniRegistryPage() {
 
   const handleNomorChange = (val: string) => {
     setNomorAlumni(val);
-    const clean = normalizeNomorAlumni(val);
-    const parts = clean.split('-');
-    if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
-      setAngkatan(parts[1]);
-    }
   };
 
   const handleAddAlumni = async (e: React.FormEvent) => {
@@ -420,10 +414,10 @@ export default function AdminAlumniRegistryPage() {
                   required
                   value={nomorAlumni}
                   onChange={(e) => handleNomorChange(e.target.value)}
-                  placeholder="Contoh: MMTC-2024-105 atau STMM-2023-010"
+                  placeholder="Contoh: 903452018000035"
                   className="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-200 font-mono uppercase focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600"
                 />
-                <p className="text-[10px] text-slate-400 mt-1">Format standar: MMTC-YYYY-XXX atau STMM-YYYY-XXX</p>
+                <p className="text-[10px] text-slate-400 mt-1">Nomor identitas alumni resmi terdaftar</p>
               </div>
 
               <div>

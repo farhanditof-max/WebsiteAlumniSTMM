@@ -95,6 +95,30 @@
       "angkatan": "2024",
       "isRegistered": false,
       "createdAt": "2026-10-01T00:00:00.000Z"
+    },
+    "903452018000035": {
+      "nomorAlumni": "903452018000035",
+      "namaLengkap": "Dary Halim",
+      "prodi": "Animasi",
+      "angkatan": "2018",
+      "isRegistered": false,
+      "createdAt": "2026-11-09T00:00:00.000Z"
+    },
+    "903452019000119": {
+      "nomorAlumni": "903452019000119",
+      "namaLengkap": "Maydia Goklas Pratama Simanjuntak",
+      "prodi": "Animasi",
+      "angkatan": "2019",
+      "isRegistered": false,
+      "createdAt": "2026-11-09T00:00:00.000Z"
+    },
+    "903452018000189": {
+      "nomorAlumni": "903452018000189",
+      "namaLengkap": "Farhandito Fadila",
+      "prodi": "Animasi",
+      "angkatan": "2019",
+      "isRegistered": false,
+      "createdAt": "2026-11-09T00:00:00.000Z"
     }
   },
   "users": {},

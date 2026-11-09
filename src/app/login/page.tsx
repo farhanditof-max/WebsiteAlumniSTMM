@@ -119,7 +119,7 @@ function LoginContent() {
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="nama@email.com atau MMTC-2020-103"
+                placeholder="nama@email.com atau 903452018000035"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
               />
             </div>

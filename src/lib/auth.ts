@@ -21,6 +21,9 @@ import { fetchRegisteredNomorAlumniRest, fetchUserByNomorAlumniRest, fetchUserPr
 
 // Hardcoded verified alumni whitelist untuk fallback & inisialisasi awal
 export const VERIFIED_ALUMNI_LIST = [
+  { nomorAlumni: '903452018000035', nama: 'Dary Halim', prodi: 'Animasi', angkatan: '2018', email: 'dary.halim@alumni.mmtc.ac.id' },
+  { nomorAlumni: '903452019000119', nama: 'Maydia Goklas Pratama Simanjuntak', prodi: 'Animasi', angkatan: '2019', email: 'maydia.goklas@alumni.mmtc.ac.id' },
+  { nomorAlumni: '903452018000189', nama: 'Farhandito Fadila', prodi: 'Animasi', angkatan: '2019', email: 'farhandito.fadila@alumni.mmtc.ac.id' },
   { nomorAlumni: 'MMTC-2018-001', nama: 'Budi Santoso', prodi: 'Animasi', angkatan: '2018', email: 'budi.santoso@alumni.mmtc.ac.id' },
   { nomorAlumni: 'MMTC-2019-042', nama: 'Siti Rahma', prodi: 'Game Design', angkatan: '2019', email: 'siti.rahmawati@alumni.mmtc.ac.id' },
   { nomorAlumni: 'MMTC-2020-103', nama: 'Andi Pratama', prodi: 'MIK', angkatan: '2020', email: 'andi.pratama@alumni.mmtc.ac.id' },
@@ -100,10 +103,15 @@ export async function getAlumniRegistryRecord(nomor: string): Promise<AlumniRegi
 }
 
 /**
- * Verifikasi Nomor Alumni & Validasi Kecocokan Nama Lengkap secara ketat.
- * Mencegah manipulasi nomor acak dan memastikan pendaftar adalah alumni asli.
+ * Verifikasi Nomor Alumni & Validasi Kecocokan Nama Lengkap, Prodi, dan Tahun Angkatan secara ketat.
+ * Mencegah manipulasi nomor acak dan memastikan pendaftar adalah alumni asli yang datanya sesuai.
  */
-export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Promise<{
+export async function verifyNomorAlumni(
+  nomor: string, 
+  namaLengkap?: string,
+  prodi?: string,
+  angkatan?: string
+): Promise<{
   nomorAlumni: string;
   nama: string;
   prodi: ProdiType;
@@ -111,6 +119,10 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
   isRegistered?: boolean;
   registeredUid?: string;
   nameMismatch?: boolean;
+  prodiMismatch?: boolean;
+  angkatanMismatch?: boolean;
+  expectedProdi?: string;
+  expectedAngkatan?: string;
 } | null> {
   const cleanNomor = normalizeNomorAlumni(nomor);
   if (!cleanNomor) return null;
@@ -120,7 +132,7 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
     return null;
   }
 
-  // Jika nama lengkap diberikan (saat registrasi), verifikasi kecocokan nama resmi!
+  // 1. Verifikasi kecocokan nama resmi (jika diisi)
   if (namaLengkap !== undefined && namaLengkap !== null && namaLengkap.trim() !== '') {
     const normInput = namaLengkap.trim().toLowerCase().replace(/\s+/g, ' ');
     const normOfficial = String(record.namaLengkap || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -134,6 +146,42 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
         isRegistered: record.isRegistered,
         registeredUid: record.registeredUid,
         nameMismatch: true
+      };
+    }
+  }
+
+  // 2. Verifikasi kecocokan program studi resmi (jika diisi)
+  if (prodi !== undefined && prodi !== null && prodi.trim() !== '') {
+    const normProdiInput = prodi.trim().toLowerCase();
+    const normProdiOfficial = String(record.prodi || '').trim().toLowerCase();
+    if (normProdiInput !== normProdiOfficial) {
+      return {
+        nomorAlumni: record.nomorAlumni,
+        nama: record.namaLengkap,
+        prodi: record.prodi,
+        angkatan: record.angkatan,
+        isRegistered: record.isRegistered,
+        registeredUid: record.registeredUid,
+        prodiMismatch: true,
+        expectedProdi: record.prodi
+      };
+    }
+  }
+
+  // 3. Verifikasi kecocokan tahun angkatan / lulus resmi (jika diisi)
+  if (angkatan !== undefined && angkatan !== null && angkatan.trim() !== '') {
+    const normAngkatanInput = angkatan.trim();
+    const normAngkatanOfficial = String(record.angkatan || '').trim();
+    if (normAngkatanInput !== normAngkatanOfficial) {
+      return {
+        nomorAlumni: record.nomorAlumni,
+        nama: record.namaLengkap,
+        prodi: record.prodi,
+        angkatan: record.angkatan,
+        isRegistered: record.isRegistered,
+        registeredUid: record.registeredUid,
+        angkatanMismatch: true,
+        expectedAngkatan: record.angkatan
       };
     }
   }
@@ -190,8 +238,8 @@ export async function registerAlumni(params: {
   const cleanNomor = normalizeNomorAlumni(params.nomorAlumni);
   const cleanEmail = params.email.trim().toLowerCase();
 
-  // 1. Verifikasi nomor alumni dan kecocokan nama resmi terlebih dahulu
-  const preVerified = await verifyNomorAlumni(cleanNomor, params.namaLengkap);
+  // 1. Verifikasi nomor alumni dan kecocokan nama, prodi, dan tahun angkatan resmi terlebih dahulu
+  const preVerified = await verifyNomorAlumni(cleanNomor, params.namaLengkap, params.prodi, params.angkatan);
   if (!preVerified) {
     throw new Error(
       `Nomor Alumni "${cleanNomor}" tidak terdaftar dalam database resmi alumni STMM MMTC.`
@@ -200,7 +248,19 @@ export async function registerAlumni(params: {
 
   if ('nameMismatch' in preVerified && preVerified.nameMismatch) {
     throw new Error(
-      `Nama lengkap "${params.namaLengkap}" tidak cocok dengan nama terdaftar untuk nomor alumni "${cleanNomor}" (${preVerified.nama}). Pastikan penulisan nama sesuai data akademik resmi.`
+      `Pendaftaran ditolak: Nama lengkap "${params.namaLengkap}" tidak cocok dengan data resmi nomor alumni "${cleanNomor}" (${preVerified.nama}). Pastikan penulisan nama sesuai data akademik resmi.`
+    );
+  }
+
+  if ('prodiMismatch' in preVerified && preVerified.prodiMismatch) {
+    throw new Error(
+      `Pendaftaran ditolak: Program Studi "${params.prodi}" tidak cocok dengan data resmi nomor alumni "${cleanNomor}" (${preVerified.expectedProdi}).`
+    );
+  }
+
+  if ('angkatanMismatch' in preVerified && preVerified.angkatanMismatch) {
+    throw new Error(
+      `Pendaftaran ditolak: Tahun Kelulusan/Angkatan "${params.angkatan}" tidak cocok dengan data resmi nomor alumni "${cleanNomor}" (${preVerified.expectedAngkatan}).`
     );
   }
 
@@ -251,7 +311,7 @@ export async function registerAlumni(params: {
   const uid = userCredential.user.uid;
 
   // Cek ulang status klaim nomor alumni
-  const verified = await verifyNomorAlumni(cleanNomor, params.namaLengkap);
+  const verified = await verifyNomorAlumni(cleanNomor, params.namaLengkap, params.prodi, params.angkatan);
   if (!verified) {
     throw new Error(
       `Nomor Alumni "${cleanNomor}" tidak terdaftar dalam database resmi alumni STMM MMTC.`
