@@ -79,8 +79,8 @@ export function runSecurityAcceptanceMatrix(): {
   // TC-04: Non-admin tidak dapat menambah/mengubah alumni_registry; anonim ditolak
   const tc04Passed =
     firestoreRules.includes("match /alumni_registry/{alumniId}") &&
-    firestoreRules.includes("allow read: if signedIn();") &&
-    firestoreRules.includes("allow create, delete: if isAdmin();");
+    (firestoreRules.includes("allow read: if signedIn();") || firestoreRules.includes("allow get: if signedIn();")) &&
+    (firestoreRules.includes("allow create, delete: if isAdmin();") || firestoreRules.includes("allow list, create, delete: if isAdmin();"));
   results.push({
     id: "TC-04",
     category: "Otorisasi dan Identitas",
@@ -108,7 +108,8 @@ export function runSecurityAcceptanceMatrix(): {
   const authLibContent = fs.existsSync(authLibPath) ? fs.readFileSync(authLibPath, "utf8") : "";
   const tc06Passed =
     authLibContent.includes("normalizeNomorAlumni") &&
-    firestoreRules.includes("locked(['nomorAlumni', 'prodi', 'angkatan'])");
+    (firestoreRules.includes("locked(['nomorAlumni', 'prodi', 'angkatan'])") ||
+     firestoreRules.includes("locked(['nomorAlumni', 'namaLengkap', 'prodi', 'angkatan', 'createdAt'])"));
   results.push({
     id: "TC-06",
     category: "Otorisasi dan Identitas",
@@ -326,6 +327,54 @@ export function runSecurityAcceptanceMatrix(): {
     findingCode: "F-23",
     passed: tc20Passed,
     details: "Operasi delete dievaluasi secara independen tanpa memeriksa request.resource.size/contentType yang null saat penghapusan.",
+  });
+
+  // ==========================================
+  // KATEGORI 5: FEED KOMUNITAS & PERCAKAPAN
+  // ==========================================
+
+  // TC-21: Feed Posts Public Read & Author Verification
+  const tc21Passed =
+    firestoreRules.includes("match /feed_posts/{postId}") &&
+    firestoreRules.includes("allow read: if true;") &&
+    firestoreRules.includes("request.resource.data.authorUid == request.auth.uid") &&
+    firestoreRules.includes("category in ['showreel', 'kolaborasi', 'diskusi', 'pencapaian']");
+  results.push({
+    id: "TC-21",
+    category: "Feed Komunitas & Percakapan",
+    title: "Feed Posts dapat dibaca publik, pembuatan terikat ke authorUid login dan kategori resmi",
+    findingCode: "F-FEED-01, F-FEED-02",
+    passed: tc21Passed,
+    details: "Rules mengizinkan publik membaca feed_posts, mewajibkan authorUid == request.auth.uid, dan memvalidasi enum kategori.",
+  });
+
+  // TC-22: Conversations Peserta Terisolasi
+  const tc22Passed =
+    firestoreRules.includes("match /conversations/{convId}") &&
+    firestoreRules.includes("request.auth.uid in resource.data.participants") &&
+    firestoreRules.includes("request.auth.uid in request.resource.data.participants");
+  results.push({
+    id: "TC-22",
+    category: "Feed Komunitas & Percakapan",
+    title: "Percakapan pesan antar-alumni terisolasi hanya untuk UID yang terdaftar di participants",
+    findingCode: "F-CONV-01",
+    passed: tc22Passed,
+    details: "Rules membatasi hak baca, update, delete, dan create percakapan hanya untuk pengguna yang merupakan partisipan.",
+  });
+
+  // TC-23: Feed Media Storage Protection
+  const tc23Passed =
+    storageRules.includes("match /feed_media/{userId}/{fileName}") &&
+    storageRules.includes("request.resource.size < 10 * 1024 * 1024") &&
+    storageRules.includes("request.resource.contentType.matches('image/(jpeg|png|webp)')") &&
+    storageRules.includes("request.resource.contentType == 'application/pdf'");
+  results.push({
+    id: "TC-23",
+    category: "Feed Komunitas & Percakapan",
+    title: "Storage Rules feed_media menolak SVG (vektor XSS), membatasi ukuran 10MB, dan menerima format foto/PDF sah",
+    findingCode: "F-12, F-FEED-05",
+    passed: tc23Passed,
+    details: "Path feed_media/{userId}/{fileName} membatasi ukuran <10MB dan memvalidasi ContentType hanya gambar/PDF sah (SVG ditolak).",
   });
 
   const passedCount = results.filter((r) => r.passed).length;

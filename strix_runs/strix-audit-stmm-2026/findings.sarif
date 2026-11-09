@@ -1,0 +1,142 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Strix",
+          "organization": "usestrix",
+          "version": "1.0.0",
+          "informationUri": "https://strix.ai",
+          "rules": [
+            {
+              "id": "STRIX-FINDING-001",
+              "name": "SyntheticEmailLoginFailure",
+              "shortDescription": {
+                "text": "Authentication Disconnect via Synthetic Email Domain in Alumni Login"
+              },
+              "fullDescription": {
+                "text": "The alumni portal login synthesized an artificial email address for Nomor Alumni, causing deterministic authentication failures because accounts are registered with personal emails in Firebase Auth."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/287.html",
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "7.5",
+                "cwe": [
+                  "CWE-287"
+                ],
+                "cvss_v31": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "status": "fixed"
+              }
+            },
+            {
+              "id": "STRIX-FINDING-002",
+              "name": "UntestedTriggerDataModelInconsistency",
+              "shortDescription": {
+                "text": "Untested Background Sync Cloud Trigger & Public Profile CV Badge Inconsistency"
+              },
+              "fullDescription": {
+                "text": "Background Cloud Functions trigger syncPublicProfile is not tested in automated emulator test suites, and open-to-work evaluates cvFileUrl which is omitted from public profile projections to protect PII."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/436.html",
+              "properties": {
+                "precision": "high",
+                "security-severity": "5.3",
+                "cwe": [
+                  "CWE-436"
+                ],
+                "cvss_v31": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                "status": "open"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "STRIX-FINDING-001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Authentication failure: loginAlumni constructed an artificial email domain (<nomor>@alumni.mmtc.ac.id) that does not exist in Firebase Auth."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/lib/auth.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 288,
+                  "startColumn": 1,
+                  "endLine": 321,
+                  "endColumn": 2
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/app/login/page.tsx",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 40,
+                  "startColumn": 1,
+                  "endLine": 129,
+                  "endColumn": 19
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "STRIX-FINDING-002",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Data model inconsistency: open-to-work UI tests alumni.cvFileUrl for CV Ready badge, but syncPublicProfile strips cvFileUrl for privacy, and cloud triggers lack automated emulator test verification."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "functions/src/index.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 180,
+                  "startColumn": 1,
+                  "endLine": 194,
+                  "endColumn": 7
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/app/open-to-work/page.tsx",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 210,
+                  "startColumn": 21,
+                  "endLine": 218,
+                  "endColumn": 24
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

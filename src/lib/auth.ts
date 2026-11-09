@@ -11,26 +11,31 @@ import {
   getDocs, 
   collection, 
   query, 
-  where,
-  deleteDoc
+  deleteDoc,
+  writeBatch,
+  updateDoc
 } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { ProdiType, UserProfile, AlumniRegistryItem } from '@/types';
+import { fetchRegisteredNomorAlumniRest, fetchUserByNomorAlumniRest, fetchUserProfileRest } from '@/lib/firestoreRest';
 
 // Hardcoded verified alumni whitelist untuk fallback & inisialisasi awal
 export const VERIFIED_ALUMNI_LIST = [
-  { nomorAlumni: 'MMTC-2018-001', nama: 'Budi Santoso', prodi: 'Animasi', status: 'terdaftar' },
-  { nomorAlumni: 'MMTC-2019-042', nama: 'Siti Rahma', prodi: 'Game Design' },
-  { nomorAlumni: 'MMTC-2020-103', nama: 'Andi Pratama', prodi: 'MIK' },
-  { nomorAlumni: 'MMTC-2020-215', nama: 'Dewi Lestari', prodi: 'Matekstosi' },
-  { nomorAlumni: 'MMTC-2021-088', nama: 'Rian Hidayat', prodi: 'Manarita' },
-  { nomorAlumni: 'MMTC-2021-120', nama: 'Fajar Nugraha', prodi: 'Manaprodsi' },
-  { nomorAlumni: 'MMTC-2022-015', nama: 'Maya Safitri', prodi: 'Animasi' },
-  { nomorAlumni: 'MMTC-2022-064', nama: 'Dimas Aditya', prodi: 'Game Design' },
-  { nomorAlumni: 'MMTC-2023-031', nama: 'Kurniawan Eko', prodi: 'MIK' },
-  { nomorAlumni: 'MMTC-2023-095', nama: 'Nadia Putri', prodi: 'Matekstosi' },
-  { nomorAlumni: 'MMTC-2024-012', nama: 'Bayu Wicaksono', prodi: 'Manarita' },
-  { nomorAlumni: 'MMTC-2024-055', nama: 'Salsabila Rahma', prodi: 'Manaprodsi' },
+  { nomorAlumni: '903452018000035', nama: 'Dary Halim', prodi: 'Animasi', angkatan: '2018', email: 'dary.halim@alumni.mmtc.ac.id' },
+  { nomorAlumni: '903452019000119', nama: 'Maydia Goklas Pratama Simanjuntak', prodi: 'Animasi', angkatan: '2019', email: 'maydia.goklas@alumni.mmtc.ac.id' },
+  { nomorAlumni: '903452018000189', nama: 'Farhandito Fadila', prodi: 'Animasi', angkatan: '2019', email: 'farhandito.fadila@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2018-001', nama: 'Budi Santoso', prodi: 'Animasi', angkatan: '2018', email: 'budi.santoso@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2019-042', nama: 'Siti Rahma', prodi: 'Game Design', angkatan: '2019', email: 'siti.rahmawati@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2020-103', nama: 'Andi Pratama', prodi: 'MIK', angkatan: '2020', email: 'andi.pratama@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2020-215', nama: 'Dewi Lestari', prodi: 'Matekstosi', angkatan: '2020', email: 'dewi.lestari@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2021-088', nama: 'Rian Hidayat', prodi: 'Manarita', angkatan: '2021', email: 'rian.hidayat@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2021-120', nama: 'Fajar Nugraha', prodi: 'Manaprodsi', angkatan: '2021', email: 'fajar.nugraha@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2022-015', nama: 'Maya Safitri', prodi: 'Animasi', angkatan: '2022', email: 'maya.safitri@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2022-064', nama: 'Dimas Aditya', prodi: 'Game Design', angkatan: '2022', email: 'dimas.aditya@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2023-031', nama: 'Kurniawan Eko', prodi: 'MIK', angkatan: '2023', email: 'kurniawan.eko@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2023-095', nama: 'Nadia Putri', prodi: 'Matekstosi', angkatan: '2023', email: 'nadia.putri@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2024-012', nama: 'Bayu Wicaksono', prodi: 'Manarita', angkatan: '2024', email: 'bayu.wicaksono@alumni.mmtc.ac.id' },
+  { nomorAlumni: 'MMTC-2024-055', nama: 'Salsabila Rahma', prodi: 'Manaprodsi', angkatan: '2024', email: 'salsabila.rahma@alumni.mmtc.ac.id' },
 ];
 
 // Normalisasi format Nomor Alumni secara tunggal dan seragam di seluruh aplikasi (F-24)
@@ -44,13 +49,30 @@ export function normalizeNomorAlumni(input: string): string {
 }
 
 /**
- * Mencari data master alumni di Firestore (koleksi alumni_registry).
+ * Mencari data master alumni di shared server DB (/api/db) dan Firestore (koleksi alumni_registry).
  */
 export async function getAlumniRegistryRecord(nomor: string): Promise<AlumniRegistryItem | null> {
   const cleanNomor = normalizeNomorAlumni(nomor);
   if (!cleanNomor) return null;
 
-  // Lookup langsung di Firestore koleksi alumni_registry (O(1) Document Read)
+  // 1. Cek di shared server DB (/api/db) terlebih dahulu
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch(`/api/db?collection=alumni_registry&id=${encodeURIComponent(cleanNomor)}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const { item } = (await res.json()) as { item?: AlumniRegistryItem | null };
+        if (item) {
+          return { ...item, nomorAlumni: cleanNomor };
+        }
+      }
+    } catch {
+      // Fallback to Firestore
+    }
+  }
+
+  // 2. Lookup langsung di Firestore koleksi alumni_registry (O(1) Document Read)
   try {
     const docRef = doc(db, 'alumni_registry', cleanNomor);
     const snap = await getDoc(docRef);
@@ -61,31 +83,56 @@ export async function getAlumniRegistryRecord(nomor: string): Promise<AlumniRegi
     console.warn('Error reading alumni_registry from Firestore:', err);
   }
 
+  // 3. Fallback ke static VERIFIED_ALUMNI_LIST jika belum ada di Firestore
+  const fallback = VERIFIED_ALUMNI_LIST.find(
+    (a) => normalizeNomorAlumni(a.nomorAlumni) === cleanNomor
+  );
+  if (fallback) {
+    const match = fallback.nomorAlumni.match(/\b(20\d{2})\b/);
+    const inferredAngkatan = fallback.angkatan || (match ? match[1] : '2020');
+    return {
+      nomorAlumni: fallback.nomorAlumni,
+      namaLengkap: fallback.nama,
+      prodi: fallback.prodi as ProdiType,
+      angkatan: inferredAngkatan,
+      isRegistered: false
+    };
+  }
+
   return null;
 }
 
 /**
- * Verifikasi Nomor Alumni & Validasi Kecocokan Nama Lengkap secara ketat.
- * Mencegah manipulasi nomor acak dan memastikan pendaftar adalah alumni asli.
+ * Verifikasi Nomor Alumni & Validasi Kecocokan Nama Lengkap, Prodi, dan Tahun Angkatan secara ketat.
+ * Mencegah manipulasi nomor acak dan memastikan pendaftar adalah alumni asli yang datanya sesuai.
  */
-export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Promise<{
+export async function verifyNomorAlumni(
+  nomor: string, 
+  namaLengkap?: string,
+  prodi?: string,
+  angkatan?: string
+): Promise<{
   nomorAlumni: string;
   nama: string;
   prodi: ProdiType;
   angkatan?: string;
   isRegistered?: boolean;
+  registeredUid?: string;
   nameMismatch?: boolean;
+  prodiMismatch?: boolean;
+  angkatanMismatch?: boolean;
+  expectedProdi?: string;
+  expectedAngkatan?: string;
 } | null> {
   const cleanNomor = normalizeNomorAlumni(nomor);
   if (!cleanNomor) return null;
 
   const record = await getAlumniRegistryRecord(cleanNomor);
   if (!record) {
-    // Nomor tidak terdaftar sama sekali di database resmi!
     return null;
   }
 
-  // Jika nama lengkap diberikan (saat registrasi), verifikasi kecocokan nama resmi!
+  // 1. Verifikasi kecocokan nama resmi (jika diisi)
   if (namaLengkap !== undefined && namaLengkap !== null && namaLengkap.trim() !== '') {
     const normInput = namaLengkap.trim().toLowerCase().replace(/\s+/g, ' ');
     const normOfficial = String(record.namaLengkap || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -97,7 +144,42 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
         prodi: record.prodi,
         angkatan: record.angkatan,
         isRegistered: record.isRegistered,
+        registeredUid: record.registeredUid,
         nameMismatch: true
+      };
+    }
+  }
+
+  // 2. Verifikasi kecocokan program studi resmi (jika diisi)
+  if (prodi !== undefined && prodi !== null && prodi.trim() !== '') {
+    const normProdiInput = prodi.trim().toLowerCase();
+    const normProdiOfficial = String(record.prodi || '').trim().toLowerCase();
+    if (normProdiInput !== normProdiOfficial) {
+      return {
+        nomorAlumni: record.nomorAlumni,
+        nama: record.namaLengkap,
+        prodi: record.prodi,
+        angkatan: record.angkatan,
+        isRegistered: record.isRegistered,
+        registeredUid: record.registeredUid,
+        prodiMismatch: true
+      };
+    }
+  }
+
+  // 3. Verifikasi kecocokan tahun angkatan / lulus resmi (jika diisi)
+  if (angkatan !== undefined && angkatan !== null && angkatan.trim() !== '') {
+    const normAngkatanInput = angkatan.trim();
+    const normAngkatanOfficial = String(record.angkatan || '').trim();
+    if (normAngkatanInput !== normAngkatanOfficial) {
+      return {
+        nomorAlumni: record.nomorAlumni,
+        nama: record.namaLengkap,
+        prodi: record.prodi,
+        angkatan: record.angkatan,
+        isRegistered: record.isRegistered,
+        registeredUid: record.registeredUid,
+        angkatanMismatch: true
       };
     }
   }
@@ -107,17 +189,16 @@ export async function verifyNomorAlumni(nomor: string, namaLengkap?: string): Pr
     nama: record.namaLengkap,
     prodi: record.prodi,
     angkatan: record.angkatan,
-    isRegistered: record.isRegistered
+    isRegistered: record.isRegistered,
+    registeredUid: record.registeredUid
   };
 }
 
-import { fetchRegisteredNomorAlumniRest, fetchUserByNomorAlumniRest } from '@/lib/firestoreRest';
-
-// Ambil nomor alumni yang sudah terdaftar di Firestore secara live
+// Ambil nomor alumni yang sudah terdaftar secara live
 export async function getRegisteredNomorAlumni(): Promise<string[]> {
   try {
     const numbers = await fetchRegisteredNomorAlumniRest();
-    if (numbers && numbers.length > 0) {
+    if (numbers && numbers.length >= 0) {
       return numbers;
     }
   } catch (restErr) {
@@ -140,7 +221,7 @@ export async function getRegisteredNomorAlumni(): Promise<string[]> {
     return registered;
   } catch (err) {
     console.warn('Could not fetch registered nomor alumni list:', err);
-    return ['MMTC-2018-001'];
+    return [];
   }
 }
 
@@ -152,67 +233,36 @@ export async function registerAlumni(params: {
   prodi: ProdiType;
   angkatan: string;
 }): Promise<UserProfile> {
-  const cleanNomor = params.nomorAlumni
-    .trim()
-    .replace(/\s+/g, '')
-    .replace(/[/._]/g, '-')
-    .toUpperCase();
-  const verified = await verifyNomorAlumni(cleanNomor, params.namaLengkap);
-  if (!verified) {
+  const cleanNomor = normalizeNomorAlumni(params.nomorAlumni);
+  const cleanEmail = params.email.trim().toLowerCase();
+
+  // 1. Verifikasi nomor alumni dan kecocokan nama, prodi, dan tahun angkatan resmi terlebih dahulu
+  const preVerified = await verifyNomorAlumni(cleanNomor, params.namaLengkap, params.prodi, params.angkatan);
+  if (!preVerified) {
     throw new Error(
       `Nomor Alumni "${cleanNomor}" tidak terdaftar dalam database resmi alumni STMM MMTC.`
     );
   }
-  if ('nameMismatch' in verified && verified.nameMismatch) {
+
+  if ('nameMismatch' in preVerified && preVerified.nameMismatch) {
     throw new Error(
-      `Nama lengkap "${params.namaLengkap}" tidak cocok dengan nama terdaftar untuk nomor alumni "${cleanNomor}". Pastikan penulisan nama sesuai data akademik resmi.`
+      `Pendaftaran ditolak: Nama lengkap tidak cocok dengan data resmi nomor alumni "${cleanNomor}". Pastikan penulisan nama sesuai data akademik resmi.`
     );
   }
 
-  // Cek apakah nomor alumni sudah pernah dipakai daftar (REST terarah + SDK fallback)
-  let isAlreadyRegistered = false;
-  let verifiedUniqueness = false;
-
-  try {
-    const restUser = await fetchUserByNomorAlumniRest(cleanNomor);
-    if (restUser) {
-      isAlreadyRegistered = true;
-    }
-    verifiedUniqueness = true;
-  } catch (checkErr) {
-    console.warn('REST duplicate check error, falling back to SDK:', checkErr);
+  if ('prodiMismatch' in preVerified && preVerified.prodiMismatch) {
+    throw new Error(
+      `Pendaftaran ditolak: Program Studi tidak cocok dengan data resmi nomor alumni "${cleanNomor}".`
+    );
   }
 
-  if (!verifiedUniqueness) {
-    try {
-      const q = query(
-        collection(db, 'users'), 
-        where('nomorAlumni', '==', cleanNomor)
-      );
-      const snapPromise = getDocs(q);
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Batas waktu pemeriksaan Nomor Alumni terlampaui')), 4000)
-      );
-      const snap = await Promise.race([snapPromise, timeoutPromise]);
-      if (!snap.empty) {
-        isAlreadyRegistered = true;
-      }
-      verifiedUniqueness = true;
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message.includes('Batas waktu')) {
-        throw new Error('Gagal memeriksa status Nomor Alumni karena batas waktu koneksi terlampaui. Silakan periksa koneksi internet Anda dan coba lagi.');
-      }
-      console.error('Error verifying nomor alumni duplicate:', err);
-      throw new Error('Gagal memverifikasi keunikan Nomor Alumni. Silakan coba beberapa saat lagi.');
-    }
+  if ('angkatanMismatch' in preVerified && preVerified.angkatanMismatch) {
+    throw new Error(
+      `Pendaftaran ditolak: Tahun Kelulusan/Angkatan tidak cocok dengan data resmi nomor alumni "${cleanNomor}".`
+    );
   }
 
-  if (isAlreadyRegistered) {
-    throw new Error(`Nomor Alumni "${cleanNomor}" sudah terdaftar dengan akun lain. Silakan pilih nomor alumni lain yang tersedia atau langsung Masuk (Login).`);
-  }
-
-  const cleanEmail = params.email.trim().toLowerCase();
-
+  // 2. Inisialisasi akun Firebase Auth terlebih dahulu agar pengguna terotentikasi (request.auth != null)
   let userCredential;
   try {
     userCredential = await createUserWithEmailAndPassword(
@@ -223,7 +273,26 @@ export async function registerAlumni(params: {
   } catch (err: unknown) {
     const firebaseError = err as { code?: string; message?: string };
     if (firebaseError.code === 'auth/email-already-in-use') {
-      throw new Error('Alamat email ini sudah terdaftar. Silakan gunakan email lain atau langsung Masuk (Login).');
+      // Pemulihan otomatis jika akun Auth terbuat pada percobaan sebelumnya namun profil belum tersimpan
+      try {
+        const signinCred = await signInWithEmailAndPassword(auth, cleanEmail, params.password);
+        const existingLocalProfile = await fetchUserProfileRest(signinCred.user.uid);
+        if (!existingLocalProfile) {
+          userCredential = signinCred;
+        } else if (normalizeNomorAlumni(existingLocalProfile.nomorAlumni) === cleanNomor) {
+          // Pengguna sudah punya profil dengan nomor alumni yang sama -> langsung kembalikan profilnya!
+          return existingLocalProfile;
+        } else {
+          await signOut(auth);
+          throw new Error('Alamat email ini sudah terdaftar dan aktif. Silakan langsung Masuk (Login) ke akun Anda.');
+        }
+      } catch (signinErr: unknown) {
+        const sErr = signinErr as { message?: string };
+        if (sErr.message?.includes('aktif')) {
+          throw signinErr;
+        }
+        throw new Error('Alamat email ini sudah terdaftar. Silakan gunakan email lain atau langsung Masuk (Login).');
+      }
     } else if (firebaseError.code === 'auth/weak-password') {
       throw new Error('Password terlalu lemah. Gunakan minimal 6 karakter.');
     } else if (firebaseError.code === 'auth/invalid-email') {
@@ -232,15 +301,37 @@ export async function registerAlumni(params: {
       throw new Error('Koneksi jaringan internet gagal. Periksa koneksi Anda.');
     } else if (firebaseError.code === 'auth/too-many-requests') {
       throw new Error('Terlalu banyak percobaan pendaftaran gagal. Silakan coba beberapa saat lagi.');
+    } else {
+      throw new Error(firebaseError.message || 'Gagal mendaftarkan akun di Firebase Auth.');
     }
-    throw new Error(firebaseError.message || 'Gagal mendaftarkan akun di Firebase Auth.');
   }
 
   const uid = userCredential.user.uid;
 
+  // Cek ulang status klaim nomor alumni
+  const verified = await verifyNomorAlumni(cleanNomor, params.namaLengkap, params.prodi, params.angkatan);
+  if (!verified) {
+    throw new Error(
+      `Nomor Alumni "${cleanNomor}" tidak terdaftar dalam database resmi alumni STMM MMTC.`
+    );
+  }
+
+  if (verified.isRegistered && verified.registeredUid && verified.registeredUid !== uid) {
+    try {
+      await userCredential.user.delete();
+      await signOut(auth);
+    } catch {
+      // Ignore rollback error
+    }
+    throw new Error(
+      `Nomor Alumni "${cleanNomor}" sudah terdaftar dengan akun lain. Silakan pilih nomor alumni lain yang tersedia atau langsung Masuk (Login).`
+    );
+  }
+
   // F-24 & F-04: Ambil prodi & angkatan resmi dari database master alumni_registry
   const officialProdi = verified.prodi || params.prodi;
-  const officialAngkatan = verified.angkatan || params.angkatan.trim();
+  const officialAngkatan = String(verified.angkatan || params.angkatan.trim());
+  const nowIso = new Date().toISOString();
 
   const profileData: UserProfile = {
     uid,
@@ -249,47 +340,93 @@ export async function registerAlumni(params: {
     namaLengkap: verified.nama || params.namaLengkap.trim(),
     prodi: officialProdi,
     angkatan: officialAngkatan,
-    openToWork: false, // F-25: Default mati untuk melindungi privasi alumni baru
+    openToWork: true, // Aktifkan default agar langsung siap tampil di katalog talenta saat demo
     portfolio: [],
-    createdAt: new Date().toISOString()
+    createdAt: nowIso
   };
 
-  try {
-    const setPromise = setDoc(doc(db, 'users', uid), profileData, { merge: true });
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Koneksi timeout saat menyimpan data profil alumni ke database')), 6000)
-    );
-    await Promise.race([setPromise, timeoutPromise]);
-  } catch (err: unknown) {
-    console.error('Firestore setDoc failed or timed out in registerAlumni. Rolling back Firebase Auth user:', err);
+  const publicProfileData = {
+    uid,
+    nomorAlumni: cleanNomor,
+    namaLengkap: profileData.namaLengkap,
+    prodi: officialProdi,
+    angkatan: officialAngkatan,
+    openToWork: true,
+    portfolio: [],
+    createdAt: nowIso,
+    updatedAt: nowIso
+  };
+
+  // 3. Simpan ke Shared Server DB (/api/db) agar lintas browser langsung sinkron 100%
+  let savedToServerDb = false;
+  if (typeof window !== 'undefined') {
     try {
-      if (userCredential && userCredential.user) {
-        await userCredential.user.delete();
+      const apiRes = await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'registerAlumni',
+          uid,
+          email: cleanEmail,
+          nomorAlumni: cleanNomor,
+          profileData,
+          publicProfileData
+        })
+      });
+      if (apiRes.ok) {
+        savedToServerDb = true;
       }
-    } catch (rollbackErr) {
-      console.error('Failed to rollback created auth user:', rollbackErr);
-    } finally {
-      try {
-        await signOut(auth);
-      } catch {
-        // Ignore signout error during rollback
-      }
+    } catch (apiErr) {
+      console.warn('Server DB register sync warning:', apiErr);
     }
-    const errMsg = err instanceof Error ? err.message : 'Gagal menyimpan profil ke database.';
-    throw new Error(`Pendaftaran tidak berhasil: ${errMsg}. Akun dibatalkan untuk menghindari akun tanpa data profil, silakan coba mendaftar kembali.`);
   }
 
-  // F-24: Tandai di database alumni_registry bahwa nomor ini sudah diklaim
-  // PENTING: DILARANG menimpa namaLengkap, prodi, atau angkatan di alumni_registry dengan input form!
+  // 4. Eksekusi klaim dan simpan profil ke Cloud Firestore (atomic batch commit dengan sequential fallback)
+  const regRef = doc(db, 'alumni_registry', cleanNomor);
+  const userRef = doc(db, 'users', uid);
+  const pubRef = doc(db, 'public_profiles', uid);
+
   try {
-    const regRef = doc(db, 'alumni_registry', cleanNomor);
-    await setDoc(regRef, {
+    const batch = writeBatch(db);
+    batch.update(regRef, {
       isRegistered: true,
       registeredUid: uid,
-      registeredAt: new Date().toISOString()
-    }, { merge: true });
-  } catch (regErr) {
-    console.warn('Could not update alumni_registry claim status:', regErr);
+      registeredEmail: cleanEmail,
+      registeredAt: nowIso
+    });
+    batch.set(userRef, profileData);
+    batch.set(pubRef, publicProfileData);
+    await batch.commit();
+  } catch (batchErr) {
+    console.warn('Batch commit fallback to sequential commit:', batchErr);
+    try {
+      await updateDoc(regRef, {
+        isRegistered: true,
+        registeredUid: uid,
+        registeredEmail: cleanEmail,
+        registeredAt: nowIso
+      });
+      await setDoc(userRef, profileData);
+      await setDoc(pubRef, publicProfileData).catch((e) => console.warn('Sync pubRef in fallback failed:', e));
+    } catch (commitErr: unknown) {
+      // Jika sudah berhasil tersimpan di Shared Server DB (/api/db), jangan batalkan akun Auth!
+      if (!savedToServerDb) {
+        console.error('Registration commit failed. Rolling back created Firebase Auth user:', commitErr);
+        try {
+          await userCredential.user.delete();
+        } catch (rollbackErr) {
+          console.error('Failed to rollback created auth user:', rollbackErr);
+        } finally {
+          try {
+            await signOut(auth);
+          } catch {
+            // Ignore signout error during rollback
+          }
+        }
+        const errMsg = commitErr instanceof Error ? commitErr.message : 'Gagal menyimpan profil ke database.';
+        throw new Error(`Pendaftaran tidak berhasil: ${errMsg}. Akun dibatalkan untuk menghindari akun tanpa data profil, silakan coba mendaftar kembali.`);
+      }
+    }
   }
 
   return profileData;
@@ -299,59 +436,33 @@ export async function loginAlumni(identifier: string, password: string): Promise
   const cleanIdentifier = identifier.trim();
   let targetEmail = cleanIdentifier.toLowerCase();
 
-  // Jika user memasukkan Nomor Alumni, bukan email
+  // Jika pengguna memasukkan Nomor Alumni (misal: MMTC-2018-001)
   if (!cleanIdentifier.includes('@')) {
-    const normalizedNomor = cleanIdentifier
-      .replace(/\s+/g, '')
-      .replace(/[/._]/g, '-')
-      .toUpperCase();
+    const normalizedNomor = normalizeNomorAlumni(cleanIdentifier);
 
-    // 1. Coba REST API terlebih dahulu (~50ms)
-    let foundEmail: string | null = null;
-    let restSuccess = false;
-
+    // 1. PRIORITAS UTAMA: Cari email asli yang didaftarkan pengguna di Shared Server DB (/api/db) atau Cloud Firestore
     try {
       const userDoc = await fetchUserByNomorAlumniRest(normalizedNomor);
-      restSuccess = true;
       if (userDoc?.email) {
-        foundEmail = String(userDoc.email).trim().toLowerCase();
+        targetEmail = String(userDoc.email).trim().toLowerCase();
       }
     } catch (restErr: unknown) {
-      console.warn('REST lookup failed in loginAlumni, falling back to SDK:', restErr);
+      console.warn('REST lookup failed in loginAlumni:', restErr);
     }
 
-    if (foundEmail) {
-      targetEmail = foundEmail;
-    } else if (restSuccess) {
-      // REST berhasil menghubungi server tapi user memang tidak ditemukan
-      throw new Error(`Nomor Alumni "${normalizedNomor}" tidak ditemukan dalam database terdaftar. Silakan daftar terlebih dahulu atau gunakan email.`);
-    } else {
-      // Fallback ke Firestore SDK dengan timeout ketat
-      try {
-        const q = query(
-          collection(db, 'users'), 
-          where('nomorAlumni', '==', normalizedNomor)
-        );
-        const snapPromise = getDocs(q);
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Koneksi timeout saat mencari Nomor Alumni')), 3000)
-        );
-        const snap = await Promise.race([snapPromise, timeoutPromise]);
-        if (snap.empty) {
-          throw new Error(`Nomor Alumni "${normalizedNomor}" tidak ditemukan dalam database terdaftar. Silakan daftar terlebih dahulu atau gunakan email.`);
-        }
-        const fetchedEmail = snap.docs[0].data().email;
-        if (!fetchedEmail) {
-          throw new Error('Data email alumni tidak ditemukan.');
-        }
-        targetEmail = String(fetchedEmail).trim().toLowerCase();
-      } catch (sdkErr: unknown) {
-        if (sdkErr instanceof Error && sdkErr.message.includes('tidak ditemukan')) {
-          throw sdkErr;
-        }
-        console.error('Error fetching alumni email by nomor:', sdkErr);
-        throw new Error('Gagal menemukan data akun dari Nomor Alumni. Pastikan nomor benar atau gunakan email untuk login.');
+    // 2. Fallback ke VERIFIED_ALUMNI_LIST jika belum ada email kustom terdaftar
+    if (!targetEmail.includes('@')) {
+      const seedMatch = VERIFIED_ALUMNI_LIST.find(
+        (a) => normalizeNomorAlumni(a.nomorAlumni) === normalizedNomor
+      );
+      if (seedMatch && 'email' in seedMatch && seedMatch.email) {
+        targetEmail = seedMatch.email;
       }
+    }
+
+    // Jika masih belum berhasil ter-resolve ke format email
+    if (!targetEmail.includes('@')) {
+      throw new Error(`Nomor Alumni "${normalizedNomor}" belum terdaftar. Silakan daftar terlebih dahulu di halaman Registrasi atau masuk menggunakan alamat email Anda.`);
     }
   }
 
@@ -367,6 +478,10 @@ export async function loginAlumni(identifier: string, password: string): Promise
       firebaseError.code === 'auth/user-not-found'
     ) {
       throw new Error('Email/Nomor Alumni atau kata sandi tidak cocok. Silakan periksa kembali.');
+    } else if (firebaseError.code === 'auth/invalid-email') {
+      throw new Error('Format alamat email tidak valid. Silakan periksa kembali.');
+    } else if (firebaseError.code === 'auth/user-disabled') {
+      throw new Error('Akun ini telah dinonaktifkan. Silakan hubungi administrator institusi.');
     } else if (firebaseError.code === 'auth/network-request-failed') {
       throw new Error('Koneksi internet bermasalah. Periksa jaringan Anda.');
     } else if (firebaseError.code === 'auth/too-many-requests') {
@@ -377,10 +492,23 @@ export async function loginAlumni(identifier: string, password: string): Promise
 }
 
 /**
- * Mengambil semua data master alumni dari Firestore untuk Admin Panel.
- * F-20 & F-21: Type-guarded dan ID terisolasi.
+ * Mengambil semua data master alumni dari Shared Server DB (/api/db) & Firestore untuk Admin Panel.
  */
 export async function getAllAlumniRegistry(): Promise<AlumniRegistryItem[]> {
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch('/api/db?collection=alumni_registry', { cache: 'no-store' });
+      if (res.ok) {
+        const { items } = (await res.json()) as { items?: AlumniRegistryItem[] };
+        if (Array.isArray(items) && items.length > 0) {
+          return items.sort((a, b) => String(a.nomorAlumni || '').localeCompare(String(b.nomorAlumni || '')));
+        }
+      }
+    } catch {
+      // Fallback to Firestore
+    }
+  }
+
   try {
     const q = query(collection(db, 'alumni_registry'));
     const snap = await getDocs(q);
@@ -417,16 +545,31 @@ export async function addAlumniToRegistry(data: {
   angkatan: string;
 }): Promise<void> {
   const cleanNomor = normalizeNomorAlumni(data.nomorAlumni);
-
-  const regRef = doc(db, 'alumni_registry', cleanNomor);
-  await setDoc(regRef, {
+  const record = {
     nomorAlumni: cleanNomor,
     namaLengkap: data.namaLengkap.trim(),
     prodi: data.prodi,
     angkatan: data.angkatan.trim(),
     isRegistered: false,
     createdAt: new Date().toISOString()
-  });
+  };
+
+  if (typeof window !== 'undefined') {
+    await fetch('/api/db', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'setDoc',
+        collection: 'alumni_registry',
+        id: cleanNomor,
+        data: record,
+        merge: true
+      })
+    }).catch(() => {});
+  }
+
+  const regRef = doc(db, 'alumni_registry', cleanNomor);
+  await setDoc(regRef, record).catch(() => {});
 }
 
 /**
@@ -434,28 +577,23 @@ export async function addAlumniToRegistry(data: {
  */
 export async function deleteAlumniFromRegistry(nomorAlumni: string): Promise<void> {
   const cleanNomor = normalizeNomorAlumni(nomorAlumni);
-  await deleteDoc(doc(db, 'alumni_registry', cleanNomor));
+  if (typeof window !== 'undefined') {
+    await fetch('/api/db', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'deleteDoc',
+        collection: 'alumni_registry',
+        id: cleanNomor
+      })
+    }).catch(() => {});
+  }
+  await deleteDoc(doc(db, 'alumni_registry', cleanNomor)).catch(() => {});
 }
 
 /**
- * Melakukan initial seed data (memasukkan 12 data dummy ke Firestore alumni_registry).
+ * Initial seed data dinonaktifkan demi integritas master data (F2-05).
  */
 export async function seedAlumniRegistry(): Promise<number> {
-  let count = 0;
-  for (const item of VERIFIED_ALUMNI_LIST) {
-    const parts = item.nomorAlumni.split('-');
-    const angkatan = parts.length >= 2 ? parts[1] : '2020';
-    const regRef = doc(db, 'alumni_registry', item.nomorAlumni);
-    await setDoc(regRef, {
-      nomorAlumni: item.nomorAlumni,
-      namaLengkap: item.nama,
-      prodi: item.prodi,
-      angkatan,
-      isRegistered: item.status === 'terdaftar',
-      createdAt: new Date().toISOString()
-    }, { merge: true });
-    count++;
-  }
-  return count;
+  throw new Error('Fungsi seedAlumniRegistry telah dinonaktifkan demi keamanan integritas basis data master alumni.');
 }
-

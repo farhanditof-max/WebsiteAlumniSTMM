@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { initializeFirestore, getFirestore, Firestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { initializeFirestore, getFirestore, Firestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -27,5 +27,36 @@ try {
 
 export const db = firestoreDb;
 export const storage = getStorage(app);
-export default app;
 
+// Connect to Local Firebase Emulators when Sandbox/Staging mode is enabled
+const authEmulator = process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST;
+const firestoreEmulator = process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST;
+const storageEmulator = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_EMULATOR_HOST;
+
+if (authEmulator) {
+  try {
+    connectAuthEmulator(auth, `http://${authEmulator}`, { disableWarnings: true });
+  } catch {
+    // Emulator already connected in hot-reload
+  }
+}
+
+if (firestoreEmulator) {
+  try {
+    const [host, port] = firestoreEmulator.split(":");
+    connectFirestoreEmulator(db, host || "127.0.0.1", parseInt(port || "8080"));
+  } catch {
+    // Emulator already connected in hot-reload
+  }
+}
+
+if (storageEmulator) {
+  try {
+    const [host, port] = storageEmulator.split(":");
+    connectStorageEmulator(storage, host || "127.0.0.1", parseInt(port || "9199"));
+  } catch {
+    // Emulator already connected in hot-reload
+  }
+}
+
+export default app;

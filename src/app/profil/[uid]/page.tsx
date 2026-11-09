@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { UserProfile, PortfolioItem } from '@/types';
-import { parseYouTubeVideoId, formatWhatsAppUrl, safeHttpUrl } from '@/lib/media';
+import { parseYouTubeVideoId, formatWhatsAppUrl } from '@/lib/media';
+import { useAuth } from '@/context/AuthContext';
 import { 
   FileText, 
   ExternalLink, 
@@ -15,168 +16,197 @@ import {
   Phone, 
   Globe, 
   Mail, 
-  Loader2, 
   Video,
-  Lock,
-  ShieldCheck,
-  Clock,
-  Send,
-  X,
-  CheckCircle2
+  User,
+  Share2,
+  Maximize2,
+  Briefcase,
+  MapPin
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
-import { useAuth } from '@/context/AuthContext';
+import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
+import { OpenToWorkBadge } from '@/components/ui/Badge';
+import { CinemaLightbox } from '@/components/ui/Modal';
+import { ShareModal } from '@/components/ui/ShareModal';
+import { extractSkills } from '@/components/profile/skills';
+import AlumniActivityHistory from '@/components/profile/AlumniActivityHistory';
+
+const InstagramIcon = ({ className = "w-4 h-4 text-[#0087cc]" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
+export interface CustomLinkItem {
+  id: string;
+  title: string;
+  url: string;
+}
+
+interface ExtendedUserProfile extends UserProfile {
+  pekerjaanSaatIni?: string;
+  pekerjaan?: string;
+  domisili?: string;
+  instagramUrl?: string;
+  customLinks?: CustomLinkItem[];
+}
+
+// Komponen pratinjau portofolio gambar di luar fungsi render (React 19 pattern)
+function PortfolioImagePreview({ url, title }: { url: string; title: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-64 flex items-center justify-center p-2">
+      {hasError ? (
+        <span className="text-xs text-slate-400 py-6">Gambar tidak dapat dimuat</span>
+      ) : (
+        <img 
+          src={url} 
+          alt={title} 
+          className="w-full h-full max-h-60 object-contain rounded-lg" 
+          onError={() => setHasError(true)}
+        />
+      )}
+    </div>
+  );
+}
 
 export default function PublicProfilePage({ params }: { params: Promise<{ uid: string }> }) {
   const resolvedParams = use(params);
   const rawUid = resolvedParams.uid;
-  const cleanUid = rawUid ? decodeURIComponent(rawUid).trim() : '';
-  const { user, profile: authProfile } = useAuth();
 
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
 
-  // Status Permintaan Kontak WhatsApp (Proteksi PII sesama Alumni)
-  const [contactRequestStatus, setContactRequestStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [contactPurpose, setContactPurpose] = useState('Peluang Kerja / Proyek');
-  const [contactMessage, setContactMessage] = useState('');
-  const [submittingContact, setSubmittingContact] = useState(false);
-  const [contactError, setContactError] = useState<string | null>(null);
-  const [contactSuccessMsg, setContactSuccessMsg] = useState<string | null>(null);
+  const isOwner = Boolean(user && profile && user.uid === profile.uid);
 
   useEffect(() => {
     async function loadProfile() {
-      if (!cleanUid) return;
+      if (!rawUid) return;
+      const cleanUid = decodeURIComponent(rawUid).trim();
       setLoading(true);
 
       try {
-        // F-21 & F-25: Hanya lookup langsung berdasarkan Document ID (UID) terverifikasi
-        // Menutup kebocoran profil & CV alumni non-openToWork via URL parameter tebakan nomorAlumni/email
-        const docRef = doc(db, 'users', cleanUid);
-        const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 4000)
-        );
-        let snap;
-        try {
-          snap = await Promise.race([getDoc(docRef), timeout]);
-        } catch {
-          snap = null;
+        let loaded = false;
+
+        // 0. Coba ambil dari Server DB (/api/db) terlebih dahulu
+        if (typeof window !== 'undefined') {
+          try {
+            const resUser = await fetch(`/api/db?collection=users&id=${encodeURIComponent(cleanUid)}`, { cache: 'no-store' });
+            if (resUser.ok) {
+              const jsonUser = await resUser.json();
+              if (jsonUser.doc) {
+                setProfile({ uid: cleanUid, ...jsonUser.doc } as UserProfile);
+                loaded = true;
+              }
+            }
+            if (!loaded) {
+              const resPub = await fetch(`/api/db?collection=public_profiles&id=${encodeURIComponent(cleanUid)}`, { cache: 'no-store' });
+              if (resPub.ok) {
+                const jsonPub = await resPub.json();
+                if (jsonPub.doc) {
+                  setProfile({ uid: cleanUid, ...jsonPub.doc } as UserProfile);
+                  loaded = true;
+                }
+              }
+            }
+          } catch {
+            // fallback below
+          }
         }
 
-        if (snap && snap.exists()) {
-          setProfile({ ...snap.data(), uid: snap.id } as UserProfile);
-          return;
+        // 1. Coba lookup langsung berdasarkan Document ID (UID Firebase Auth)
+        if (!loaded) {
+          try {
+            const docRef = doc(db, 'users', cleanUid);
+            const timeout = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Profile fetch timeout')), 3500)
+            );
+            const snap = await Promise.race([getDoc(docRef), timeout]);
+            if (snap && snap.exists()) {
+              setProfile({ uid: snap.id, ...snap.data() } as UserProfile);
+              loaded = true;
+            }
+          } catch {
+            // users fetch blocked by rules if not owner/admin
+          }
         }
 
-        setProfile(null);
+        // 2. Fallback ke public_profiles whitelist (non-PII publik)
+        if (!loaded) {
+          try {
+            const pubRef = doc(db, 'public_profiles', cleanUid);
+            const pubSnap = await getDoc(pubRef);
+            if (pubSnap && pubSnap.exists()) {
+              setProfile({ uid: pubSnap.id, ...pubSnap.data() } as UserProfile);
+              loaded = true;
+            }
+          } catch (pubErr) {
+            console.warn('public_profiles lookup fallback failed:', pubErr);
+          }
+        }
+
+        // 3. Fallback lookup demo atau cache lokal jika sedang mode demo / offline preview
+        if (!loaded && typeof window !== 'undefined') {
+          try {
+            const localCached = localStorage.getItem(`mmtc_profile_${cleanUid}`) || 
+              (cleanUid === 'demo-alumni-001' || cleanUid.startsWith('demo') ? localStorage.getItem('mmtc_demo_profile') : null);
+            if (localCached) {
+              const parsed = JSON.parse(localCached);
+              setProfile({ uid: cleanUid, ...parsed } as UserProfile);
+              loaded = true;
+            }
+          } catch {
+            // ignore
+          }
+        }
+
+        if (!loaded) {
+          setProfile(null);
+        }
       } catch (err) {
-        console.error('Error loadProfile:', err);
+        console.warn('Notice loadProfile:', err);
         setProfile(null);
       } finally {
         setLoading(false);
       }
     }
     loadProfile();
-  }, [cleanUid]);
+  }, [rawUid]);
 
-  // Cek apakah user saat ini sudah pernah meminta kontak target
-  useEffect(() => {
-    let isMounted = true;
-    async function checkContactRequest() {
-      if (!user || !profile || user.uid === profile.uid) return;
-      try {
-        const qReq = query(
-          collection(db, 'contact_requests'),
-          where('requesterUid', '==', user.uid),
-          where('targetUid', '==', profile.uid)
-        );
-        const snap = await getDocs(qReq);
-        if (isMounted) {
-          if (!snap.empty) {
-            const reqData = snap.docs[0].data();
-            setContactRequestStatus(reqData.status as 'pending' | 'approved' | 'rejected');
-          } else {
-            setContactRequestStatus('none');
-          }
-        }
-      } catch (err) {
-        console.warn('Failed to check contact request status:', err);
-      }
-    }
-    checkContactRequest();
-    return () => {
-      isMounted = false;
-    };
-  }, [user, profile]);
-
-  const handleSendContactRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !profile) return;
-    if (!contactMessage.trim()) {
-      setContactError('Mohon isi pesan pengantar keperluan Anda.');
-      return;
-    }
-    setSubmittingContact(true);
-    setContactError(null);
-    try {
-      await addDoc(collection(db, 'contact_requests'), {
-        requesterUid: user.uid,
-        requesterName: authProfile?.namaLengkap || user.displayName || user.email?.split('@')[0] || 'Alumni STMM',
-        requesterEmail: user.email || '',
-        requesterProdi: authProfile?.prodi || '',
-        targetUid: profile.uid,
-        targetName: profile.namaLengkap,
-        purpose: contactPurpose,
-        message: contactMessage.trim(),
-        status: 'pending',
-        createdAt: new Date().toISOString()
-      });
-      setContactRequestStatus('pending');
-      setShowContactModal(false);
-      setContactSuccessMsg('Permintaan akses kontak berhasil diajukan kepada pemilik akun.');
-      setTimeout(() => setContactSuccessMsg(null), 5000);
-    } catch (err: unknown) {
-      const e = err as Error;
-      setContactError(e.message || 'Gagal mengirim permintaan kontak.');
-    } finally {
-      setSubmittingContact(false);
-    }
-  };
-
-  const PortfolioImagePreview = ({ url, title }: { url: string; title: string }) => {
-    const [hasError, setHasError] = useState(false);
-
-    return (
-      <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-60 flex items-center justify-center p-2">
-        {hasError ? (
-          <span className="text-xs text-slate-400 py-6">Gambar tidak dapat dimuat</span>
-        ) : (
-          <img 
-            src={url} 
-            alt={title} 
-            className="w-full h-full max-h-56 object-contain rounded-lg" 
-            onError={() => setHasError(true)}
-          />
-        )}
-      </div>
-    );
-  };
 
   const renderEmbed = (item: PortfolioItem) => {
     if (item.type === 'youtube') {
       const videoId = parseYouTubeVideoId(item.url);
 
       return videoId ? (
-        <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black shadow-sm">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}`}
-            className="w-full h-full border-0"
-            title={item.title || 'YouTube video player'}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
+        <div className="space-y-2">
+          <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black shadow-xs">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              className="w-full h-full border-0"
+              title={item.title || 'YouTube video player'}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+          <div className="flex items-center justify-between pt-0.5">
+            <span className="text-[10px] text-slate-400 font-medium">YouTube Video</span>
+            <button
+              type="button"
+              onClick={() => setCinemaVideo({ videoId, title: item.title || 'Showreel Alumni' })}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200 hover:border-sky-200 text-[11px] font-semibold transition cursor-pointer"
+            >
+              <Maximize2 className="w-3 h-3 text-[#0284c7]" />
+              <span>Mode Bioskop</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="p-3 bg-red-50 rounded-xl text-xs text-red-600 border border-red-100">
@@ -194,25 +224,33 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
         href={item.url.startsWith('http') ? item.url : `https://${item.url}`} 
         target="_blank" 
         rel="noopener noreferrer"
-        className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition group"
+        className="flex items-center justify-between p-4 bg-slate-50 hover:bg-sky-50/60 border border-slate-200 hover:border-sky-200 rounded-xl transition group"
       >
         <div className="space-y-0.5">
-          <span className="text-xs font-semibold text-slate-800 group-hover:text-[#0284c7] transition truncate block max-w-[200px]">
+          <span className="text-xs font-bold text-slate-800 group-hover:text-[#0284c7] transition truncate block max-w-[240px]">
             {item.title}
           </span>
           <span className="text-[10px] text-slate-400 capitalize block">
             Platform: {item.type}
           </span>
         </div>
-        <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] transition shrink-0" />
+        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-[#0284c7] transition shrink-0" />
       </a>
     );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-800">
-        <Loader2 className="w-6 h-6 animate-spin text-[#0284c7]" />
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
+        <Navbar />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <ProfileHeaderSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="h-64 bg-white rounded-2xl animate-pulse border border-slate-200" />
+            <div className="lg:col-span-2 h-96 bg-white rounded-2xl animate-pulse border border-slate-200" />
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
@@ -223,9 +261,12 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
         <Navbar />
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+              <User className="w-6 h-6" />
+            </div>
             <h2 className="text-xl font-bold text-slate-900">Profil Alumni Tidak Ditemukan</h2>
             <p className="text-xs text-slate-500">
-              Akun alumni yang kamu cari tidak terdaftar atau telah dinonaktifkan.
+              Akun alumni yang kamu cari tidak terdaftar atau telah dinonaktifkan dari sistem.
             </p>
             <Link 
               href="/open-to-work" 
@@ -240,14 +281,13 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
     );
   }
 
-  const isOwner = !!user && !!profile && user.uid === profile.uid;
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-10 py-8">
-        <div className="mb-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {/* TOP NAVIGATION / BREADCRUMB */}
+        <div className="mb-6 flex items-center justify-between">
           <Link 
             href="/open-to-work" 
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-[#0284c7] transition"
@@ -255,43 +295,66 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
             <ArrowLeft className="w-3.5 h-3.5" />
             Kembali ke Katalog Open to Work
           </Link>
+
+          <button
+            onClick={() => setIsShareOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition shadow-2xs cursor-pointer"
+          >
+            <Share2 className="w-3.5 h-3.5 text-[#0284c7]" />
+            <span>Bagikan Profil</span>
+          </button>
         </div>
 
         {/* PROFILE HEADER CARD */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-xs">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-2xs">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center text-3xl font-bold shadow-sm overflow-hidden border-2 border-white shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center text-3xl font-bold shadow-2xs overflow-hidden border-2 border-white shrink-0">
               <AlumniAvatar src={profile.fotoProfil} name={profile.namaLengkap} />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{profile.namaLengkap}</h1>
-              <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
+                {profile.namaLengkap}
+              </h1>
+              <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-1">
                 {profile.prodi} • Angkatan {profile.angkatan}
               </p>
-              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5">
-                <span>Nomor Alumni:</span>
-                {user ? (
-                  <span className="text-slate-600 font-semibold">{profile.nomorAlumni}</span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-slate-400">
-                    <span>••••••••••</span>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-sans font-medium">
-                      <Lock className="w-2.5 h-2.5" /> Terkunci
-                    </span>
-                  </span>
+              <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                {((profile as ExtendedUserProfile).pekerjaanSaatIni || (profile as ExtendedUserProfile).pekerjaan) && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-bold text-slate-800">
+                    <Briefcase className="w-3.5 h-3.5 text-[#0284c7]" />
+                    <span>Bekerja di: {(profile as ExtendedUserProfile).pekerjaanSaatIni || (profile as ExtendedUserProfile).pekerjaan}</span>
+                  </div>
                 )}
+                {(profile as ExtendedUserProfile).domisili && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-700">
+                    <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                    <span>{(profile as ExtendedUserProfile).domisili}</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400 font-mono mt-1">
+                Nomor Alumni: {profile.nomorAlumni}
+              </p>
+
+              {/* TECHNICAL SKILL BADGES */}
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {extractSkills(profile.bio || '', profile.prodi || '').map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[11px] font-medium text-[#0284c7]"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
 
           <div>
             {profile.openToWork ? (
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Open to Work
-              </span>
+              <OpenToWorkBadge />
             ) : (
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500 text-xs font-semibold">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500 text-xs font-semibold">
                 Sedang Tidak Mencari Proyek
               </span>
             )}
@@ -303,370 +366,216 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
           
           {/* LEFT SIDEBAR: PINNED TO LEFT (Width fixed: 320px) */}
           <div className="w-full lg:w-80 shrink-0 space-y-6">
-            {!user ? (
-              /* KARTU TERKUNCI (UNTUK PENGUNJUNG PUBLIK BELUM LOGIN) */
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 text-center space-y-4 shadow-xs">
-                <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center mx-auto shadow-2xs">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="text-sm font-bold text-slate-900">Kontak & CV Terproteksi</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Untuk melindungi privasi alumni STMM MMTC, nomor WhatsApp, email, dan file CV resmi hanya dapat diakses oleh alumni atau perekrut yang sudah masuk.
-                  </p>
-                </div>
+            
+            {/* CV BOX */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-3.5 shadow-2xs">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#0284c7]" />
+                Resume &amp; Dokumen
+              </h3>
 
-                <div className="pt-2">
-                  <Link
-                    href={`/login?redirect=/profil/${encodeURIComponent(cleanUid || rawUid)}`}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shadow-xs transition"
-                  >
-                    <Lock className="w-3.5 h-3.5" />
-                    Masuk untuk Melihat Kontak
-                  </Link>
+              {!isOwner && !profile.openToWork ? (
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500">
+                  Dokumen dan resume disembunyikan karena alumni sedang tidak mencari proyek (Open to Work non-aktif).
                 </div>
-
-                <p className="text-[11px] text-slate-400 pt-1">
-                  Belum punya akun?{' '}
-                  <Link href="/register" className="text-[#0284c7] font-semibold hover:underline">
-                    Daftar Akun Alumni
-                  </Link>
-                </p>
-              </div>
-            ) : (
-              /* TAMPILAN RESUME & KONTAK LENGKAP (UNTUK USER TERAUTENTIKASI) */
-              <>
-                {/* CV BOX */}
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-3.5 shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-[#0284c7]" />
-                      Resume & Dokumen
-                    </h3>
-                    {profile.openToWork ? (
-                      <span className="px-2 py-0.5 rounded-full bg-sky-50 text-[#0284c7] text-[10px] font-semibold border border-sky-100 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3" /> Terbuka
+              ) : (
+                <>
+                  {profile.cvFileUrl ? (
+                    <a 
+                      href={profile.cvFileUrl} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="w-full p-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-100 text-[#0284c7] text-xs font-bold flex items-center justify-between transition group"
+                    >
+                      <span className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#0284c7]" />
+                        Buka CV Resmi (PDF)
                       </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold border border-slate-200">
-                        Privat
-                      </span>
-                    )}
-                  </div>
-
-                  {!isOwner && !profile.openToWork ? (
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-[11px] leading-relaxed">
-                      Alumni ini sedang tidak aktif mencari pekerjaan (<em>Not Looking</em>). Dokumen resume dan CV disimpan secara privat oleh pemilik akun.
-                    </div>
+                      <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                    </a>
                   ) : (
-                    <>
-                      {profile.cvFileUrl && safeHttpUrl(profile.cvFileUrl) ? (
-                        <a 
-                          href={safeHttpUrl(profile.cvFileUrl)!} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="w-full p-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-100 text-[#0284c7] text-xs font-semibold flex items-center justify-between transition"
-                        >
-                          <span>Buka CV Resmi (PDF)</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      ) : (
-                        <p className="text-xs text-slate-400">Alumni belum mengunggah file CV PDF.</p>
-                      )}
-
-                      {profile.cvExternalLink && safeHttpUrl(profile.cvExternalLink) && (
-                        <a 
-                          href={safeHttpUrl(profile.cvExternalLink)!} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-between transition"
-                        >
-                          <span>Link Portfolio / Drive</span>
-                          <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                        </a>
-                      )}
-                    </>
+                    <p className="text-xs text-slate-400">Alumni belum mengunggah file CV PDF.</p>
                   )}
+
+                  {profile.cvExternalLink && (
+                    <a 
+                      href={profile.cvExternalLink.startsWith('http') ? profile.cvExternalLink : `https://${profile.cvExternalLink}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="w-full p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-between transition group"
+                    >
+                      <span>Link Portfolio / Google Drive</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition" />
+                    </a>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* CONTACT CARD */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 text-xs shadow-2xs">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                Kontak Alumni
+              </h3>
+              
+              <div className="space-y-3">
+                {(profile as ExtendedUserProfile).domisili && (
+                  <div className="flex items-center gap-3 text-slate-700 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <MapPin className="w-4 h-4 text-[#0087cc] shrink-0" />
+                    <span className="truncate font-medium">
+                      {(profile as ExtendedUserProfile).domisili}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                  <Mail className="w-4 h-4 text-[#0087cc] shrink-0" />
+                  <a href={`mailto:${profile.email}`} className="hover:text-[#0087cc] hover:underline truncate font-medium">
+                    {profile.email}
+                  </a>
                 </div>
 
-                {/* CONTACT */}
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-3.5 text-xs shadow-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Kontak Alumni</h3>
-                    {isOwner ? (
-                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-slate-500" /> Profil Anda
-                      </span>
-                    ) : contactRequestStatus === 'approved' ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3" /> Akses WA Disetujui
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold border border-amber-200 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> WA Terproteksi
-                      </span>
-                    )}
-                  </div>
-
-                  {contactSuccessMsg && (
-                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                      <span>{contactSuccessMsg}</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center gap-2.5 text-slate-600">
-                    <Mail className="w-4 h-4 text-[#0284c7] shrink-0" />
-                    <a href={`mailto:${profile.email}`} className="hover:text-[#0284c7] hover:underline truncate">
-                      {profile.email}
+                {profile.phone && (
+                  <div className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <Phone className="w-4 h-4 text-[#0087cc] shrink-0" />
+                    <a 
+                      href={formatWhatsAppUrl(profile.phone)} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="hover:text-[#0087cc] hover:underline font-semibold text-slate-800 truncate"
+                    >
+                      WhatsApp: {profile.phone}
                     </a>
                   </div>
-
-                  {profile.phone && (
-                    <>
-                      {isOwner || contactRequestStatus === 'approved' ? (
-                        <div className="flex items-center justify-between gap-2.5 text-slate-600">
-                          <div className="flex items-center gap-2.5">
-                            <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <a 
-                              href={formatWhatsAppUrl(profile.phone)} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="hover:text-emerald-600 hover:underline font-mono font-medium"
-                            >
-                              WhatsApp: {profile.phone}
-                            </a>
-                          </div>
-                          {isOwner && (
-                            <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-sans font-medium">
-                              Kontak Anda
-                            </span>
-                          )}
-                        </div>
-                      ) : contactRequestStatus === 'pending' ? (
-                        <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-amber-900 flex items-center gap-1.5 text-xs">
-                              <Clock className="w-3.5 h-3.5 text-amber-600" /> Permintaan Terkirim
-                            </span>
-                            <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">Menunggu Respon</span>
-                          </div>
-                          <p className="text-[11px] text-amber-800/90 leading-relaxed">
-                            Permintaan akses kontak Anda sedang menunggu konfirmasi dari {profile.namaLengkap}. Nomor WhatsApp akan terbuka otomatis saat disetujui.
-                          </p>
-                        </div>
-                      ) : contactRequestStatus === 'rejected' ? (
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-slate-700 text-xs">Akses WhatsApp Belum Diberikan</span>
-                            <span className="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium">Ditolak</span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">
-                            Alumni saat ini belum bersedia membagikan nomor WhatsApp pribadi. Anda tetap dapat menghubungi via email resmi di atas.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => setShowContactModal(true)}
-                            className="mt-1 text-[11px] font-semibold text-[#0284c7] hover:underline cursor-pointer"
-                          >
-                            Ajukan Permintaan Ulang
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-slate-700 font-medium">
-                              <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span>WhatsApp:</span>
-                              <span className="font-mono text-slate-400">••••••••••••</span>
-                            </div>
-                            <span className="inline-flex items-center gap-1 text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded font-medium">
-                              <Lock className="w-2.5 h-2.5" /> Terproteksi
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">
-                            Nomor WhatsApp dilindungi privasi agar tidak disalahgunakan. Ajukan permintaan akses kontak agar {profile.namaLengkap} dapat memverifikasi identitas Anda.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => setShowContactModal(true)}
-                            className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer"
-                          >
-                            <Phone className="w-3.5 h-3.5" />
-                            Minta Akses Kontak WhatsApp
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {profile.linkedinUrl && (
-                    <div className="flex items-center gap-2.5 text-slate-600">
-                      <Globe className="w-4 h-4 text-[#0284c7] shrink-0" />
-                      <a 
-                        href={profile.linkedinUrl.startsWith('http') ? profile.linkedinUrl : `https://${profile.linkedinUrl}`} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="hover:text-[#0284c7] hover:underline truncate"
-                      >
-                        Profil LinkedIn / Web
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {/* SHORTCUT KELOLA JIKA MILIK SENDIRI */}
-                {user.uid === profile.uid && (
-                  <Link
-                    href="/profil"
-                    className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center justify-center gap-2 transition"
-                  >
-                    Edit Profil Saya
-                  </Link>
                 )}
-              </>
-            )}
+
+                {profile.linkedinUrl && (
+                  <div className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <Globe className="w-4 h-4 text-[#0087cc] shrink-0" />
+                    <a 
+                      href={profile.linkedinUrl.startsWith('http') ? profile.linkedinUrl : `https://${profile.linkedinUrl}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="hover:text-[#0087cc] hover:underline truncate font-medium"
+                    >
+                      LinkedIn Profil
+                    </a>
+                  </div>
+                )}
+
+                {(profile as ExtendedUserProfile).instagramUrl && (
+                  <div className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <InstagramIcon className="w-4 h-4 text-[#0087cc] shrink-0" />
+                    <a 
+                      href={(profile as ExtendedUserProfile).instagramUrl!.startsWith('http') ? (profile as ExtendedUserProfile).instagramUrl : `https://${(profile as ExtendedUserProfile).instagramUrl}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="hover:text-[#0087cc] hover:underline truncate font-medium"
+                    >
+                      Instagram Portofolio
+                    </a>
+                  </div>
+                )}
+
+                {(profile as ExtendedUserProfile).customLinks?.map((link) => (
+                  <div key={link.id} className="flex items-center gap-3 text-slate-600 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <ExternalLink className="w-4 h-4 text-sky-600 shrink-0" />
+                    <a 
+                      href={link.url.startsWith('http') ? link.url : `https://${link.url}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="hover:text-[#0284c7] hover:underline truncate font-medium flex-1"
+                    >
+                      {link.title || 'Tautan Eksternal'}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* RIGHT CONTENT: BIO & SHOWREEL EMBEDS (SUSUN 2 2 / 2 COLUMNS) */}
+          {/* RIGHT CONTENT: BIO & SHOWREEL EMBEDS (SUSUN 2 KOLOM DI DESKTOP) */}
           <div className="flex-1 w-full space-y-6">
             {profile.bio && (
-              <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-2 shadow-xs">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Tentang / Bio</h3>
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-2.5 shadow-2xs">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                  Tentang Alumni / Bio Singkat
+                </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
                   {profile.bio}
                 </p>
               </div>
             )}
 
-            {/* SHOWREELS EMBED SECTION: SUSUN 2 2 (2 COLUMNS) */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3.5">
-                <Video className="w-4 h-4 text-[#0284c7]" />
-                <h3 className="text-sm font-bold text-slate-900">Galeri Showreel & Portofolio Karya</h3>
+            {/* SHOWREELS EMBED SECTION: SUSUN 2 KOLOM DESKTOP */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 space-y-6 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <Video className="w-5 h-5 text-[#0284c7]" />
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                    Galeri Showreel &amp; Portofolio Karya
+                  </h3>
+                </div>
+                <span className="text-xs text-slate-400 font-medium">
+                  {profile.portfolio?.length || 0} Karya Tersemat
+                </span>
               </div>
 
               {profile.portfolio?.length ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {profile.portfolio.map((item) => (
-                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 shadow-xs">
-                      <span className="text-xs font-bold text-slate-900 block truncate">{item.title}</span>
-                      <div className="w-full">
-                        {renderEmbed(item)}
+                    <div 
+                      key={item.id} 
+                      className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200 hover:border-slate-300 transition space-y-3 shadow-2xs flex flex-col justify-between"
+                    >
+                      <div className="space-y-2.5">
+                        <span className="text-xs font-bold text-slate-900 block truncate" title={item.title}>
+                          {item.title}
+                        </span>
+                        <div className="w-full">
+                          {renderEmbed(item)}
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
-                  Alumni belum menyematkan karya showreel.
+                <div className="text-center py-14 text-slate-400 text-xs border border-dashed border-slate-200 rounded-2xl space-y-2">
+                  <Video className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="font-semibold text-slate-600">Alumni belum menyematkan karya showreel.</p>
+                  <p className="text-slate-400">Portofolio video YouTube, Pinterest, atau Behance akan tampil di sini.</p>
                 </div>
               )}
             </div>
+
+            {/* AKTIVITAS & RIWAYAT POSTINGAN ALUMNI (LINKEDIN / FACEBOOK STYLE) */}
+            <AlumniActivityHistory 
+              authorUid={rawUid}
+              authorName={profile.namaLengkap}
+              authorProdi={profile.prodi}
+              authorAvatar={profile.fotoProfil}
+              isOwner={false}
+            />
           </div>
         </div>
+
+        {/* CINEMA LIGHTBOX MODAL */}
+        <CinemaLightbox
+          isOpen={Boolean(cinemaVideo)}
+          onClose={() => setCinemaVideo(null)}
+          title={cinemaVideo?.title || 'Showreel Alumni STMM MMTC'}
+          videoId={cinemaVideo?.videoId || ''}
+        />
+
+        {/* SHARE MODAL */}
+        <ShareModal
+          isOpen={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+          title={profile.namaLengkap}
+          subtitle={`${profile.prodi} • Angkatan ${profile.angkatan}`}
+          shareUrl={typeof window !== 'undefined' ? window.location.href : ''}
+        />
       </main>
-
-      {/* MODAL MINTA AKSES KONTAK WHATSAPP */}
-      {showContactModal && profile && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <Phone className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">Minta Akses Kontak Alumni</h3>
-                  <p className="text-[11px] text-slate-400">Kepada: {profile.namaLengkap}</p>
-                </div>
-              </div>
-              <button 
-                type="button"
-                onClick={() => setShowContactModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="bg-sky-50/70 border border-sky-100 rounded-xl p-3 text-xs text-sky-900 space-y-1">
-              <p className="font-semibold flex items-center gap-1.5 text-sky-950">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
-                Verifikasi Identitas Sesama Alumni
-              </p>
-              <p className="text-slate-600 text-[11px] leading-relaxed">
-                Permintaan ini akan mencantumkan identitas Anda ({authProfile?.namaLengkap || user?.email}) agar pemilik profil tahu siapa yang menghubungi sebelum membagikan nomor WhatsApp.
-              </p>
-            </div>
-
-            <form onSubmit={handleSendContactRequest} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Keperluan Menghubungi <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={contactPurpose}
-                  onChange={(e) => setContactPurpose(e.target.value)}
-                  className="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7]"
-                >
-                  <option value="Peluang Kerja / Proyek">Peluang Kerja / Proyek Freelance</option>
-                  <option value="Kolaborasi Kreatif">Kolaborasi Kreatif / Produksi</option>
-                  <option value="Pertanyaan Karir & Networking">Pertanyaan Karir / Networking Alumni</option>
-                  <option value="Lainnya">Keperluan Lainnya</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Pesan Pengantar <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={contactMessage}
-                  onChange={(e) => setContactMessage(e.target.value)}
-                  placeholder="Jelaskan secara singkat tujuan Anda meminta nomor WhatsApp..."
-                  className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7] resize-none"
-                />
-              </div>
-
-              {contactError && (
-                <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
-                  {contactError}
-                </p>
-              )}
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowContactModal(false)}
-                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingContact || !contactMessage.trim()}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-xl transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  {submittingContact ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      Mengirim...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      Kirim Permintaan
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>

@@ -10,14 +10,22 @@ import { createJob } from '@/lib/jobs';
 import { PRODI_LIST, ProdiType } from '@/types';
 import { 
   PlusCircle, 
-  AlertCircle,
-  Loader2,
-  CheckCircle2
+  AlertCircle, 
+  Loader2, 
+  CheckCircle2, 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  Banknote, 
+  Briefcase,
+  FileText, 
+  GraduationCap
 } from 'lucide-react';
 
 export default function PostLowonganPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
+  const isDemo = !user;
 
   const [judul, setJudul] = useState('');
   const [perusahaan, setPerusahaan] = useState('');
@@ -33,46 +41,23 @@ export default function PostLowonganPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // F-26: Smart format angka, teks, akronim "jt/juta", atau rentang ke Rupiah tanpa merusak input
+  // Helper smart format angka atau rentang ke Rupiah
   const formatRupiahString = (val: string): string => {
     const trimmed = val.trim();
     if (!trimmed) return '';
-
-    const formatPart = (part: string): string => {
-      const p = part.trim();
-      if (!p) return '';
-
-      // Cek apakah mengandung akronim 'jt' atau 'juta' (mis. '5jt', '7.5 juta')
-      const jtMatch = p.match(/^(\d+(?:[.,]\d+)?)\s*(?:jt|juta)$/i);
-      if (jtMatch) {
-        const num = parseFloat(jtMatch[1].replace(',', '.'));
-        return 'Rp ' + Math.round(num * 1_000_000).toLocaleString('id-ID');
-      }
-
-      // Cek apakah mengandung akronim 'rb' atau 'ribu' (mis. '500rb')
-      const rbMatch = p.match(/^(\d+(?:[.,]\d+)?)\s*(?:rb|ribu)$/i);
-      if (rbMatch) {
-        const num = parseFloat(rbMatch[1].replace(',', '.'));
-        return 'Rp ' + Math.round(num * 1_000).toLocaleString('id-ID');
-      }
-
-      // Jika murni berisi angka / titik / format Rp
-      if (/^[\d.\sRp]+$/i.test(p)) {
-        const cleanNumber = p.replace(/\D/g, '');
-        if (cleanNumber) {
-          return 'Rp ' + parseInt(cleanNumber, 10).toLocaleString('id-ID');
-        }
-      }
-
-      // Jika format teks deskriptif (mis. 'Kompetitif', 'Negotiable'), pertahankan
-      return p;
-    };
-
     if (trimmed.includes('-')) {
       const parts = trimmed.split('-');
-      return parts.map(formatPart).join(' - ');
+      const formattedParts = parts.map(part => {
+        const digits = part.replace(/\D/g, '');
+        return digits ? 'Rp ' + parseInt(digits, 10).toLocaleString('id-ID') : part.trim();
+      });
+      return formattedParts.join(' - ');
     }
-    return formatPart(trimmed);
+    const cleanNumber = trimmed.replace(/\D/g, '');
+    if (cleanNumber) {
+      return 'Rp ' + parseInt(cleanNumber, 10).toLocaleString('id-ID');
+    }
+    return trimmed;
   };
 
   const handleGajiBlur = () => {
@@ -93,18 +78,25 @@ export default function PostLowonganPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      setError('Anda harus masuk terlebih dahulu untuk mempublikasikan lowongan.');
-      return;
-    }
 
     if (!judul.trim() || !perusahaan.trim() || !lokasi.trim() || !deskripsi.trim()) {
-      setError('Mohon lengkapi semua kolom wajib.');
+      setError('Mohon lengkapi semua kolom wajib bertanda bintang (*).');
       return;
     }
 
     setLoading(true);
     setError('');
+
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setLoading(false);
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/lowongan');
+        }, 1500);
+      }, 700);
+      return;
+    }
 
     try {
       const kualifikasi = kualifikasiRaw
@@ -150,150 +142,169 @@ export default function PostLowonganPage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-xl font-bold">Harap Masuk Terlebih Dahulu</h2>
-            <p className="text-xs text-slate-500">Hanya alumni MMTC yang dapat mempublikasikan lowongan kerja.</p>
-            <Link 
-              href="/login?redirect=/post-lowongan" 
-              className="inline-block px-5 py-2.5 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shadow-xs"
-            >
-              Masuk ke Akun
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        
+        {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900 leading-tight">Masuk untuk Memasang Lowongan Resmi</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Gunakan akun alumni agar informasi lowongan kerja atau rekrutmen kru langsung tayang di bursa karir.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shrink-0 text-center"
+            >
+              Masuk Akun
+            </Link>
+          </div>
+        )}
+
         <div className="mb-8 space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Pasang Lowongan Kerja Alumni</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+            Pasang Lowongan Kerja Alumni
+          </h1>
           <p className="text-slate-600 text-xs sm:text-sm">
-            Bantu sesama alumni dan adik tingkat MMTC mendapatkan kesempatan berkarya di perusahaan atau studio kreatifmu.
+            Bantu sesama alumni dan adik tingkat MMTC mendapatkan kesempatan berkarya di perusahaan, stasiun TV, game studio, atau agensi kreatifmu.
           </p>
         </div>
 
         {success ? (
-          <div className="p-12 text-center bg-white border border-slate-200 rounded-2xl space-y-3 shadow-xs">
-            <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-            <h3 className="text-lg font-bold text-slate-900">Lowongan Berhasil Ditayangkan!</h3>
-            <p className="text-xs text-slate-500">Mengarahkan ke daftar lowongan...</p>
+          <div className="p-12 text-center bg-white border border-slate-200 rounded-3xl space-y-3 shadow-sm animate-fade-in">
+            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Lowongan Berhasil Ditayangkan!</h3>
+            <p className="text-xs text-slate-500">Mengarahkan Anda ke daftar lowongan kerja...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5 animate-fade-in">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+                <span className="font-semibold">{error}</span>
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Judul Posisi / Pekerjaan *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={judul}
-                  onChange={(e) => setJudul(e.target.value)}
-                  placeholder="e.g. 3D Animator, Video Editor, Unity Developer"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-                />
+            {/* SECTION 1: INFORMASI DASAR */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-5 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#0284c7]" />
+                Detail Posisi &amp; Perusahaan
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Judul Posisi / Pekerjaan *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={judul}
+                    onChange={(e) => setJudul(e.target.value)}
+                    placeholder="e.g. 3D Animator, Video Editor, Unity Game Developer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Nama Perusahaan / Studio *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={perusahaan}
+                    onChange={(e) => setPerusahaan(e.target.value)}
+                    placeholder="e.g. Infinite Studios, Trans Media, Gameloft"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  />
+                </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                    Lokasi Kerja *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={lokasi}
+                    onChange={(e) => setLokasi(e.target.value)}
+                    placeholder="e.g. Jakarta Selatan / Remote / Yogyakarta"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Tipe Pekerjaan *
+                  </label>
+                  <select
+                    value={tipeKerja}
+                    onChange={(e) => setTipeKerja(e.target.value as 'Full-time' | 'Part-time' | 'Freelance' | 'Magang')}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
+                  >
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Freelance">Freelance / Project-based</option>
+                    <option value="Magang">Magang / Internship</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
+                    <Banknote className="w-3.5 h-3.5 text-slate-400" />
+                    Perkiraan Gaji (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    value={gajiRange}
+                    onChange={(e) => setGajiRange(e.target.value)}
+                    onBlur={handleGajiBlur}
+                    placeholder="Contoh: Rp 7.500.000 atau Rp 5.000.000 - Rp 8.000.000"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium text-slate-900"
+                  />
+                </div>
+              </div>
+
+              {/* BATAS WAKTU LAMARAN */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Nama Perusahaan / Studio *
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  Batas Waktu Lamaran / Deadline (Opsional)
                 </label>
                 <input
-                  type="text"
-                  required
-                  value={perusahaan}
-                  onChange={(e) => setPerusahaan(e.target.value)}
-                  placeholder="e.g. Infinite Studios, Trans TV, Gameloft"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="w-full sm:w-1/2 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Lokasi Kerja *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={lokasi}
-                  onChange={(e) => setLokasi(e.target.value)}
-                  placeholder="e.g. Jakarta Selatan / Remote"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Tipe Pekerjaan *
-                </label>
-                <select
-                  value={tipeKerja}
-                  onChange={(e) => setTipeKerja(e.target.value as 'Full-time' | 'Part-time' | 'Freelance' | 'Magang')}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-                >
-                  <option value="Full-time">Full-time</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Freelance">Freelance</option>
-                  <option value="Magang">Magang / Internship</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Perkiraan Gaji (Opsional)
-                </label>
-                <input
-                  type="text"
-                  value={gajiRange}
-                  onChange={(e) => setGajiRange(e.target.value)}
-                  onBlur={handleGajiBlur}
-                  placeholder="e.g. 7.500.000 atau 5jt - 8jt"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-semibold text-emerald-600"
-                />
-              </div>
-            </div>
-
-            {/* BATAS WAKTU LAMARAN (DEADLINE) */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Batas Waktu Lamaran / Deadline (Opsional)
-              </label>
-              <input
-                type="date"
-                value={deadline}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="w-full sm:w-1/2 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-              />
-            </div>
-
-            {/* PILIH JURUSAN TARGET */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-2">
+            {/* SECTION 2: PILIH JURUSAN TARGET */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-[#0284c7]" />
                 Target Program Studi Alumni (Bisa pilih lebih dari satu) *
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              </h3>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {PRODI_LIST.map((p) => {
                   const isChecked = selectedProdi.includes(p.id);
                   return (
@@ -301,52 +312,63 @@ export default function PostLowonganPage() {
                       type="button"
                       key={p.id}
                       onClick={() => toggleProdi(p.id)}
-                      className={`p-3 rounded-xl border text-left text-xs transition ${
+                      className={`p-3.5 rounded-2xl border text-left text-xs transition cursor-pointer ${
                         isChecked 
-                          ? 'bg-sky-50 border-[#0284c7] text-[#0284c7] font-semibold' 
-                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
+                          ? 'bg-sky-50 border-[#0284c7] text-[#0284c7] font-bold shadow-2xs' 
+                          : 'bg-slate-50 border-slate-200/80 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                     >
-                      <span className="block font-bold">{p.label}</span>
-                      <span className="text-[10px] text-slate-500 line-clamp-1">{p.desc}</span>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-slate-900">{p.label}</span>
+                        {isChecked && <span className="text-[10px] bg-[#0284c7] text-white px-1.5 py-0.2 rounded-full font-bold">✓</span>}
+                      </div>
+                      <span className="text-[11px] text-slate-500 line-clamp-1 leading-snug">{p.desc}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Deskripsi Pekerjaan & Tanggung Jawab *
-              </label>
-              <textarea
-                rows={5}
-                required
-                value={deskripsi}
-                onChange={(e) => setDeskripsi(e.target.value)}
-                placeholder="Jelaskan mengenai proyek, peran yang dicari, dan workflow kerja..."
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-              />
+            {/* SECTION 3: DESKRIPSI & PERSYARATAN */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#0284c7]" />
+                Deskripsi &amp; Persyaratan Kualifikasi
+              </h3>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Deskripsi Pekerjaan &amp; Tanggung Jawab *
+                </label>
+                <textarea
+                  rows={5}
+                  required
+                  value={deskripsi}
+                  onChange={(e) => setDeskripsi(e.target.value)}
+                  placeholder="Jelaskan mengenai proyek atau pekerjaan, tanggung jawab utama, dan workflow di studio..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Kualifikasi &amp; Persyaratan (Tulis satu persyaratan per baris)
+                </label>
+                <textarea
+                  rows={4}
+                  value={kualifikasiRaw}
+                  onChange={(e) => setKualifikasiRaw(e.target.value)}
+                  placeholder="Menguasai software Blender / Maya&#10;Memiliki portfolio atau showreel animasi aktif&#10;Mampu bekerja secara komunikatif dalam tim"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition leading-relaxed"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Kualifikasi & Persyaratan (Satu per baris)
-              </label>
-              <textarea
-                rows={3}
-                value={kualifikasiRaw}
-                onChange={(e) => setKualifikasiRaw(e.target.value)}
-                placeholder="Menguasai Blender / Maya&#10;Memiliki showreel animasi 3D&#10;Dapat bekerja dalam tim studio"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
-              />
-            </div>
-
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-sm font-semibold shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                className="px-8 py-3.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white text-sm font-bold shadow-md shadow-sky-500/20 transition flex items-center gap-2 disabled:opacity-50 active:scale-[0.98] cursor-pointer"
               >
                 {loading ? (
                   <>

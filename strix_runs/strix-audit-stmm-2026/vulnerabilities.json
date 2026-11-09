@@ -1,0 +1,74 @@
+[
+  {
+    "id": "STRIX-FINDING-001",
+    "title": "Authentication Disconnect via Synthetic Email Domain in Alumni Login (Nomor Alumni Login Failure)",
+    "severity": "high",
+    "cvss_v31": {
+      "score": 7.5,
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+    },
+    "cwe": "CWE-287",
+    "cwe_name": "Improper Authentication",
+    "status": "fixed",
+    "endpoint": "/login",
+    "method": "POST",
+    "impact": "Legitimate registered alumni cannot log into the portal when following the advertised Nomor Alumni login pattern. Client code fabricated synthetic email addresses (`<nomor>@alumni.mmtc.ac.id`) that never matched the user's registered personal email in Firebase Auth, leading to total denial of access for affected accounts.",
+    "technical_analysis": "In `src/lib/auth.ts`, `loginAlumni` transformed non-email inputs into an artificial domain `${normalizedNomor.toLowerCase()}@alumni.mmtc.ac.id`. However, in `registerAlumni`, accounts are registered using the student's personal email address (`createUserWithEmailAndPassword(auth, cleanEmail, password)`), while `nomorAlumni` is only preserved as a Firestore document field in `users/{uid}` and `alumni_registry/{nomor}`. Because Firebase Client SDK cannot query Firestore documents unauthenticated without violating privacy controls (F3-02, UU PDP), client-side synthesis of email addresses caused immediate `auth/user-not-found` or `auth/invalid-credential` errors. Furthermore, the login form in `src/app/login/page.tsx` presented 'Email atau Nomor Alumni' and lacked client-side guidance informing the user that login authentication must use the registered email address.",
+    "poc_description": "1. An alumnus registers via `/register` with email `alumni@example.com`, password `Password123!`, and Nomor Alumni `MMTC-2020-103`.\n2. Registration succeeds, creating a Firebase Auth user with email `alumni@example.com`.\n3. The alumnus navigates to `/login` and enters identifier `MMTC-2020-103` and `Password123!`.\n4. Client transforms identifier to `mmtc-2020-103@alumni.mmtc.ac.id` and calls `signInWithEmailAndPassword`.\n5. Firebase Auth rejects the request with `auth/user-not-found` because no account exists with domain `@alumni.mmtc.ac.id`.\n6. The user is completely unable to log into their account.",
+    "poc_script_code": "// Client authentication failure reproduction\nimport { signInWithEmailAndPassword } from 'firebase/auth';\n// User registered as personal email:\n// auth.user.email == 'user@gmail.com', nomorAlumni == 'MMTC-2020-103'\nconst targetEmail = 'mmtc-2020-103@alumni.mmtc.ac.id';\ntry {\n  await signInWithEmailAndPassword(auth, targetEmail, 'Password123!');\n} catch (err) {\n  console.error('Expected failure: user-not-found', err.code);\n}",
+    "code_locations": [
+      {
+        "file": "src/lib/auth.ts",
+        "start_line": 288,
+        "end_line": 321,
+        "fix_before": "if (!cleanIdentifier.includes('@')) {\n  const normalizedNomor = normalizeNomorAlumni(cleanIdentifier);\n  targetEmail = `${normalizedNomor.toLowerCase()}@alumni.mmtc.ac.id`;\n}",
+        "fix_after": "if (!cleanIdentifier.includes('@')) {\n  throw new Error('Silakan masukkan alamat email yang Anda daftarkan saat registrasi alumni.');\n}\nconst targetEmail = cleanIdentifier.toLowerCase();"
+      },
+      {
+        "file": "src/app/login/page.tsx",
+        "start_line": 40,
+        "end_line": 129,
+        "fix_before": "<div>\n  <label className=\"block text-xs font-semibold text-slate-700 mb-1.5\">\n    Email atau Nomor Alumni\n  </label>\n  <input\n    type=\"text\"\n    placeholder=\"nama@email.com atau MMTC-2020-103\"\n...",
+        "fix_after": "<div>\n  <label className=\"block text-xs font-semibold text-slate-700 mb-1.5\">\n    Alamat Email Terdaftar\n  </label>\n  <input\n    type=\"email\"\n    placeholder=\"nama@email.com\"\n  />\n  <p className=\"text-[11px] text-slate-400 mt-1\">\n    Nomor Alumni digunakan untuk verifikasi akademik saat pertama kali mendaftar.\n  </p>\n</div>"
+      }
+    ],
+    "remediation": "1. Remove the artificial email synthesis in `src/lib/auth.ts` and require email input for authentication.\n2. In `src/app/login/page.tsx`, update UI labels and placeholders to 'Alamat Email Terdaftar' and provide clear helper guidance that Nomor Alumni is used for registration verification, while portal login requires the registered email address.\n3. Implement immediate client validation in `handleSubmit` to notify the user if an '@' is missing.",
+    "verification_status": "Verified fixed. Unit tests and type checks pass with 0 errors."
+  },
+  {
+    "id": "STRIX-FINDING-002",
+    "title": "Untested Background Sync Cloud Trigger & Public Profile CV Badge Data Model Inconsistency",
+    "severity": "medium",
+    "cvss_v31": {
+      "score": 5.3,
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
+    },
+    "cwe": "CWE-436",
+    "cwe_name": "Interpretation Conflict",
+    "status": "open",
+    "endpoint": "Cloud Functions: syncPublicProfile / /open-to-work",
+    "method": "Firestore Event Trigger onWrite(users/{uid})",
+    "impact": "1. The background trigger `syncPublicProfile` responsible for mirroring private user profiles to public projections lacks automated integration tests in the test runner, risking silent synchronization failures in deployed environments.\n2. The public talent catalog (`open-to-work`) attempts to inspect `alumni.cvFileUrl` to show a 'CV Ready' badge. Because `syncPublicProfile` correctly strips `cvFileUrl` to preserve PII confidentiality, the 'CV Ready' badge never renders for public viewers, causing a functional data inconsistency.",
+    "technical_analysis": "In `functions/src/index.ts`, `syncPublicProfile` maintains a strict whitelist of fields mirrored to `public_profiles/{uid}`: `uid, namaLengkap, prodi, angkatan, bio, keahlian, portfolio, openToWork, fotoProfil, domisili, updatedAt`. It deliberately strips `cvUrl` and `cvFileUrl` to protect private resume data in accordance with UU PDP and rule F-02. However, `src/app/open-to-work/page.tsx` evaluates `(alumni.cvFileUrl || alumni.cvExternalLink)` to render the 'CV Ready' badge. Since `cvFileUrl` is omitted from `public_profiles`, this badge never appears even when an alumni has uploaded a valid CV document. In addition, `tests/strix-security-verification.ts` currently spins up only Firestore and Storage emulators (`--only firestore,storage`), omitting the Cloud Functions emulator runtime.",
+    "poc_description": "1. User `user_victim_bob` has uploaded `cv.pdf` and has `cvUrl` in `users/user_victim_bob`.\n2. The background trigger runs and updates `public_profiles/user_victim_bob` with whitelisted attributes, leaving out `cvFileUrl`.\n3. Recruiter visits `/open-to-work`. The frontend queries `public_profiles` where `openToWork == true`.\n4. Condition `(alumni.cvFileUrl || alumni.cvExternalLink)` evaluates to false.\n5. The badge 'CV Ready' is never shown, despite the candidate possessing an active, uploaded CV.",
+    "poc_script_code": "// Public profile snapshot inspection\nconst docSnap = await getDoc(doc(db, 'public_profiles', 'user_victim_bob'));\nconsole.log(docSnap.data().cvFileUrl); // undefined\nconsole.log(Boolean(docSnap.data().cvFileUrl || docSnap.data().cvExternalLink)); // false",
+    "code_locations": [
+      {
+        "file": "functions/src/index.ts",
+        "start_line": 180,
+        "end_line": 194,
+        "fix_before": "const publicData = {\n  uid,\n  namaLengkap: typeof userData.namaLengkap === \"string\" ? userData.namaLengkap : \"\",\n  prodi: typeof userData.prodi === \"string\" ? userData.prodi : \"\",\n  angkatan: typeof userData.angkatan === \"number\" || typeof userData.angkatan === \"string\" ? userData.angkatan : \"\",\n  bio: typeof userData.bio === \"string\" ? userData.bio.slice(0, 500) : \"\",\n  keahlian: Array.isArray(userData.keahlian) ? userData.keahlian.slice(0, 20) : [],\n  portfolio: sanitizedPortfolio,\n  openToWork: Boolean(userData.openToWork),\n  fotoProfil: isSafeUrl(userData.fotoProfil) ? userData.fotoProfil : (isSafeUrl(userData.avatarUrl) ? userData.avatarUrl : null),\n  domisili: typeof userData.domisili === \"string\" ? userData.domisili.slice(0, 100) : \"\",\n  updatedAt: admin.firestore.FieldValue.serverTimestamp(),\n};",
+        "fix_after": "const publicData = {\n  uid,\n  namaLengkap: typeof userData.namaLengkap === \"string\" ? userData.namaLengkap : \"\",\n  prodi: typeof userData.prodi === \"string\" ? userData.prodi : \"\",\n  angkatan: typeof userData.angkatan === \"number\" || typeof userData.angkatan === \"string\" ? userData.angkatan : \"\",\n  bio: typeof userData.bio === \"string\" ? userData.bio.slice(0, 500) : \"\",\n  keahlian: Array.isArray(userData.keahlian) ? userData.keahlian.slice(0, 20) : [],\n  portfolio: sanitizedPortfolio,\n  openToWork: Boolean(userData.openToWork),\n  hasCv: Boolean(userData.cvUrl || userData.cvFileUrl || userData.cvExternalLink),\n  fotoProfil: isSafeUrl(userData.fotoProfil) ? userData.fotoProfil : (isSafeUrl(userData.avatarUrl) ? userData.avatarUrl : null),\n  domisili: typeof userData.domisili === \"string\" ? userData.domisili.slice(0, 100) : \"\",\n  updatedAt: admin.firestore.FieldValue.serverTimestamp(),\n};"
+      },
+      {
+        "file": "src/app/open-to-work/page.tsx",
+        "start_line": 210,
+        "end_line": 218,
+        "fix_before": "{(alumni.cvFileUrl || alumni.cvExternalLink) && (\n  <>\n    <span>•</span>\n    <span className=\"flex items-center gap-1 text-[#0284c7] font-medium\">\n      <FileText className=\"w-3.5 h-3.5\" />\n      CV Ready\n    </span>\n  </>\n)}",
+        "fix_after": "{(alumni.hasCv || alumni.cvFileUrl || alumni.cvExternalLink) && (\n  <>\n    <span>•</span>\n    <span className=\"flex items-center gap-1 text-[#0284c7] font-medium\">\n      <FileText className=\"w-3.5 h-3.5\" />\n      CV Ready\n    </span>\n  </>\n)}"
+      }
+    ],
+    "remediation": "1. Update `syncPublicProfile` in `functions/src/index.ts` to include a boolean flag `hasCv: Boolean(userData.cvUrl || userData.cvFileUrl || userData.cvExternalLink)` without exposing the raw storage path or file URL.\n2. Update `src/app/open-to-work/page.tsx` line 210 to check `alumni.hasCv || alumni.cvFileUrl || alumni.cvExternalLink`.\n3. Add an automated integration test in `tests/strix-security-verification.ts` that boots the functions emulator and verifies that updating `users/{uid}` properly triggers the projection update.",
+    "verification_status": "Tracked as technical debt finding. Recommended for implementation in next sprint."
+  }
+]

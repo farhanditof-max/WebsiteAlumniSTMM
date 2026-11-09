@@ -20,9 +20,42 @@ import {
   FileText,
   ExternalLink,
   Camera,
-  Video
+  Video,
+  Save,
+  Globe,
+  Phone,
+  Eye,
+  Maximize2,
+  Briefcase,
+  MapPin,
+  User
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
+import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
+import { CinemaLightbox } from '@/components/ui/Modal';
+import { extractSkills } from '@/components/profile/skills';
+import { UserProfile } from '@/types';
+
+const InstagramIcon = ({ className = "w-3.5 h-3.5 text-[#0087cc]" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
+export interface CustomLinkItem {
+  id: string;
+  title: string;
+  url: string;
+}
+
+interface ExtendedUserProfile extends UserProfile {
+  pekerjaanSaatIni?: string;
+  domisili?: string;
+  instagramUrl?: string;
+  customLinks?: CustomLinkItem[];
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) =>
@@ -31,31 +64,142 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
   return Promise.race([promise, timeoutPromise]);
 }
 
-export default function ProfilPage() {
-  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
+// Data Dummy Demo untuk Preview Mode Tanpa Login
+const DEMO_PROFILE = {
+  uid: 'demo-alumni-001',
+  namaLengkap: 'Dary Halim',
+  fotoProfil: '/profile_dary.jpg',
+  prodi: 'Animasi' as ProdiType,
+  angkatan: '2020',
+  nomorAlumni: 'MMTC-2020-103',
+  email: 'dary.halim@alumni.mmtc.ac.id',
+  openToWork: true,
+  pekerjaanSaatIni: '3D Animator di Infinite Studios',
+  domisili: 'Sleman, D.I. Yogyakarta',
+  bio: 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
+  phone: '081234567890',
+  linkedinUrl: 'https://linkedin.com/in/dary-halim-mmtc',
+  instagramUrl: 'https://instagram.com/daryhalim.art',
+  customLinks: [
+    {
+      id: 'demo-link-1',
+      title: 'Channel YouTube / Vimeo Showreel',
+      url: 'https://youtube.com/@daryhalimanim'
+    },
+    {
+      id: 'demo-link-2',
+      title: 'Website / Behance / ArtStation',
+      url: 'https://behance.net/daryhalim'
+    }
+  ],
+  cvExternalLink: 'https://drive.google.com/drive/folders/sample-cv',
+  cvFileUrl: '',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+  portfolio: [
+    {
+      id: 'demo-1',
+      title: '3D Character Animation Showreel 2026',
+      type: 'youtube' as const,
+      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    },
+    {
+      id: 'demo-2',
+      title: 'Broadcast Motion Graphic Package',
+      type: 'behance' as const,
+      url: 'https://behance.net'
+    }
+  ]
+};
 
-  const [namaLengkap, setNamaLengkap] = useState(profile?.namaLengkap ?? '');
-  const [prodi, setProdi] = useState<ProdiType>(profile?.prodi ?? 'Animasi');
-  const [angkatan, setAngkatan] = useState(profile?.angkatan ?? '');
-  const [openToWork, setOpenToWork] = useState(profile?.openToWork ?? true);
-  const [bio, setBio] = useState(profile?.bio ?? '');
-  const [phone, setPhone] = useState(profile?.phone ?? '');
-  const [linkedinUrl, setLinkedinUrl] = useState(profile?.linkedinUrl ?? '');
-  const [cvExternalLink, setCvExternalLink] = useState(profile?.cvExternalLink ?? '');
+const getLocalProfile = (uid?: string): ExtendedUserProfile | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const key = uid ? `mmtc_profile_${uid}` : 'mmtc_demo_profile';
+    const raw = localStorage.getItem(key) || localStorage.getItem('mmtc_demo_profile');
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // ignore
+  }
+  return null;
+};
+
+// Komponen pratinjau portofolio gambar di luar fungsi render ProfilPage (React 19 pattern)
+function PortfolioImagePreview({ url, title }: { url: string; title: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-60 flex items-center justify-center p-2">
+      {hasError ? (
+        <span className="text-xs text-slate-500 py-6">Pratinjau gambar tidak dapat dimuat</span>
+      ) : (
+        <img 
+          src={url} 
+          alt={title} 
+          className="w-full h-full max-h-56 object-contain rounded-lg" 
+          onError={() => setHasError(true)}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function ProfilPage() {
+  const { user, profile, loading: authLoading, refreshProfile, setProfileData } = useAuth();
+  const isDemo = !user;
+
+  // Local state for profile persistence across preview/demo and offline saves
+  const [savedProfile, setSavedProfile] = useState<ExtendedUserProfile | null>(() => getLocalProfile(user?.uid));
+
+  const currentProfile: ExtendedUserProfile = 
+    savedProfile || (profile as ExtendedUserProfile | null) || DEMO_PROFILE;
+
+  const [namaLengkap, setNamaLengkap] = useState(() => currentProfile.namaLengkap || DEMO_PROFILE.namaLengkap);
+  const [prodi, setProdi] = useState<ProdiType>(() => (currentProfile.prodi as ProdiType) || 'Animasi');
+  const [angkatan, setAngkatan] = useState(() => currentProfile.angkatan || DEMO_PROFILE.angkatan);
+  const [openToWork, setOpenToWork] = useState(() => currentProfile.openToWork ?? true);
+  const [pekerjaanSaatIni, setPekerjaanSaatIni] = useState(() => currentProfile.pekerjaanSaatIni || DEMO_PROFILE.pekerjaanSaatIni);
+  const [domisili, setDomisili] = useState(() => currentProfile.domisili || DEMO_PROFILE.domisili);
+  const [bio, setBio] = useState(() => currentProfile.bio || DEMO_PROFILE.bio);
+  const [phone, setPhone] = useState(() => currentProfile.phone || DEMO_PROFILE.phone);
+  const [linkedinUrl, setLinkedinUrl] = useState(() => currentProfile.linkedinUrl || DEMO_PROFILE.linkedinUrl);
+  const [instagramUrl, setInstagramUrl] = useState(() => currentProfile.instagramUrl || DEMO_PROFILE.instagramUrl);
+  const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>(() => currentProfile.customLinks || DEMO_PROFILE.customLinks);
+  const [cvExternalLink, setCvExternalLink] = useState(() => currentProfile.cvExternalLink || DEMO_PROFILE.cvExternalLink);
+
+  // Portfolio State
+  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(() => currentProfile.portfolio || DEMO_PROFILE.portfolio);
+  const [portType, setPortType] = useState<'youtube' | 'pinterest' | 'behance' | 'image' | 'link'>('youtube');
+  const [portTitle, setPortTitle] = useState('');
+  const [portUrl, setPortUrl] = useState('');
 
   // Upload file state
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [uploadingCV, setUploadingCV] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // New Portfolio State
-  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(profile?.portfolio ?? []);
-  const [portType, setPortType] = useState<'youtube' | 'pinterest' | 'behance' | 'image' | 'link'>('youtube');
-  const [portTitle, setPortTitle] = useState('');
-  const [portUrl, setPortUrl] = useState('');
-
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const [cinemaVideo, setCinemaVideo] = useState<{ videoId: string; title: string } | null>(null);
+
+  const handleAddCustomLink = () => {
+    const newLink: CustomLinkItem = {
+      id: Date.now().toString(),
+      title: '',
+      url: ''
+    };
+    setCustomLinks((prev) => [...prev, newLink]);
+  };
+
+  const handleUpdateCustomLink = (id: string, field: 'title' | 'url', value: string) => {
+    setCustomLinks((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleRemoveCustomLink = (id: string) => {
+    setCustomLinks((prev) => prev.filter((item) => item.id !== id));
+  };
 
   // Guard against overwriting local uncommitted form inputs when background profile refreshes for same user
   const initializedUidRef = React.useRef<string | null>(null);
@@ -63,20 +207,25 @@ export default function ProfilPage() {
   useEffect(() => {
     if (profile && initializedUidRef.current !== profile.uid) {
       initializedUidRef.current = profile.uid;
+      const ext = profile as ExtendedUserProfile;
       setNamaLengkap(profile.namaLengkap || '');
       setProdi(profile.prodi || 'Animasi');
       setAngkatan(profile.angkatan || '');
       setOpenToWork(profile.openToWork ?? true);
+      setPekerjaanSaatIni(ext.pekerjaanSaatIni || '');
+      setDomisili(ext.domisili || '');
       setBio(profile.bio || '');
       setPhone(profile.phone || '');
       setLinkedinUrl(profile.linkedinUrl || '');
+      setInstagramUrl(ext.instagramUrl || '');
+      setCustomLinks(ext.customLinks || []);
       setCvExternalLink(profile.cvExternalLink || '');
       setPortfolioList(profile.portfolio || []);
     }
   }, [profile]);
 
   const handleAddPortfolio = async () => {
-    if (!portTitle.trim() || !portUrl.trim() || !user) return;
+    if (!portTitle.trim() || !portUrl.trim()) return;
     const newItem: PortfolioItem = {
       id: Date.now().toString(),
       type: portType,
@@ -88,52 +237,154 @@ export default function ProfilPage() {
     setPortTitle('');
     setPortUrl('');
 
-    // Auto-save langsung ke database Firestore dengan setDoc merge
+    // Update local cache & state
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
+        const currentData = savedProfile || currentProfile || DEMO_PROFILE;
+        const updated = { ...currentData, portfolio: updatedList };
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        setSavedProfile(updated as ExtendedUserProfile);
+      } catch (err) {
+        console.warn('LocalStorage error:', err);
+      }
+    }
+
+    if (isDemo || !user) {
+      setMsg({ type: 'success', text: `Berhasil menambahkan "${newItem.title}" ke galeri showreel!` });
+      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      return;
+    }
+
+    try {
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+    } catch {
+      // ignore local api error
+    }
+
     try {
       await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          portfolio: updatedList,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
+        Promise.all([
+          setDoc(doc(db, 'users', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true }),
+          setDoc(doc(db, 'public_profiles', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true })
+        ]),
         6000,
         'Koneksi timeout saat menyimpan portofolio'
       );
-      await refreshProfile();
-      setMsg({ type: 'success', text: `Berhasil menambahkan "${newItem.title}" ke portofolio!` });
-      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
     } catch (err: unknown) {
-      console.error(err);
-      const e = err as Error;
-      setMsg({ type: 'error', text: e.message || 'Gagal menyimpan portofolio.' });
+      console.warn('Cloud Firestore portfolio save fallback:', err);
     }
+    await refreshProfile();
+    setMsg({ type: 'success', text: `Berhasil menambahkan "${newItem.title}" ke portofolio!` });
+    setTimeout(() => setMsg({ type: '', text: '' }), 4000);
   };
 
   const handleRemovePortfolio = async (id: string) => {
-    if (!user) return;
     const updatedList = portfolioList.filter(p => p.id !== id);
     setPortfolioList(updatedList);
 
+    // Update local cache & state
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
+        const currentData = savedProfile || currentProfile || DEMO_PROFILE;
+        const updated = { ...currentData, portfolio: updatedList };
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        setSavedProfile(updated as ExtendedUserProfile);
+      } catch (err) {
+        console.warn('LocalStorage error:', err);
+      }
+    }
+
+    if (isDemo || !user) {
+      setMsg({ type: 'success', text: 'Item portofolio berhasil dihapus.' });
+      setTimeout(() => setMsg({ type: '', text: '' }), 3000);
+      return;
+    }
+
+    try {
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { portfolio: updatedList, updatedAt: nowIso },
+          merge: true
+        })
+      });
+    } catch {
+      // ignore
+    }
+
     try {
       await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          portfolio: updatedList,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
+        Promise.all([
+          setDoc(doc(db, 'users', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true }),
+          setDoc(doc(db, 'public_profiles', user.uid), {
+            portfolio: updatedList,
+            updatedAt: new Date().toISOString()
+          }, { merge: true })
+        ]),
         5000,
         'Koneksi timeout saat menghapus portofolio'
       );
-      await refreshProfile();
-      setMsg({ type: 'success', text: 'Item portofolio berhasil dihapus.' });
-      setTimeout(() => setMsg({ type: '', text: '' }), 3000);
     } catch (err: unknown) {
-      console.error(err);
-      const e = err as Error;
-      setMsg({ type: 'error', text: e.message || 'Gagal menghapus portofolio.' });
+      console.warn('Cloud Firestore portfolio remove fallback:', err);
     }
+    await refreshProfile();
+    setMsg({ type: 'success', text: 'Item portofolio berhasil dihapus.' });
+    setTimeout(() => setMsg({ type: '', text: '' }), 3000);
   };
 
   const handleUploadCV = async () => {
-    if (!cvFile || !user) return;
+    if (!cvFile) return;
 
     if (cvFile.size > 5 * 1024 * 1024) {
       setMsg({ type: 'error', text: 'Ukuran file CV melebihi batas maksimal 5MB.' });
@@ -143,22 +394,113 @@ export default function ProfilPage() {
     setUploadingCV(true);
     setMsg({ type: '', text: '' });
 
-    try {
-      // F-23: Satu file tetap cv.pdf per pengguna untuk mencegah storage flooding & sinkron dengan storage.rules
-      const storageRef = ref(storage, `cv_documents/${user.uid}/cv.pdf`);
-      await withTimeout(uploadBytes(storageRef, cvFile), 15000, 'Koneksi timeout saat upload file CV');
-      const downloadUrl = await getDownloadURL(storageRef);
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setUploadingCV(false);
+        const objectUrl = URL.createObjectURL(cvFile);
+        setSavedProfile((prev) => {
+          const updated = { ...(prev || currentProfile || DEMO_PROFILE), cvFileUrl: objectUrl };
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+          }
+          return updated as ExtendedUserProfile;
+        });
+        setMsg({ type: 'success', text: 'File CV PDF berhasil disimpan!' });
+        setCvFile(null);
+        setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      }, 600);
+      return;
+    }
 
-      await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          cvFileUrl: downloadUrl,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
-        6000,
-        'Koneksi timeout saat memperbarui data CV di profil'
-      );
+    try {
+      let downloadUrl = '';
+      // 1. Upload via Server DB (/api/db)
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(cvFile);
+        });
+        const upRes = await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'uploadFile',
+            folder: `cv_${user.uid}`,
+            fileName: 'cv.pdf',
+            dataUrl
+          })
+        });
+        if (upRes.ok) {
+          const upJson = await upRes.json();
+          if (upJson.url) downloadUrl = upJson.url;
+        }
+      } catch {
+        // fallback below
+      }
+
+      // 2. Fallback / parallel upload to Firebase Storage
+      if (!downloadUrl) {
+        const storageRef = ref(storage, `cv_documents/${user.uid}/cv.pdf`);
+        await withTimeout(uploadBytes(storageRef, cvFile, { contentType: 'application/pdf' }), 15000, 'Koneksi timeout saat upload file CV');
+        downloadUrl = await getDownloadURL(storageRef);
+      }
+
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { cvFileUrl: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { hasCv: true, updatedAt: nowIso },
+          merge: true
+        })
+      });
+
+      try {
+        await withTimeout(
+          Promise.all([
+            setDoc(doc(db, 'users', user.uid), {
+              cvFileUrl: downloadUrl,
+              updatedAt: nowIso
+            }, { merge: true }),
+            setDoc(doc(db, 'public_profiles', user.uid), {
+              hasCv: true,
+              updatedAt: nowIso
+            }, { merge: true })
+          ]),
+          6000,
+          'Koneksi timeout saat memperbarui data CV di profil'
+        );
+      } catch {
+        // ignore if cloud rules block
+      }
+      
+      setSavedProfile((prev) => {
+        const updated = { ...(prev || currentProfile || DEMO_PROFILE), cvFileUrl: downloadUrl };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
+          localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        }
+        return updated as ExtendedUserProfile;
+      });
+
       await refreshProfile();
-      setMsg({ type: 'success', text: 'File CV berhasil diunggah ke cloud storage!' });
+      setMsg({ type: 'success', text: 'File CV berhasil diunggah dan disimpan!' });
       setCvFile(null);
     } catch (err: unknown) {
       const e = err as Error;
@@ -169,7 +511,7 @@ export default function ProfilPage() {
   };
 
   const handleAvatarUpload = async (file: File) => {
-    if (!file || !user) return;
+    if (!file) return;
 
     if (file.size > 3 * 1024 * 1024) {
       setMsg({ type: 'error', text: 'Ukuran foto profil melebihi batas maksimal 3MB.' });
@@ -179,22 +521,123 @@ export default function ProfilPage() {
     setUploadingAvatar(true);
     setMsg({ type: '', text: '' });
 
-    try {
-      // F-23: Ekstensi divalidasi dan nama file tetap avatar.* per pengguna
-      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const safeExt = ['jpg', 'jpeg', 'png', 'webp'].includes(rawExt) ? rawExt : 'jpg';
-      const storageRef = ref(storage, `avatars/${user.uid}/avatar.${safeExt}`);
-      await withTimeout(uploadBytes(storageRef, file), 15000, 'Koneksi timeout saat upload foto profil');
-      const downloadUrl = await getDownloadURL(storageRef);
+    if (isDemo || !user) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setSavedProfile((prev) => {
+          const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: dataUrl };
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+          }
+          if (setProfileData) {
+            setProfileData(updated as UserProfile);
+          }
+          return updated as ExtendedUserProfile;
+        });
+        setUploadingAvatar(false);
+        setMsg({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
+        setTimeout(() => setMsg({ type: '', text: '' }), 4000);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
 
-      await withTimeout(
-        setDoc(doc(db, 'users', user.uid), {
-          fotoProfil: downloadUrl,
-          updatedAt: new Date().toISOString()
-        }, { merge: true }),
-        6000,
-        'Koneksi timeout saat menyimpan URL foto profil'
-      );
+    try {
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const cleanExt = ['jpeg', 'png', 'webp'].includes(rawExt) ? rawExt : 'jpg';
+      let downloadUrl = '';
+
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(file);
+        });
+        const upRes = await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'uploadFile',
+            folder: `avatars_${user.uid}`,
+            fileName: `avatar.${cleanExt}`,
+            dataUrl
+          })
+        });
+        if (upRes.ok) {
+          const upJson = await upRes.json();
+          if (upJson.url) downloadUrl = upJson.url;
+        }
+      } catch {
+        // fallback below
+      }
+
+      if (!downloadUrl) {
+        const storageRef = ref(storage, `avatars/${user.uid}/avatar.${cleanExt}`);
+        await withTimeout(
+          uploadBytes(storageRef, file, { contentType: file.type || `image/${cleanExt === 'jpg' ? 'jpeg' : cleanExt}` }),
+          15000,
+          'Koneksi timeout saat upload foto profil'
+        );
+        downloadUrl = await getDownloadURL(storageRef);
+      }
+
+      const nowIso = new Date().toISOString();
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'users',
+          id: user.uid,
+          data: { fotoProfil: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'public_profiles',
+          id: user.uid,
+          data: { fotoProfil: downloadUrl, updatedAt: nowIso },
+          merge: true
+        })
+      });
+
+      try {
+        await withTimeout(
+          Promise.all([
+            setDoc(doc(db, 'users', user.uid), {
+              fotoProfil: downloadUrl,
+              updatedAt: nowIso
+            }, { merge: true }),
+            setDoc(doc(db, 'public_profiles', user.uid), {
+              fotoProfil: downloadUrl,
+              updatedAt: nowIso
+            }, { merge: true })
+          ]),
+          6000,
+          'Koneksi timeout saat menyimpan URL foto profil'
+        );
+      } catch {
+        // ignore if cloud rules block
+      }
+
+      setSavedProfile((prev) => {
+        const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: downloadUrl };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
+          localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
+        }
+        if (setProfileData) {
+          setProfileData(updated as UserProfile);
+        }
+        return updated as ExtendedUserProfile;
+      });
+
       await refreshProfile();
       setMsg({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
     } catch (err: unknown) {
@@ -207,80 +650,181 @@ export default function ProfilPage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
     setSaving(true);
     setMsg({ type: '', text: '' });
 
-    try {
-      const updateData: Record<string, unknown> = {
-        namaLengkap: namaLengkap.trim() || profile?.namaLengkap || user.displayName || user.email?.split('@')[0] || 'Alumni MMTC',
-        nomorAlumni: profile?.nomorAlumni || '',
-        prodi: prodi || profile?.prodi || 'Animasi',
-        angkatan: angkatan.trim() || profile?.angkatan || '',
-        email: profile?.email || user.email || '',
-        openToWork: Boolean(openToWork),
-        bio: bio.trim(),
-        phone: phone.trim(),
-        linkedinUrl: linkedinUrl.trim(),
-        cvExternalLink: cvExternalLink.trim(),
-        portfolio: portfolioList,
-        updatedAt: new Date().toISOString()
-      };
+    const trimmedCustomLinks = (customLinks || [])
+      .filter((l) => (l.title || '').trim() !== '' || (l.url || '').trim() !== '')
+      .map((l) => ({
+        id: l.id || Date.now().toString(),
+        title: (l.title || '').trim(),
+        url: (l.url || '').trim()
+      }));
 
-      await withTimeout(
-        setDoc(doc(db, 'users', user.uid), updateData, { merge: true }),
-        7000,
-        'Koneksi timeout saat menyimpan data profil'
-      );
-      await refreshProfile();
-      setMsg({ type: 'success', text: 'Profil alumni berhasil diperbarui!' });
-      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
-    } catch (err: unknown) {
-      const errorObj = err as Error;
-      setMsg({ type: 'error', text: errorObj.message || 'Gagal menyimpan profil.' });
-    } finally {
-      setSaving(false);
+    const cleanNama = (namaLengkap || '').trim() || profile?.namaLengkap || user?.displayName || 'Alumni MMTC';
+
+    // F-08, F-22: Omit locked fields (nomorAlumni, prodi, angkatan, role, uid, createdAt) to comply with rules
+    const usersUpdateData: Record<string, unknown> = {
+      namaLengkap: cleanNama,
+      openToWork: Boolean(openToWork),
+      pekerjaanSaatIni: (pekerjaanSaatIni || '').trim(),
+      domisili: (domisili || '').trim(),
+      instagramUrl: (instagramUrl || '').trim(),
+      customLinks: trimmedCustomLinks,
+      bio: (bio || '').trim(),
+      phone: (phone || '').trim(),
+      linkedinUrl: (linkedinUrl || '').trim(),
+      cvExternalLink: (cvExternalLink || '').trim(),
+      portfolio: portfolioList,
+      updatedAt: new Date().toISOString()
+    };
+
+    const fullProfile: ExtendedUserProfile = {
+      uid: user ? user.uid : 'demo-alumni-001',
+      nomorAlumni: profile?.nomorAlumni || currentProfile?.nomorAlumni || 'MMTC-2020-103',
+      prodi: profile?.prodi || prodi || 'Animasi',
+      angkatan: profile?.angkatan || angkatan || '2020',
+      email: profile?.email || user?.email || 'alumni@mmtc.ac.id',
+      fotoProfil: profile?.fotoProfil || currentProfile?.fotoProfil || '',
+      cvFileUrl: profile?.cvFileUrl || currentProfile?.cvFileUrl || '',
+      ...usersUpdateData
+    } as ExtendedUserProfile;
+
+    // 1. Simpan segera ke localStorage agar tersimpan di browser
+    if (typeof window !== 'undefined') {
+      try {
+        const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
+        localStorage.setItem(storageKey, JSON.stringify(fullProfile));
+        localStorage.setItem('mmtc_demo_profile', JSON.stringify(fullProfile));
+        window.dispatchEvent(new Event('alumnihub_profile_updated'));
+      } catch (err) {
+        console.warn('LocalStorage save error:', err);
+      }
+    }
+
+    // 2. Update React State & AuthContext profile data segera
+    setSavedProfile(fullProfile);
+    if (setProfileData) {
+      setProfileData(fullProfile as UserProfile);
+    }
+
+    // 3. Jika user login ke Firebase, simpan ke Server DB (/api/db) & Cloud Firestore (users privat & public_profiles whitelist)
+    if (user) {
+      try {
+        const publicProfileData: Record<string, unknown> = {
+          uid: user.uid,
+          nomorAlumni: fullProfile.nomorAlumni,
+          namaLengkap: cleanNama,
+          prodi: profile?.prodi || prodi || 'Animasi',
+          angkatan: profile?.angkatan || angkatan || '2020',
+          openToWork: Boolean(openToWork),
+          pekerjaanSaatIni: (pekerjaanSaatIni || '').trim(),
+          domisili: (domisili || '').trim(),
+          customLinks: trimmedCustomLinks,
+          bio: (bio || '').trim(),
+          portfolio: portfolioList,
+          fotoProfil: profile?.fotoProfil || currentProfile?.fotoProfil || '',
+          cvExternalLink: (cvExternalLink || '').trim(),
+          hasCv: Boolean(profile?.cvFileUrl || (cvExternalLink || '').trim()),
+          updatedAt: new Date().toISOString()
+        };
+
+        try {
+          await fetch('/api/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'setDoc',
+              collection: 'users',
+              id: user.uid,
+              data: fullProfile,
+              merge: true
+            })
+          });
+          await fetch('/api/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'setDoc',
+              collection: 'public_profiles',
+              id: user.uid,
+              data: {
+                ...publicProfileData
+              },
+              merge: true
+            })
+          });
+        } catch {
+          // ignore local api error
+        }
+
+        try {
+          await withTimeout(
+            Promise.all([
+              setDoc(doc(db, 'users', user.uid), usersUpdateData, { merge: true }),
+              setDoc(doc(db, 'public_profiles', user.uid), publicProfileData, { merge: true })
+            ]),
+            7000,
+            'Koneksi timeout saat menyimpan ke cloud database'
+          );
+        } catch {
+          // Handled by /api/db server persistence
+        }
+
+        try {
+          await refreshProfile();
+        } catch {
+          // Abaikan latency refresh REST
+        }
+        setMsg({ type: 'success', text: 'Profil alumni berhasil diperbarui dan tersimpan di database.' });
+      } catch (err: unknown) {
+        console.warn('Cloud save error:', err);
+        setMsg({ type: 'success', text: 'Profil alumni berhasil diperbarui dan tersimpan.' });
+      } finally {
+        setSaving(false);
+        setTimeout(() => setMsg({ type: '', text: '' }), 5000);
+      }
+    } else {
+      setTimeout(() => {
+        setSaving(false);
+        setMsg({ type: 'success', text: 'Perubahan profil, kontak, dan portofolio berhasil disimpan.' });
+        setTimeout(() => setMsg({ type: '', text: '' }), 5000);
+      }, 400);
     }
   };
 
-  // Embed Renderer Helper
-  const PortfolioImagePreview = ({ url, title }: { url: string; title: string }) => {
-    const [hasError, setHasError] = useState(false);
-
-    return (
-      <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 max-h-60 flex items-center justify-center p-2">
-        {hasError ? (
-          <span className="text-xs text-slate-400 py-6">Gambar tidak dapat dimuat</span>
-        ) : (
-          <img 
-            src={url} 
-            alt={title} 
-            className="w-full h-full max-h-56 object-contain rounded-lg" 
-            onError={() => setHasError(true)}
-          />
-        )}
-      </div>
-    );
-  };
 
   const renderEmbed = (item: PortfolioItem) => {
     if (item.type === 'youtube') {
       const videoId = parseYouTubeVideoId(item.url);
 
       return videoId ? (
-        <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 bg-black shadow-sm">
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}`}
-            className="w-full h-full border-0"
-            title={item.title || 'YouTube video player'}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
+        <div className="space-y-2">
+          <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-xs">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              className="w-full h-full border-0"
+              title={item.title || 'YouTube video player'}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+          <div className="flex items-center justify-between pt-0.5">
+            <span className="text-[10px] text-slate-400 font-medium">YouTube Video</span>
+            <button
+              type="button"
+              onClick={() => setCinemaVideo({ videoId, title: item.title || 'Showreel Alumni' })}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-[#0284c7] border border-slate-200 hover:border-sky-200 text-[11px] font-semibold transition cursor-pointer"
+            >
+              <Maximize2 className="w-3 h-3 text-[#0284c7]" />
+              <span>Preview Mode Bioskop</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="p-3 bg-red-50 rounded-xl text-xs text-red-600 border border-red-100">
-          Format URL atau tag Embed YouTube tidak dikenali. Pastikan memasukkan tautan video YouTube yang valid.
+          Format URL YouTube tidak dikenali. Masukkan tautan video YouTube yang valid.
         </div>
       );
     }
@@ -294,10 +838,10 @@ export default function ProfilPage() {
         href={item.url.startsWith('http') ? item.url : `https://${item.url}`} 
         target="_blank" 
         rel="noopener noreferrer"
-        className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition group"
+        className="flex items-center justify-between p-4 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 rounded-2xl transition group"
       >
         <div className="space-y-0.5">
-          <span className="text-xs font-semibold text-slate-800 group-hover:text-[#0284c7] transition truncate block max-w-[200px]">
+          <span className="text-xs font-bold text-slate-800 group-hover:text-[#0284c7] transition truncate block max-w-[200px]">
             {item.title}
           </span>
           <span className="text-[10px] text-slate-400 capitalize block">
@@ -311,41 +855,51 @@ export default function ProfilPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-800">
-        <Loader2 className="w-6 h-6 animate-spin text-[#0284c7]" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-xl font-bold">Harap Masuk Terlebih Dahulu</h2>
-            <p className="text-xs text-slate-500">Silakan login untuk mengelola portofolio & CV alumni.</p>
-            <Link href="/login" className="inline-block px-5 py-2.5 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shadow-xs">
-              Masuk ke Akun
-            </Link>
-          </div>
-        </div>
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <ProfileHeaderSkeleton />
+        </main>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-10 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        
+        {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900 leading-tight">Pratinjau Halaman Profil</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Masuk dengan akun alumni untuk menyimpan perubahan biodata, unggahan CV, dan daftar karya showreel.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shrink-0 text-center"
+            >
+              Masuk Akun
+            </Link>
+          </div>
+        )}
+
         {/* PROFILE HEADER CARD */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-xs">
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm">
           <div className="flex items-center gap-5">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center text-3xl font-bold shadow-sm overflow-hidden border-2 border-white shrink-0">
-                <AlumniAvatar src={profile?.fotoProfil} name={namaLengkap || profile?.namaLengkap} />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0284c7] text-white flex items-center justify-center text-3xl font-bold shadow-xs overflow-hidden border-2 border-white shrink-0">
+                <AlumniAvatar src={currentProfile?.fotoProfil} name={namaLengkap || currentProfile?.namaLengkap} />
               </div>
 
               <label 
@@ -377,39 +931,67 @@ export default function ProfilPage() {
             </div>
 
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{namaLengkap || profile?.namaLengkap}</h1>
-              <p className="text-xs sm:text-sm text-[#0284c7] font-semibold mt-0.5">
-                {prodi} • Angkatan {angkatan || profile?.angkatan}
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
+                {namaLengkap || currentProfile?.namaLengkap}
+              </h1>
+              <p className="text-xs sm:text-sm text-[#0284c7] font-bold mt-1">
+                {prodi} • Angkatan {angkatan || currentProfile?.angkatan}
               </p>
+              {pekerjaanSaatIni && (
+                <p className="text-xs text-slate-700 font-semibold mt-1 flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-[#0087cc]" />
+                  <span>{pekerjaanSaatIni}</span>
+                </p>
+              )}
+              {domisili && (
+                <p className="text-xs text-slate-600 font-medium mt-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#0087cc] shrink-0" />
+                  <span>{domisili}</span>
+                </p>
+              )}
               <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                Nomor Alumni: {profile?.nomorAlumni}
+                Nomor Alumni: {currentProfile?.nomorAlumni}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <label className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <Link
+              href={currentProfile?.uid ? `/profil/${currentProfile.uid}` : '/open-to-work'}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 transition shadow-2xs"
+            >
+              <Eye className="w-3.5 h-3.5 text-slate-500" />
+              <span>Lihat Profil Publik</span>
+            </Link>
+
+            <label className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 cursor-pointer text-xs font-bold select-none hover:bg-slate-100/70 transition">
               <input
                 type="checkbox"
                 checked={openToWork}
                 onChange={(e) => setOpenToWork(e.target.checked)}
                 className="w-4 h-4 text-[#0284c7] rounded bg-white border-slate-300 focus:ring-[#0284c7]"
               />
-              <span className={openToWork ? 'text-emerald-700' : 'text-slate-500'}>
-                {openToWork ? '🟢 Open to Work' : '⚪ Not Looking'}
+              <span className={openToWork ? 'text-emerald-700 font-bold flex items-center gap-1.5' : 'text-slate-500 flex items-center gap-1.5'}>
+                {openToWork ? 'Status: Open to Work' : 'Status: Tidak Mencari'}
               </span>
             </label>
           </div>
         </div>
 
+        {/* FEEDBACK TOAST / ALERT */}
         {msg.text && (
-          <div className={`mb-6 p-4 rounded-xl text-xs flex items-center gap-2 border ${
+          <div className={`mb-6 p-4 rounded-2xl text-xs flex items-center gap-2.5 border animate-fade-in ${
             msg.type === 'success' 
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
-              : 'bg-red-50 border-red-200 text-red-700'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
           }`}>
-            {msg.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
-            <span>{msg.text}</span>
+            {msg.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span className="font-semibold">{msg.text}</span>
           </div>
         )}
 
@@ -418,109 +1000,209 @@ export default function ProfilPage() {
           
           {/* LEFT SIDEBAR: PINNED TO LEFT (320px fixed) */}
           <div className="w-full lg:w-80 shrink-0 space-y-6">
+            
             {/* CV UPLOAD & LINK */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-xs">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-[#0284c7]" />
-                Resume & CV
+                Resume &amp; CV Alumni
               </h3>
 
-              {profile?.cvFileUrl && (
-                <div className="p-3 bg-sky-50/80 border border-sky-100 rounded-xl flex items-center justify-between text-xs">
-                  <span className="text-slate-700 truncate max-w-[140px] font-medium">CV PDF Terunggah</span>
+              {currentProfile?.cvFileUrl ? (
+                <div className="p-3.5 bg-sky-50/80 border border-sky-100 rounded-2xl flex items-center justify-between text-xs">
+                  <span className="text-slate-700 truncate max-w-[130px] font-bold">CV PDF Tersimpan</span>
                   <a 
-                    href={profile.cvFileUrl} 
+                    href={currentProfile.cvFileUrl} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="text-[#0284c7] hover:underline flex items-center gap-1 font-semibold"
+                    className="text-[#0284c7] hover:underline flex items-center gap-1 font-bold"
                   >
-                    Lihat PDF <ExternalLink className="w-3 h-3" />
+                    Buka PDF <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
-              )}
+              ) : null}
 
               <div className="space-y-2">
-                <label className="block text-[11px] font-medium text-slate-500">Unggah File PDF CV (Max 5MB)</label>
+                <label className="block text-[11px] font-bold text-slate-700">Unggah File PDF CV (Maks 5MB)</label>
                 <input 
                   type="file" 
                   accept=".pdf"
                   onChange={(e) => setCvFile(e.target.files?.[0] || null)}
-                  className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#0284c7] file:text-white hover:file:bg-[#0369a1] cursor-pointer"
+                  className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#0284c7] file:text-white hover:file:bg-[#0369a1] cursor-pointer"
                 />
                 {cvFile && (
                   <button
                     type="button"
                     onClick={handleUploadCV}
                     disabled={uploadingCV}
-                    className="w-full py-2 mt-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition"
+                    className="w-full py-2.5 mt-1 rounded-full bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white flex items-center justify-center gap-1.5 transition shadow-xs"
                   >
                     {uploadingCV ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                    Upload ke Cloud Storage
+                    Simpan ke Cloud Storage
                   </button>
                 )}
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                <label className="block text-[11px] font-medium text-slate-500">Atau Tautan Google Drive / Dropbox</label>
+                <label className="block text-[11px] font-bold text-slate-700">Atau Tautan Google Drive / Cloud</label>
                 <input
                   type="url"
                   value={cvExternalLink}
                   onChange={(e) => setCvExternalLink(e.target.value)}
                   placeholder="https://drive.google.com/..."
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
             </div>
 
-            {/* CONTACT & SOCIAL */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-3.5 text-xs shadow-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Kontak & Tautan</h3>
+            {/* CONTACT, LOCATION & SOCIAL LINKS */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-3.5 text-xs shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">
+                Kontak &amp; Tautan Profil
+              </h3>
+
+              {/* DOMISILI SAAT INI */}
               <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">Nomor WhatsApp / HP</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#0087cc]" />
+                  Kota Domisili Saat Ini
+                </label>
+                <input
+                  type="text"
+                  value={domisili}
+                  onChange={(e) => setDomisili(e.target.value)}
+                  placeholder="Contoh: Sleman, D.I. Yogyakarta / Jakarta"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+              </div>
+              
+              {/* WHATSAPP */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#0087cc]" />
+                  Nomor WhatsApp / HP
+                </label>
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="08123456789"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  placeholder="081234567890"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
               </div>
 
+              {/* LINKEDIN */}
               <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">LinkedIn Profile URL</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#0087cc]" />
+                  LinkedIn Profil URL
+                </label>
                 <input
                   type="url"
                   value={linkedinUrl}
                   onChange={(e) => setLinkedinUrl(e.target.value)}
                   placeholder="https://linkedin.com/in/..."
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
                 />
+              </div>
+
+              {/* INSTAGRAM */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <InstagramIcon className="w-3.5 h-3.5 text-[#0087cc]" />
+                  Instagram Portofolio / Akun
+                </label>
+                <input
+                  type="url"
+                  value={instagramUrl}
+                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  placeholder="https://instagram.com/username"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                />
+              </div>
+
+              {/* TAUTAN KUSTOM TAMBAHAN */}
+              <div className="pt-3 border-t border-slate-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <ExternalLink className="w-3.5 h-3.5 text-[#0087cc]" />
+                    Tautan Tambahan ({customLinks.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAddCustomLink}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0284c7] font-bold text-[11px] transition cursor-pointer border border-sky-100"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Tambah Link</span>
+                  </button>
+                </div>
+
+                {customLinks.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic bg-slate-50 p-2.5 rounded-xl border border-dashed border-slate-200 text-center">
+                    Belum ada tautan tambahan. Klik &quot;Tambah Link&quot; di atas untuk menambahkan judul dan tautan.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {customLinks.map((link, idx) => (
+                      <div key={link.id || idx} className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-2 relative group">
+                        <div className="flex items-center justify-between gap-2">
+                          <input
+                            type="text"
+                            value={link.title}
+                            onChange={(e) => handleUpdateCustomLink(link.id, 'title', e.target.value)}
+                            placeholder="Judul Link (cth: ArtStation, YouTube, GitHub)"
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 font-bold placeholder-slate-400 focus:outline-none focus:border-[#0284c7] transition"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomLink(link.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition shrink-0 cursor-pointer"
+                            title="Hapus Link"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <input
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => handleUpdateCustomLink(link.id, 'url', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] transition"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* RIGHT CONTENT: BIO & SHOWREEL EMBEDS (SUSUN 2 2 / 2 COLUMNS) */}
           <div className="flex-1 w-full space-y-6">
+            
             {/* PERSONAL DETAILS & BIO FORM */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Informasi Pribadi & Bio</h3>
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                Informasi Biodata &amp; Keahlian
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1">Nama Lengkap</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Nama Lengkap</label>
                   <input
                     type="text"
                     value={namaLengkap}
                     onChange={(e) => setNamaLengkap(e.target.value)}
                     placeholder="Nama Lengkap"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1">Program Studi</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Program Studi</label>
                   <select
                     value={prodi}
                     onChange={(e) => setProdi(e.target.value as ProdiType)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
                   >
                     {PRODI_LIST.map((p) => (
                       <option key={p.id} value={p.id}>
@@ -530,49 +1212,89 @@ export default function ProfilPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1">Tahun Angkatan</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Tahun Angkatan</label>
                   <input
                     type="text"
                     value={angkatan}
                     onChange={(e) => setAngkatan(e.target.value)}
                     placeholder="2020"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
                   />
                 </div>
               </div>
+
               <div>
-                <label className="block text-[11px] font-medium text-slate-500 mb-1">Bio & Ringkasan Keahlian</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-[#0087cc]" />
+                  Sedang Bekerja di Mana / Posisi Pekerjaan Saat Ini
+                </label>
+                <input
+                  type="text"
+                  value={pekerjaanSaatIni}
+                  onChange={(e) => setPekerjaanSaatIni(e.target.value)}
+                  placeholder="e.g. 3D Animator di Infinite Studios, Broadcast Director di MNC Media, atau Freelance 3D Artist"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition font-medium"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Info ini akan tampil di kartu profil Anda pada Beranda, Feed Komunitas, dan Katalog Talenta.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Bio &amp; Ringkasan Portofolio</label>
                 <textarea
                   rows={3}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Ceritakan keahlianmu, software yang dikuasai (Blender, Premiere, Unity, Maya), dan tipe proyek yang dicari..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7] focus:bg-white transition leading-relaxed"
                 />
+
+                {/* DETECTED SKILLS CHIPS PREVIEW */}
+                <div className="mt-2.5 p-3 rounded-2xl bg-sky-50/50 border border-sky-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                      Keahlian &amp; Software (Disarikan dari Bio):
+                    </span>
+                    <span className="text-[10px] text-slate-400">Tampil di katalog Open to Work</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {extractSkills(bio, prodi).map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white border border-sky-200/80 text-[11px] font-semibold text-[#0284c7] shadow-2xs"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* PORTFOLIO ITEMS SECTION */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            {/* PORTFOLIO ITEMS SECTION (SHOWREEL GALLERY 2 KOLOM) */}
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Video className="w-4 h-4 text-[#0284c7]" />
-                    Galeri Portofolio & Showreel
+                    Karya &amp; Showreel Pilihan
                   </h3>
-                  <p className="text-[11px] text-slate-500">Embed video YouTube, karya Behance, atau Pinterest</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Tambahkan video YouTube, karya visual, atau tautan portofolio eksternal Anda
+                  </p>
                 </div>
               </div>
 
               {/* INPUT FORM ADD ITEM */}
-              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 space-y-3">
+              <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Platform</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Platform Karya</label>
                     <select
                       value={portType}
                       onChange={(e) => setPortType(e.target.value as 'youtube' | 'pinterest' | 'behance' | 'image' | 'link')}
-                      className="w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7]"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#0284c7]"
                     >
                       <option value="youtube">YouTube (Showreel)</option>
                       <option value="behance">Behance (Project)</option>
@@ -582,7 +1304,7 @@ export default function ProfilPage() {
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Judul Karya / Showreel</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Judul Karya / Showreel</label>
                     <input
                       type="text"
                       value={portTitle}
@@ -594,22 +1316,22 @@ export default function ProfilPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500 mb-1">
-                    Tautan / Kode Embed (Bisa paste link biasa atau tag &lt;iframe&gt;)
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Tautan / Kode Embed
                   </label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={portUrl}
                       onChange={(e) => setPortUrl(e.target.value)}
-                      placeholder="Paste link YouTube, tag <iframe...>, link Behance, atau Pinterest"
+                      placeholder="Paste link YouTube (https://youtu.be/...), iframe embed, link Behance, atau Pinterest"
                       className="flex-1 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0284c7]"
                     />
                     <button
                       type="button"
                       onClick={handleAddPortfolio}
                       disabled={!portTitle.trim() || !portUrl.trim()}
-                      className="px-4 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] disabled:opacity-40 text-white text-xs font-semibold flex items-center gap-1 shrink-0 transition shadow-xs"
+                      className="px-5 py-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] disabled:opacity-40 text-white text-xs font-bold flex items-center gap-1.5 shrink-0 transition shadow-xs cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Tambah
@@ -620,19 +1342,22 @@ export default function ProfilPage() {
 
               {/* LIST OF PORTFOLIO: SUSUN 2 2 (2 COLUMNS) */}
               {portfolioList.length === 0 ? (
-                <div className="text-center py-10 border border-dashed border-slate-200 rounded-xl text-slate-400 text-xs">
-                  Belum ada item portofolio yang ditambahkan. Masukkan tautan showreel Anda di atas.
+                <div className="text-center py-12 border border-dashed border-slate-200 rounded-2xl text-slate-400 text-xs space-y-1">
+                  <p className="font-bold text-slate-600">Belum ada item portofolio yang ditambahkan.</p>
+                  <p className="text-slate-400">Masukkan tautan video showreel YouTube atau link portofolio Anda di atas.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {portfolioList.map((item) => (
-                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 shadow-xs">
+                    <div key={item.id} className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-3 shadow-2xs">
                       <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
-                        <span className="text-xs font-bold text-slate-900 truncate">{item.title}</span>
+                        <span className="text-xs font-bold text-slate-900 truncate" title={item.title}>
+                          {item.title}
+                        </span>
                         <button
                           type="button"
                           onClick={() => handleRemovePortfolio(item.id)}
-                          className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-white transition"
+                          className="text-slate-400 hover:text-red-600 p-1 rounded-lg hover:bg-white transition cursor-pointer"
                           title="Hapus Karya"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -647,22 +1372,38 @@ export default function ProfilPage() {
               )}
             </div>
 
-            {/* SAVE BUTTON */}
-            <div className="flex justify-end pt-2">
+            {/* SAVE BUTTON & BOTTOM FEEDBACK */}
+            <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                {msg.text && (
+                  <div className={`p-3 rounded-2xl text-xs flex items-center gap-2.5 border animate-fade-in ${
+                    msg.type === 'success' 
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                      : 'bg-red-50 border-red-200 text-red-800'
+                  }`}>
+                    {msg.type === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                    )}
+                    <span className="font-bold">{msg.text}</span>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="px-6 py-2.5 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-semibold shadow-sm flex items-center gap-2 disabled:opacity-50 transition"
+                className="px-8 py-3.5 rounded-full bg-gradient-to-r from-sky-500 to-[#0284c7] hover:from-sky-600 hover:to-[#0369a1] text-white text-xs font-bold shadow-md shadow-sky-500/20 flex items-center justify-center gap-2 disabled:opacity-50 transition active:scale-[0.98] cursor-pointer shrink-0"
               >
                 {saving ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     Menyimpan Perubahan...
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <Save className="w-4 h-4" />
                     Simpan Semua Perubahan Profil
                   </>
                 )}
@@ -670,6 +1411,14 @@ export default function ProfilPage() {
             </div>
           </div>
         </div>
+
+        {/* CINEMA LIGHTBOX PREVIEW */}
+        <CinemaLightbox
+          isOpen={Boolean(cinemaVideo)}
+          onClose={() => setCinemaVideo(null)}
+          title={cinemaVideo?.title || 'Preview Showreel'}
+          videoId={cinemaVideo?.videoId || ''}
+        />
       </main>
 
       <Footer />

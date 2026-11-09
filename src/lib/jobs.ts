@@ -27,7 +27,7 @@ export async function getJobs(filterProdi?: ProdiType): Promise<JobPosting[]> {
   // 1. Coba REST API terlebih dahulu (sangat cepat ~100ms & tidak pernah hang)
   try {
     const restJobs = await fetchJobsRest();
-    if (restJobs && restJobs.length > 0) {
+    if (restJobs !== null) { // <-- Langsung return meskipun array kosong []
       let jobs = restJobs as JobPosting[];
       if (filterProdi) {
         jobs = jobs.filter(j => j.prodiTarget?.includes(filterProdi));
@@ -83,9 +83,36 @@ export async function createJob(jobData: Omit<JobPosting, 'id' | 'createdAt' | '
     Object.entries(rawJob).filter(([, v]) => v !== undefined)
   );
 
-  const docPromise = addDoc(collection(db, 'jobs'), newJob);
-  const docRef = await withTimeout(docPromise, 7000, 'Koneksi timeout saat mempublikasikan lowongan');
-  return { ...newJob, id: docRef.id } as unknown as JobPosting;
+  let createdId = '';
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'addDoc',
+          collection: 'jobs',
+          data: newJob
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.id) createdId = json.id;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  try {
+    const docPromise = addDoc(collection(db, 'jobs'), newJob);
+    const docRef = await withTimeout(docPromise, 7000, 'Koneksi timeout saat mempublikasikan lowongan');
+    if (!createdId) createdId = docRef.id;
+  } catch (err) {
+    if (!createdId) throw err;
+  }
+
+  return { ...newJob, id: createdId } as unknown as JobPosting;
 }
 
 // Kirim lamaran kerja (F-06: Menggunakan Deterministic ID jobId_applicantUid untuk mencegah duplikasi & race condition)
@@ -102,13 +129,56 @@ export async function applyJob(applicationData: Omit<JobApplication, 'id' | 'app
     Object.entries(rawApp).filter(([, v]) => v !== undefined)
   );
 
-  const docRef = doc(db, 'applications', deterministicId);
-  await withTimeout(setDoc(docRef, newApp), 7000, 'Koneksi timeout saat mengirim lamaran');
+  let savedToApi = false;
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'applications',
+          id: deterministicId,
+          data: newApp,
+          merge: false
+        })
+      });
+      if (res.ok) savedToApi = true;
+    } catch {
+      // ignore
+    }
+  }
+
+  try {
+    const docRef = doc(db, 'applications', deterministicId);
+    await withTimeout(setDoc(docRef, newApp), 7000, 'Koneksi timeout saat mengirim lamaran');
+  } catch (err) {
+    if (!savedToApi) throw err;
+  }
+
   return { ...newApp, id: deterministicId } as unknown as JobApplication;
 }
 
 // Ambil lamaran yang masuk untuk lowongan user
 export async function getReceivedApplications(posterUid: string): Promise<JobApplication[]> {
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch(`/api/db?collection=applications&posterUid=${encodeURIComponent(posterUid)}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.items)) {
+          const apps = json.items as JobApplication[];
+          apps.sort((a, b) => (b.appliedAt || '').localeCompare(a.appliedAt || ''));
+          return apps;
+        }
+      }
+    } catch {
+      // fallback below
+    }
+  }
+
   try {
     const q = query(collection(db, 'applications'), where('posterUid', '==', posterUid));
     const snap = await withTimeout(getDocs(q), 5000, 'Received applications timeout');
@@ -123,6 +193,24 @@ export async function getReceivedApplications(posterUid: string): Promise<JobApp
 
 // Ambil lamaran yang diajukan oleh user
 export async function getMyApplications(applicantUid: string): Promise<JobApplication[]> {
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch(`/api/db?collection=applications&applicantUid=${encodeURIComponent(applicantUid)}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.items)) {
+          const apps = json.items as JobApplication[];
+          apps.sort((a, b) => (b.appliedAt || '').localeCompare(a.appliedAt || ''));
+          return apps;
+        }
+      }
+    } catch {
+      // fallback below
+    }
+  }
+
   try {
     const q = query(collection(db, 'applications'), where('applicantUid', '==', applicantUid));
     const snap = await withTimeout(getDocs(q), 5000, 'My applications timeout');
@@ -140,10 +228,35 @@ export async function updateApplicationStatus(
   applicationId: string, 
   status: 'pending' | 'reviewed' | 'accepted' | 'rejected'
 ): Promise<void> {
-  const docRef = doc(db, 'applications', applicationId);
-  await withTimeout(
-    updateDoc(docRef, { status, updatedAt: new Date().toISOString() }),
-    5000,
-    'Koneksi timeout saat memperbarui status lamaran'
-  );
+  const nowIso = new Date().toISOString();
+  let savedToApi = false;
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'setDoc',
+          collection: 'applications',
+          id: applicationId,
+          data: { status, updatedAt: nowIso },
+          merge: true
+        })
+      });
+      if (res.ok) savedToApi = true;
+    } catch {
+      // ignore
+    }
+  }
+
+  try {
+    const docRef = doc(db, 'applications', applicationId);
+    await withTimeout(
+      updateDoc(docRef, { status, updatedAt: nowIso }),
+      5000,
+      'Koneksi timeout saat memperbarui status lamaran'
+    );
+  } catch (err) {
+    if (!savedToApi) throw err;
+  }
 }

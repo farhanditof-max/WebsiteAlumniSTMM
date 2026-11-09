@@ -12,9 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    "functions/**",
     "tests/**",
     "audit/**",
+    "functions/**",
+    "strix_runs/**",
+    "scripts/**",
   ]),
 ]);
 

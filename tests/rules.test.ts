@@ -22,17 +22,25 @@ describe("Firebase Rules Security Acceptance Tests (Bagian 10)", () => {
   let testEnv: RulesTestEnvironment;
 
   beforeAll(async () => {
+    const hostPort = process.env.FIRESTORE_EMULATOR_HOST || "127.0.0.1:8088";
+    const [host, portStr] = hostPort.split(":");
+    const port = parseInt(portStr || "8088", 10);
+
+    const storageHostPort = process.env.FIREBASE_STORAGE_EMULATOR_HOST || "127.0.0.1:9199";
+    const [sHost, sPortStr] = storageHostPort.split(":");
+    const sPort = parseInt(sPortStr || "9199", 10);
+
     testEnv = await initializeTestEnvironment({
       projectId: PROJECT_ID,
       firestore: {
         rules: fs.readFileSync(path.resolve(__dirname, "../firestore.rules"), "utf8"),
-        host: "127.0.0.1",
-        port: 8080,
+        host: host || "127.0.0.1",
+        port: port,
       },
       storage: {
         rules: fs.readFileSync(path.resolve(__dirname, "../storage.rules"), "utf8"),
-        host: "127.0.0.1",
-        port: 9199,
+        host: sHost || "127.0.0.1",
+        port: sPort,
       },
     });
   });
@@ -297,6 +305,166 @@ describe("Firebase Rules Security Acceptance Tests (Bagian 10)", () => {
         fileRef.put(Buffer.from("<svg onload=alert(1)>"), {
           contentType: "image/svg+xml",
         })
+      );
+    });
+  });
+
+  // ==========================================
+  // 5. FEED KOMUNITAS, STORAGE MEDIA & PERCAKAPAN
+  // ==========================================
+  describe("5. Feed Komunitas, Storage Media & Percakapan", () => {
+    it("TC-13: Anonim dapat membaca feed_posts, tetapi ditolak saat membuat post baru (F-FEED-01)", async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context.firestore().collection("feed_posts").doc("post_seed_1").set({
+          authorUid: "user_bob",
+          authorName: "Bob",
+          category: "showreel",
+          content: "Postingan contoh",
+          likesCount: 0,
+          likedBy: [],
+          comments: [],
+          commentsCount: 0,
+          createdAt: new Date().toISOString()
+        });
+      });
+
+      const unauthed = testEnv.unauthenticatedContext();
+      await assertSucceeds(
+        unauthed.firestore().collection("feed_posts").doc("post_seed_1").get()
+      );
+
+      await assertFails(
+        unauthed.firestore().collection("feed_posts").doc("post_anon").set({
+          authorUid: "anon_uid",
+          authorName: "Anon",
+          category: "diskusi",
+          content: "Post anonim",
+          likesCount: 0,
+          comments: []
+        })
+      );
+    });
+
+    it("TC-14: Pengguna login dapat membuat postingan feed sah dan dilarang spoofing authorUid (F-FEED-02)", async () => {
+      const userAlice = testEnv.authenticatedContext("user_alice");
+      // Post sah milik Alice
+      await assertSucceeds(
+        userAlice.firestore().collection("feed_posts").doc("post_alice_1").set({
+          authorUid: "user_alice",
+          authorName: "Alice",
+          category: "showreel",
+          content: "Showreel rigging animasi terbaru saya di Blender",
+          likesCount: 0,
+          comments: [],
+          createdAt: new Date().toISOString()
+        })
+      );
+
+      // Alice mencoba spoof authorUid Bob -> ditolak
+      await assertFails(
+        userAlice.firestore().collection("feed_posts").doc("post_spoofed").set({
+          authorUid: "user_bob",
+          authorName: "Bob Spoofed",
+          category: "diskusi",
+          content: "Post palsu atas nama Bob",
+          likesCount: 0,
+          comments: []
+        })
+      );
+    });
+
+    it("TC-15: Pengguna dilarang menghapus postingan milik pengguna lain (BOLA F-FEED-03)", async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context.firestore().collection("feed_posts").doc("post_bob_1").set({
+          authorUid: "user_bob",
+          authorName: "Bob",
+          category: "showreel",
+          content: "Karya Bob",
+          likesCount: 0,
+          comments: [],
+          createdAt: new Date().toISOString()
+        });
+      });
+
+      const userAlice = testEnv.authenticatedContext("user_alice");
+      await assertFails(
+        userAlice.firestore().collection("feed_posts").doc("post_bob_1").delete()
+      );
+
+      const userBob = testEnv.authenticatedContext("user_bob");
+      await assertSucceeds(
+        userBob.firestore().collection("feed_posts").doc("post_bob_1").delete()
+      );
+    });
+
+    it("TC-16: Pengguna lain diizinkan like/komentar tapi dilarang mengedit konten post orang lain (F-FEED-04)", async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context.firestore().collection("feed_posts").doc("post_bob_2").set({
+          authorUid: "user_bob",
+          authorName: "Bob",
+          category: "diskusi",
+          content: "Konten asli Bob",
+          likesCount: 0,
+          likedBy: [],
+          comments: [],
+          commentsCount: 0,
+          createdAt: new Date().toISOString()
+        });
+      });
+
+      const userAlice = testEnv.authenticatedContext("user_alice");
+
+      // Like / komentar sah diperbolehkan
+      await assertSucceeds(
+        userAlice.firestore().collection("feed_posts").doc("post_bob_2").update({
+          likesCount: 1,
+          likedBy: ["user_alice"],
+          updatedAt: new Date().toISOString()
+        })
+      );
+
+      // Alice mencoba merusak konten post Bob -> ditolak
+      await assertFails(
+        userAlice.firestore().collection("feed_posts").doc("post_bob_2").update({
+          content: "Konten dibajak oleh Alice"
+        })
+      );
+    });
+
+    it("TC-17: Storage Rules feed_media menolak SVG dan menerima JPEG/PDF < 10MB (F-FEED-05)", async () => {
+      const userAlice = testEnv.authenticatedContext("user_alice");
+      const svgFileRef = userAlice.storage().ref("feed_media/user_alice/hack.svg");
+      await assertFails(
+        svgFileRef.put(Buffer.from("<svg onload=alert(1)>"), {
+          contentType: "image/svg+xml"
+        })
+      );
+
+      const imgFileRef = userAlice.storage().ref("feed_media/user_alice/photo.jpg");
+      await assertSucceeds(
+        imgFileRef.put(Buffer.from("dummy-image-data"), {
+          contentType: "image/jpeg"
+        })
+      );
+    });
+
+    it("TC-18: Percakapan conversations hanya dapat diakses oleh partisipan (F-CONV-01)", async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context.firestore().collection("conversations").doc("conv_alice_bob").set({
+          participants: ["user_alice", "user_bob"],
+          lastMessage: "Halo Bob",
+          updatedAt: new Date().toISOString()
+        });
+      });
+
+      const userEve = testEnv.authenticatedContext("user_eve");
+      await assertFails(
+        userEve.firestore().collection("conversations").doc("conv_alice_bob").get()
+      );
+
+      const userAlice = testEnv.authenticatedContext("user_alice");
+      await assertSucceeds(
+        userAlice.firestore().collection("conversations").doc("conv_alice_bob").get()
       );
     });
   });

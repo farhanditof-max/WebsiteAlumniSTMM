@@ -1,0 +1,379 @@
+{
+  "timestamp": "2026-10-26T15:04:12.658Z",
+  "summary": {
+    "total": 46,
+    "passed": 46,
+    "failed": 0,
+    "score": "100.0%"
+  },
+  "results": [
+    {
+      "id": "SEC-CTL-01.1",
+      "control": "Kontrol 1: Otorisasi Role Admin",
+      "title": "Pengguna biasa dilarang meng-update role menjadi 'admin' pada dokumen sendiri",
+      "findingCode": "F-01",
+      "status": "PASS",
+      "evidence": "Request ditolak permission-denied oleh locked(['role'])."
+    },
+    {
+      "id": "SEC-CTL-01.2",
+      "control": "Kontrol 1: Otorisasi Role Admin",
+      "title": "Pembuatan akun baru dengan payload role: 'admin' secara langsung ditolak",
+      "findingCode": "F-01",
+      "status": "PASS",
+      "evidence": "Rules memeriksa request.resource.data.role != 'admin' saat create."
+    },
+    {
+      "id": "SEC-CTL-01.3",
+      "control": "Kontrol 1: Otorisasi Role Admin",
+      "title": "Pengguna non-admin dilarang menghapus akun langsung dari client (delete users/{uid})",
+      "findingCode": "F-22",
+      "status": "PASS",
+      "evidence": "allow delete: if isAdmin() memblokir aksi hapus non-admin."
+    },
+    {
+      "id": "SEC-CTL-01.4",
+      "control": "Kontrol 1: Otorisasi Role Admin",
+      "title": "Admin resmi (token.admin == true) berhasil melakukan administrasi pada profil alumni",
+      "findingCode": "F-01",
+      "status": "PASS",
+      "evidence": "isAdmin() mengizinkan bypass field lock dan update administratif."
+    },
+    {
+      "id": "SEC-CTL-02.1",
+      "control": "Kontrol 2: Kerahasiaan PII",
+      "title": "Penyerang (Alice) ditolak saat mencoba membaca dokumen privat korban (Bob)",
+      "findingCode": "F-02, F-25",
+      "status": "PASS",
+      "evidence": "isOwner(userId) || isAdmin() menolak pembacaan users/user_victim_bob oleh user_attacker_alice."
+    },
+    {
+      "id": "SEC-CTL-02.2",
+      "control": "Kontrol 2: Kerahasiaan PII",
+      "title": "Pengguna anonim/unauthenticated dilarang mengakses dokumen users/{uid}",
+      "findingCode": "F-02",
+      "status": "PASS",
+      "evidence": "Pengguna tanpa autentikasi menerima permission-denied."
+    },
+    {
+      "id": "SEC-CTL-02.3",
+      "control": "Kontrol 2: Kerahasiaan PII",
+      "title": "Pemilik sah (Bob) dapat membaca dokumen profil privat miliknya",
+      "findingCode": "F-02",
+      "status": "PASS",
+      "evidence": "isOwner(userId) mengevaluasi true dan mengizinkan get()."
+    },
+    {
+      "id": "SEC-CTL-02.4",
+      "control": "Kontrol 2: Kerahasiaan PII",
+      "title": "Koleksi public_profiles (whitelist tanpa nomor HP/CV) dapat dibaca publik",
+      "findingCode": "F-02",
+      "status": "PASS",
+      "evidence": "allow read: if true pada public_profiles/{userId} berhasil."
+    },
+    {
+      "id": "SEC-CTL-02.5",
+      "control": "Kontrol 2: Kerahasiaan PII",
+      "title": "Pengguna biasa dilarang memodifikasi public_profiles (hanya Admin/Cloud Functions)",
+      "findingCode": "F-02",
+      "status": "PASS",
+      "evidence": "allow write: if isAdmin() mencegah modifikasi publik oleh sembarang user."
+    },
+    {
+      "id": "SEC-CTL-03.1",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pihak ketiga (Alice) ditolak saat mencoba membaca lamaran milik Bob (BOLA)",
+      "findingCode": "F-06",
+      "status": "PASS",
+      "evidence": "Rules membatasi read hanya pada applicantUid, posterUid, atau admin."
+    },
+    {
+      "id": "SEC-CTL-03.2",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pelamar sah (Bob) berhasil membaca dokumen lamarannya sendiri",
+      "findingCode": "F-06",
+      "status": "PASS",
+      "evidence": "resource.data.applicantUid == request.auth.uid memberikan izin baca."
+    },
+    {
+      "id": "SEC-CTL-03.3",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pemilik lowongan (Dave) berhasil membaca lamaran yang masuk ke lowongannya",
+      "findingCode": "F-06",
+      "status": "PASS",
+      "evidence": "resource.data.posterUid == request.auth.uid memberikan izin baca ke job owner."
+    },
+    {
+      "id": "SEC-CTL-03.4",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pihak ketiga (Alice) ditolak saat memodifikasi status lamaran korban",
+      "findingCode": "F-06",
+      "status": "PASS",
+      "evidence": "Alice bukan posterUid maupun admin sehingga update ditolak."
+    },
+    {
+      "id": "SEC-CTL-03.5",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pemilik lowongan dilarang memanipulasi pesan/CV pelamar saat update status",
+      "findingCode": "F-06, F-22",
+      "status": "PASS",
+      "evidence": "affectedKeys().hasOnly(['status', 'updatedAt']) menolak tampering isi lamaran."
+    },
+    {
+      "id": "SEC-CTL-03.6",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pemilik lowongan diizinkan memperbarui status lamaran ke nilai enum yang sah ('reviewed')",
+      "findingCode": "F-06",
+      "status": "PASS",
+      "evidence": "Update dengan status enum yang sah ('reviewed') berhasil dieksekusi."
+    },
+    {
+      "id": "SEC-CTL-03.7",
+      "control": "Kontrol 3: BOLA/IDOR Lamaran",
+      "title": "Pengajuan lamaran dengan Document ID acak/non-deterministik ditolak oleh Rules",
+      "findingCode": "F-06, F-21",
+      "status": "PASS",
+      "evidence": "applicationId == jobId + '_' + request.auth.uid menolak ID selain pola deterministik."
+    },
+    {
+      "id": "SEC-CTL-04.1",
+      "control": "Kontrol 4: Integritas Nomor Alumni",
+      "title": "Pendaftaran user baru dengan nomor alumni palsu (tidak ada di alumni_registry) ditolak",
+      "findingCode": "F-04, F2-02",
+      "status": "PASS",
+      "evidence": "exists(/databases/$(database)/documents/alumni_registry/...) gagal verifikasi."
+    },
+    {
+      "id": "SEC-CTL-04.2",
+      "control": "Kontrol 4: Integritas Nomor Alumni",
+      "title": "Pendaftaran user baru membajak nomor alumni yang sudah terdaftar ke akun lain ditolak",
+      "findingCode": "F-04, F2-02",
+      "status": "PASS",
+      "evidence": "alumni_registry.registeredUid == userId memblokir pendaftaran akun kembar/pembajak."
+    },
+    {
+      "id": "SEC-CTL-04.3",
+      "control": "Kontrol 4: Integritas Nomor Alumni",
+      "title": "Pengguna dilarang mengubah nomorAlumni permanen pada profil yang telah aktif",
+      "findingCode": "F-08, F-24",
+      "status": "PASS",
+      "evidence": "locked(['nomorAlumni']) memblokir manipulasi nomor alumni."
+    },
+    {
+      "id": "SEC-CTL-04.4",
+      "control": "Kontrol 4: Integritas Nomor Alumni",
+      "title": "Pengguna biasa ditolak saat mencoba menulis/mengubah data master di alumni_registry",
+      "findingCode": "F-04",
+      "status": "PASS",
+      "evidence": "allow create, delete: if isAdmin() melindungi master alumni_registry."
+    },
+    {
+      "id": "SEC-CTL-05.1",
+      "control": "Kontrol 5: Anti-Spam Deletion",
+      "title": "Pengirim dilarang menghapus contact_requests yang berstatus 'rejected' (mencegah spam ulang)",
+      "findingCode": "F4-02, F-10",
+      "status": "PASS",
+      "evidence": "resource.data.status == 'pending' memblokir penghapusan dokumen yang telah ditolak."
+    },
+    {
+      "id": "SEC-CTL-05.2",
+      "control": "Kontrol 5: Anti-Spam Deletion",
+      "title": "Pengguna dilarang menghapus contact_requests yang berstatus 'approved'",
+      "findingCode": "F4-02",
+      "status": "PASS",
+      "evidence": "resource.data.status == 'pending' memblokir penghapusan dokumen kontak yang disetujui."
+    },
+    {
+      "id": "SEC-CTL-05.3",
+      "control": "Kontrol 5: Anti-Spam Deletion",
+      "title": "Pengirim diizinkan membatalkan/menghapus contact_requests jika status masih 'pending'",
+      "findingCode": "F4-02",
+      "status": "PASS",
+      "evidence": "resource.data.status == 'pending' mengizinkan pembatalan oleh pemilik."
+    },
+    {
+      "id": "SEC-CTL-05.4",
+      "control": "Kontrol 5: Anti-Spam Deletion",
+      "title": "Pelamar dilarang menghapus berkas lamaran setelah status diubah dari 'pending'",
+      "findingCode": "F-06, F4-02",
+      "status": "PASS",
+      "evidence": "allow delete: if status == 'pending' menjaga integritas jejak rekrutmen."
+    },
+    {
+      "id": "SEC-CTL-06.1",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Pihak ketiga (Alice) ditolak saat mencoba mengunduh dokumen CV privat milik Bob",
+      "findingCode": "F-03, F2-04",
+      "status": "PASS",
+      "evidence": "Storage rules cv_documents/{userId}/{fileName} membatasi read ke isOwner(userId) || isAdmin()."
+    },
+    {
+      "id": "SEC-CTL-06.2",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Pengguna anonim ditolak saat mencoba mengunduh dokumen CV privat",
+      "findingCode": "F-03",
+      "status": "PASS",
+      "evidence": "Unauthenticated context menerima permission-denied saat getDownloadURL."
+    },
+    {
+      "id": "SEC-CTL-06.3",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Pemilik sah (Bob) berhasil mendapatkan akses download URL untuk CV miliknya",
+      "findingCode": "F-03",
+      "status": "PASS",
+      "evidence": "isOwner(userId) mengevaluasi true pada storage rules."
+    },
+    {
+      "id": "SEC-CTL-06.4",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Admin institusi berhasil mengunduh berkas CV untuk keperluan audit/verifikasi",
+      "findingCode": "F-03",
+      "status": "PASS",
+      "evidence": "request.auth.token.admin == true mengizinkan pembacaan berkas CV."
+    },
+    {
+      "id": "SEC-CTL-06.5",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Storage Rules menolak berkas non-PDF (misal MIME SVG) pada folder cv_documents",
+      "findingCode": "F-03, F-12",
+      "status": "PASS",
+      "evidence": "request.resource.contentType == 'application/pdf' memvalidasi MIME type berkas."
+    },
+    {
+      "id": "SEC-CTL-06.6",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Storage Rules mengunci nama file CV hanya 'cv.pdf' untuk mencegah penumpukan file sembarang",
+      "findingCode": "F-03, F-23",
+      "status": "PASS",
+      "evidence": "fileName == 'cv.pdf' menolak nama berkas selain pola baku."
+    },
+    {
+      "id": "SEC-CTL-06.7",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Storage Rules menolak avatar berformat SVG yang berpotensi menjadi vektor Stored XSS",
+      "findingCode": "F-12",
+      "status": "PASS",
+      "evidence": "contentType.matches('image/(jpeg|png|webp)') secara tegas menolak format vektor SVG."
+    },
+    {
+      "id": "SEC-CTL-06.8",
+      "control": "Kontrol 6: Akses Berkas Storage CV",
+      "title": "Storage Rules memisahkan allow delete sehingga penghapusan file tidak mengalami error null request.resource",
+      "findingCode": "F-23",
+      "status": "PASS",
+      "evidence": "allow delete: if isOwner(userId) berhasil menghapus berkas milik sendiri."
+    },
+    {
+      "id": "SEC-CTL-07.1",
+      "control": "Kontrol 7: Sanitasi URL Eksternal",
+      "title": "Penolakan mutlak terhadap skema berbahaya (javascript:, data:, vbscript:, file:, blob:)",
+      "findingCode": "F-07, F4-03",
+      "status": "PASS",
+      "evidence": "Seluruh 8 vektor URI berbahaya berhasil dinetralkan (mengembalikan null)."
+    },
+    {
+      "id": "SEC-CTL-07.2",
+      "control": "Kontrol 7: Sanitasi URL Eksternal",
+      "title": "Normalisasi URL HTTP/HTTPS sah dan auto-prefixing protokol https:// pada tautan web",
+      "findingCode": "F-07",
+      "status": "PASS",
+      "evidence": "Tautan valid terurai sempurna: https://mmtc.ac.id/showcase, http://mitra-industri.com/, https://github.com/alumni-mmtc"
+    },
+    {
+      "id": "SEC-CTL-07.3",
+      "control": "Kontrol 7: Sanitasi URL Eksternal",
+      "title": "Enforcement whitelist host/domain untuk embed media sensitif (youtube.com & youtu.be)",
+      "findingCode": "F-07, F-12",
+      "status": "PASS",
+      "evidence": "Domain youtube.com & youtu.be diterima, domain phishing ditolak null."
+    },
+    {
+      "id": "SEC-CTL-08.1",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pengguna anonim/unauthenticated dapat membaca koleksi feed_posts (public read)",
+      "findingCode": "F-FEED-01",
+      "status": "PASS",
+      "evidence": "Dokumen feed_posts berhasil dibaca tanpa autentikasi (sesuai spesifikasi read-only)."
+    },
+    {
+      "id": "SEC-CTL-08.2",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pengguna anonim ditolak saat mencoba membuat postingan feed (wajib login)",
+      "findingCode": "F-FEED-01",
+      "status": "PASS",
+      "evidence": "Rules menolak pembuatan postingan feed oleh pengunjung anonim."
+    },
+    {
+      "id": "SEC-CTL-08.3",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pengguna alumni yang login berhasil membuat postingan feed miliknya sendiri",
+      "findingCode": "F-FEED-02",
+      "status": "PASS",
+      "evidence": "Postingan baru berhasil dibuat oleh pemilik akun dengan data valid."
+    },
+    {
+      "id": "SEC-CTL-08.4",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pengguna dilarang memalsukan authorUid akun lain pada feed_posts (anti-spoofing)",
+      "findingCode": "F-FEED-02, F-21",
+      "status": "PASS",
+      "evidence": "Rules menolak pembuatan postingan jika authorUid != request.auth.uid."
+    },
+    {
+      "id": "SEC-CTL-08.5",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Penyerang ditolak saat mencoba menghapus postingan milik alumni lain (BOLA protection)",
+      "findingCode": "F-FEED-03, F-06",
+      "status": "PASS",
+      "evidence": "Rules menolak penghapusan feed_posts oleh non-pemilik (authorUid != auth.uid)."
+    },
+    {
+      "id": "SEC-CTL-08.6",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pengguna lain yang login diizinkan berinteraksi (Like & Komentar) pada feed",
+      "findingCode": "F-FEED-04",
+      "status": "PASS",
+      "evidence": "Pembaruan field interaksi (likesCount, likedBy, updatedAt) diterima secara aman."
+    },
+    {
+      "id": "SEC-CTL-08.7",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pengguna lain ditolak saat mencoba merusak atau menyunting konten teks postingan orang lain",
+      "findingCode": "F-FEED-04, F-22",
+      "status": "PASS",
+      "evidence": "Rules melarang modifikasi content oleh pengguna selain pemilik postingan."
+    },
+    {
+      "id": "SEC-CTL-08.8",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Storage Rules menolak berkas SVG berbahaya pada folder feed_media (Anti-XSS)",
+      "findingCode": "F-12, F-FEED-05",
+      "status": "PASS",
+      "evidence": "Upload berkas SVG ditolak oleh contentType validator Storage Rules."
+    },
+    {
+      "id": "SEC-CTL-08.9",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Storage Rules mengizinkan upload berkas gambar JPEG/PNG dan dokumen PDF pada feed_media",
+      "findingCode": "F-FEED-05",
+      "status": "PASS",
+      "evidence": "Berkas JPEG dan PDF berukuran sah (<10MB) berhasil diunggah oleh pemilik."
+    },
+    {
+      "id": "SEC-CTL-08.10",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Pihak ketiga (Alice) ditolak saat mencoba membaca percakapan privat antara Bob dan Dave (BOLA Chat)",
+      "findingCode": "F-CONV-01, F-06",
+      "status": "PASS",
+      "evidence": "Rules membatasi pembacaan percakapan hanya untuk UID yang ada di array participants."
+    },
+    {
+      "id": "SEC-CTL-08.11",
+      "control": "Kontrol 8: Feed & Pesan",
+      "title": "Peserta percakapan yang sah (Bob) berhasil membaca riwayat percakapan",
+      "findingCode": "F-CONV-01",
+      "status": "PASS",
+      "evidence": "Akses percakapan diberikan kepada peserta yang terdaftar di participants."
+    }
+  ]
+}

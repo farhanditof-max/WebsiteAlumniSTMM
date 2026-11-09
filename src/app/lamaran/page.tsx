@@ -6,73 +6,115 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useAuth } from '@/context/AuthContext';
 import { getMyApplications, getReceivedApplications, updateApplicationStatus } from '@/lib/jobs';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { JobApplication, ContactRequest } from '@/types';
-import { formatWhatsAppUrl, ensureAbsoluteUrl, safeHttpUrl } from '@/lib/media';
+import { JobApplication } from '@/types';
+import { formatWhatsAppUrl, ensureAbsoluteUrl } from '@/lib/media';
 import { 
   FileText, 
   Inbox, 
   Send, 
   Loader2,
   ExternalLink,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Eye,
+  CheckCircle2,
   AlertCircle,
   Phone,
-  ShieldCheck,
-  ArrowRight
+  User,
+  Calendar
 } from 'lucide-react';
+import { StatusBadge } from '@/components/ui/Badge';
+
+// Sample Mock Applications untuk Mode Preview Tanpa Login
+const DEMO_SENT_APPS: JobApplication[] = [
+  {
+    id: 'demo-sent-1',
+    jobId: 'job-1',
+    jobTitle: '3D Animator & Modeler',
+    applicantUid: 'demo-user',
+    applicantName: 'Dary Halim',
+    applicantEmail: 'dary.halim@alumni.mmtc.ac.id',
+    applicantProdi: 'Animasi',
+    posterUid: 'studio-infinite',
+    pesan: 'Halo tim Infinite Studios, saya alumni Animasi MMTC angkatan 2020. Sangat tertarik berkontribusi pada serial animasi 3D terbaru studio Anda. Berikut link showreel dan portofolio saya.',
+    cvExternalLink: 'https://drive.google.com/drive/folders/sample',
+    status: 'reviewed',
+    appliedAt: '2026-10-22T08:30:00.000Z'
+  },
+  {
+    id: 'demo-sent-2',
+    jobId: 'job-2',
+    jobTitle: 'Motion Graphic Specialist TV',
+    applicantUid: 'demo-user',
+    applicantName: 'Dary Halim',
+    applicantEmail: 'dary.halim@alumni.mmtc.ac.id',
+    applicantProdi: 'Animasi',
+    posterUid: 'trans-media',
+    pesan: 'Saya memiliki pengalaman 2 tahun mengerjakan on-air graphics dan promo package televisi. Siap bergabung full-time di Jakarta.',
+    status: 'accepted',
+    appliedAt: '2026-10-18T14:15:00.000Z'
+  }
+];
+
+const DEMO_RECEIVED_APPS: JobApplication[] = [
+  {
+    id: 'demo-rec-1',
+    jobId: 'job-own-1',
+    jobTitle: 'Junior Unity 3D Developer',
+    applicantUid: 'alumni-siti',
+    applicantName: 'Siti Rahma',
+    applicantEmail: 'siti.rahma@gmail.com',
+    applicantProdi: 'Game Design',
+    applicantPhone: '081298765432',
+    posterUid: 'demo-user',
+    pesan: 'Halo Mas Dary! Saya fresh graduate Game Design MMTC 2024. Mahir C#, Unity Physics, dan UI gameplay. Ini portofolio game jam saya.',
+    cvExternalLink: 'https://itch.io',
+    status: 'pending',
+    appliedAt: '2026-10-24T03:10:00.000Z'
+  },
+  {
+    id: 'demo-rec-2',
+    jobId: 'job-own-1',
+    jobTitle: 'Junior Unity 3D Developer',
+    applicantUid: 'alumni-dimas',
+    applicantName: 'Dimas Aditya',
+    applicantEmail: 'dimas.aditya@outlook.com',
+    applicantProdi: 'Game Design',
+    applicantPhone: '081345678910',
+    posterUid: 'demo-user',
+    pesan: 'Tertarik mengisi posisi Unity Developer untuk proyek game edukasi studio Anda. Pernah magang 6 bulan di Game Studio Yogyakarta.',
+    cvExternalLink: 'https://github.com',
+    status: 'reviewed',
+    appliedAt: '2026-10-23T11:45:00.000Z'
+  }
+];
 
 export default function LamaranPage() {
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'sent' | 'received' | 'contacts'>('sent');
-  const [contactSubTab, setContactSubTab] = useState<'incoming' | 'outgoing'>('incoming');
-  const [sentApps, setSentApps] = useState<JobApplication[]>([]);
-  const [receivedApps, setReceivedApps] = useState<JobApplication[]>([]);
-  const [contactRequests, setContactRequests] = useState<ContactRequest[]>([]);
-  const [sentContactRequests, setSentContactRequests] = useState<ContactRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const isDemo = !user;
+
+  const [activeTab, setActiveTab] = useState<'sent' | 'received'>('sent');
+  const [sentApps, setSentApps] = useState<JobApplication[]>(DEMO_SENT_APPS);
+  const [receivedApps, setReceivedApps] = useState<JobApplication[]>(DEMO_RECEIVED_APPS);
+  const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [updatingContactId, setUpdatingContactId] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     async function loadData() {
       if (!user) {
+        setSentApps(DEMO_SENT_APPS);
+        setReceivedApps(DEMO_RECEIVED_APPS);
         setLoading(false);
         return;
       }
       setLoading(true);
       try {
-        const [sent, received, snapContacts, snapSentContacts] = await Promise.all([
+        const [sent, received] = await Promise.all([
           getMyApplications(user.uid),
-          getReceivedApplications(user.uid),
-          getDocs(query(collection(db, 'contact_requests'), where('targetUid', '==', user.uid))).catch(() => null),
-          getDocs(query(collection(db, 'contact_requests'), where('requesterUid', '==', user.uid))).catch(() => null)
+          getReceivedApplications(user.uid)
         ]);
         setSentApps(sent);
         setReceivedApps(received);
-
-        if (snapContacts && !snapContacts.empty) {
-          const reqs = snapContacts.docs.map(d => ({ ...d.data(), id: d.id } as ContactRequest));
-          reqs.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-          setContactRequests(reqs);
-        } else {
-          setContactRequests([]);
-        }
-
-        if (snapSentContacts && !snapSentContacts.empty) {
-          const sentReqs = snapSentContacts.docs.map(d => ({ ...d.data(), id: d.id } as ContactRequest));
-          sentReqs.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-          setSentContactRequests(sentReqs);
-        } else {
-          setSentContactRequests([]);
-        }
       } catch (err) {
-        console.error('Failed to load applications / contact requests:', err);
+        console.error('Failed to load applications:', err);
       } finally {
         setLoading(false);
       }
@@ -86,17 +128,31 @@ export default function LamaranPage() {
   const handleStatusChange = async (appId: string, newStatus: 'pending' | 'reviewed' | 'accepted' | 'rejected') => {
     setUpdatingId(appId);
     setStatusMsg(null);
+
+    const statusLabels: Record<string, string> = {
+      pending: 'Menunggu Respon',
+      reviewed: 'Sedang Ditinjau',
+      accepted: 'Diterima',
+      rejected: 'Ditolak'
+    };
+
+    if (isDemo || !user) {
+      setTimeout(() => {
+        setReceivedApps((prev) =>
+          prev.map((item) => (item.id === appId ? { ...item, status: newStatus } : item))
+        );
+        setUpdatingId(null);
+        setStatusMsg({ type: 'success', text: `[Preview] Status lamaran disimulasikan menjadi "${statusLabels[newStatus]}".` });
+        setTimeout(() => setStatusMsg(null), 3000);
+      }, 400);
+      return;
+    }
+
     try {
       await updateApplicationStatus(appId, newStatus);
       setReceivedApps((prev) =>
         prev.map((item) => (item.id === appId ? { ...item, status: newStatus } : item))
       );
-      const statusLabels: Record<string, string> = {
-        pending: 'Menunggu Respon',
-        reviewed: 'Sedang Ditinjau',
-        accepted: 'Diterima',
-        rejected: 'Ditolak'
-      };
       setStatusMsg({ type: 'success', text: `Status lamaran berhasil diubah menjadi "${statusLabels[newStatus] || newStatus}".` });
       setTimeout(() => setStatusMsg(null), 3000);
     } catch (err: unknown) {
@@ -107,161 +163,103 @@ export default function LamaranPage() {
     }
   };
 
-  const handleContactStatusChange = async (reqId: string, newStatus: 'approved' | 'rejected') => {
-    setUpdatingContactId(reqId);
-    setStatusMsg(null);
-    try {
-      await updateDoc(doc(db, 'contact_requests', reqId), {
-        status: newStatus,
-        updatedAt: new Date().toISOString()
-      });
-      setContactRequests((prev) =>
-        prev.map((r) => (r.id === reqId ? { ...r, status: newStatus } : r))
-      );
-      setStatusMsg({
-        type: 'success',
-        text: newStatus === 'approved'
-          ? 'Akses nomor WhatsApp berhasil diberikan kepada pemohon.'
-          : 'Permintaan akses kontak telah ditolak.'
-      });
-      setTimeout(() => setStatusMsg(null), 4000);
-    } catch (err: unknown) {
-      const e = err as Error;
-      setStatusMsg({ type: 'error', text: e.message || 'Gagal mengubah status permintaan kontak.' });
-    } finally {
-      setUpdatingContactId(null);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'accepted':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-            <CheckCircle className="w-3.5 h-3.5" /> Diterima
-          </span>
-        );
-      case 'rejected':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
-            <XCircle className="w-3.5 h-3.5" /> Ditolak
-          </span>
-        );
-      case 'reviewed':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
-            <Eye className="w-3.5 h-3.5" /> Sedang Ditinjau
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-sky-50 border border-sky-100 text-[#0284c7] text-xs font-semibold">
-            <Clock className="w-3.5 h-3.5" /> Menunggu Respon
-          </span>
-        );
-    }
-  };
-
   if (authLoading || (user && loading)) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-800">
-        <Loader2 className="w-6 h-6 animate-spin text-[#0284c7]" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-between font-sans">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-            <FileText className="w-10 h-10 text-slate-400 mx-auto" />
-            <h2 className="text-xl font-bold text-slate-900">Harap Masuk Terlebih Dahulu</h2>
-            <p className="text-xs text-slate-500">
-              Silakan masuk dengan akun alumni MMTC untuk melihat riwayat lamaran yang Anda kirim dan pelamar yang masuk.
-            </p>
-            <Link
-              href="/login?redirect=/lamaran"
-              className="inline-block px-5 py-2.5 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shadow-xs"
-            >
-              Masuk ke Akun
-            </Link>
-          </div>
-        </div>
+        <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#0284c7]" />
+          <p className="text-xs text-slate-500 font-medium">Memuat data pelamar &amp; lamaran...</p>
+        </main>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#fafcff] text-slate-900 flex flex-col justify-between font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        
+        {/* DEMO / PREVIEW BANNER JIKA DIAKSES TANPA LOGIN */}
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200 text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-100 text-[#0284c7] flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900 leading-tight">Pratinjau Riwayat Lamaran</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Masuk dengan akun alumni untuk memantau status lamaran aktifmu dan mengelola pelamar yang masuk.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition shrink-0 text-center"
+            >
+              Masuk Akun
+            </Link>
+          </div>
+        )}
+
         <div className="mb-8 space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Manajemen Lamaran Kerja</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+            Manajemen Lamaran Kerja
+          </h1>
           <p className="text-slate-600 text-xs sm:text-sm">
-            Pantau status lamaran yang kamu kirimkan dan kelola lamaran yang masuk dari lowongan yang kamu pasang.
+            Pantau status respon lamaran yang kamu kirimkan dan kelola pelamar yang masuk ke lowongan studio kamu.
           </p>
         </div>
 
         {statusMsg && (
           <div
-            className={`mb-6 p-4 rounded-xl text-xs flex items-center gap-2 border ${
+            className={`mb-6 p-4 rounded-2xl text-xs flex items-center gap-2.5 border animate-fade-in ${
               statusMsg.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                : 'bg-red-50 border-red-200 text-red-700'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-red-50 border-red-200 text-red-800'
             }`}
           >
             {statusMsg.type === 'success' ? (
-              <CheckCircle className="w-4 h-4 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
             )}
-            <span>{statusMsg.text}</span>
+            <span className="font-semibold">{statusMsg.text}</span>
           </div>
         )}
 
-        {/* TABS */}
-        <div className="flex border-b border-slate-200 mb-8">
+        {/* MODERN PILL TABS */}
+        <div className="flex border-b border-slate-200 mb-8 gap-3">
           <button
             onClick={() => setActiveTab('sent')}
-            className={`pb-3 px-4 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
+            className={`pb-3.5 px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'sent'
                 ? 'border-[#0284c7] text-[#0284c7]'
-                : 'border-transparent text-slate-500 hover:text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Send className="w-4 h-4" />
-            Lamaran Saya Dikirim ({sentApps.length})
+            <span>Lamaran Terkirim</span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-slate-100 text-slate-700 font-bold">
+              {sentApps.length}
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('received')}
-            className={`pb-3 px-4 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
+            className={`pb-3.5 px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'received'
                 ? 'border-[#0284c7] text-[#0284c7]'
-                : 'border-transparent text-slate-500 hover:text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Inbox className="w-4 h-4" />
-            Pelamar yang Masuk ({receivedApps.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('contacts')}
-            className={`pb-3 px-4 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
-              activeTab === 'contacts'
-                ? 'border-[#0284c7] text-[#0284c7]'
-                : 'border-transparent text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            <Phone className="w-4 h-4" />
-            Permintaan Kontak ({contactRequests.length})
-            {contactRequests.filter((r) => r.status === 'pending').length > 0 && (
-              <span className="px-1.5 py-0.2 text-[10px] bg-amber-500 text-white rounded-full font-bold">
-                {contactRequests.filter((r) => r.status === 'pending').length} baru
-              </span>
-            )}
+            <span>Pelamar Masuk</span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-sky-50 text-[#0284c7] border border-sky-200 font-bold">
+              {receivedApps.length}
+            </span>
           </button>
         </div>
 
@@ -269,32 +267,36 @@ export default function LamaranPage() {
         {activeTab === 'sent' && (
           <div className="space-y-4">
             {sentApps.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl p-8 space-y-2">
-                <FileText className="w-8 h-8 text-slate-400 mx-auto" />
-                <h3 className="text-sm font-bold text-slate-800">Belum Ada Lamaran Terkirim</h3>
+              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-3xl p-8 space-y-3 shadow-xs">
+                <FileText className="w-10 h-10 text-slate-400 mx-auto" />
+                <h3 className="text-base font-bold text-slate-800">Belum Ada Lamaran Terkirim</h3>
                 <p className="text-xs text-slate-500">Kamu belum pernah melamar pekerjaan apapun di portal alumni.</p>
                 <Link
                   href="/lowongan"
-                  className="inline-block mt-2 px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition"
+                  className="inline-block mt-2 px-6 py-2.5 rounded-full bg-[#0284c7] text-white text-xs font-bold hover:bg-[#0369a1] transition shadow-xs"
                 >
                   Jelajahi Lowongan Kerja
                 </Link>
               </div>
             ) : (
               sentApps.map((app) => (
-                <div key={app.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                <div key={app.id} className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4 hover:border-sky-300 transition">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div>
-                      <h4 className="text-base font-bold text-slate-900">{app.jobTitle}</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <h4 className="text-base sm:text-lg font-bold text-slate-900">{app.jobTitle}</h4>
+                      <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         Dikirim pada: {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('id-ID', { dateStyle: 'long' }) : '-'}
                       </p>
                     </div>
-                    <div>{getStatusBadge(app.status)}</div>
+                    <div>
+                      <StatusBadge status={app.status} />
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <span className="font-semibold text-slate-500 block mb-1">Catatan Cover Letter:</span>
-                    <p className="leading-relaxed">{app.pesan}</p>
+
+                  <div className="text-xs text-slate-700 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/70 space-y-1">
+                    <span className="font-bold text-slate-600 block">Pesan Cover Letter:</span>
+                    <p className="leading-relaxed whitespace-pre-line text-slate-700">{app.pesan}</p>
                   </div>
                 </div>
               ))
@@ -306,66 +308,74 @@ export default function LamaranPage() {
         {activeTab === 'received' && (
           <div className="space-y-4">
             {receivedApps.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl p-8 space-y-2">
-                <Inbox className="w-8 h-8 text-slate-400 mx-auto" />
-                <h3 className="text-sm font-bold text-slate-800">Belum Ada Pelamar Masuk</h3>
+              <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-3xl p-8 space-y-3 shadow-xs">
+                <Inbox className="w-10 h-10 text-slate-400 mx-auto" />
+                <h3 className="text-base font-bold text-slate-800">Belum Ada Pelamar Masuk</h3>
                 <p className="text-xs text-slate-500">Belum ada alumni yang melamar ke lowongan yang kamu terbitkan.</p>
                 <Link
                   href="/post-lowongan"
-                  className="inline-block mt-2 px-4 py-2 rounded-xl bg-[#0284c7] text-white text-xs font-semibold hover:bg-[#0369a1] transition"
+                  className="inline-block mt-2 px-6 py-2.5 rounded-full bg-[#0284c7] text-white text-xs font-bold hover:bg-[#0369a1] transition shadow-xs"
                 >
                   Pasang Lowongan Baru
                 </Link>
               </div>
             ) : (
               receivedApps.map((app) => (
-                <div key={app.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <div key={app.id} className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4 hover:border-sky-300 transition">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-base font-bold text-slate-900">{app.applicantName}</h4>
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <h4 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                          <User className="w-4 h-4 text-[#0284c7]" />
+                          {app.applicantName}
+                        </h4>
                         <Link
                           href={`/profil/${app.applicantUid}`}
-                          className="text-[11px] px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 border border-sky-200 text-[#0284c7] font-semibold inline-flex items-center gap-1 transition"
+                          target="_blank"
+                          className="text-[11px] px-3 py-1 rounded-full bg-sky-50 hover:bg-sky-100 border border-sky-200 text-[#0284c7] font-bold inline-flex items-center gap-1 transition"
                         >
-                          Lihat Profil & Showreel <ExternalLink className="w-2.5 h-2.5" />
+                          Lihat Profil &amp; Showreel <ExternalLink className="w-2.5 h-2.5" />
                         </Link>
                       </div>
-                      <p className="text-xs text-[#0284c7] font-semibold mt-0.5">
-                        Prodi: {app.applicantProdi} • Lowongan: {app.jobTitle}
+                      <p className="text-xs text-[#0284c7] font-bold mt-1">
+                        Prodi: {app.applicantProdi} • Melamar untuk: <strong className="text-slate-800">{app.jobTitle}</strong>
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        Melamar pada: {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('id-ID', { dateStyle: 'long' }) : '-'}
+                        Tanggal: {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('id-ID', { dateStyle: 'long' }) : '-'}
                       </p>
                     </div>
-                    <div>{getStatusBadge(app.status)}</div>
+                    <div>
+                      <StatusBadge status={app.status} />
+                    </div>
                   </div>
 
-                  <div className="text-xs text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span className="font-semibold text-slate-500 block mb-1">Pesan dari Pelamar:</span>
-                    <p className="leading-relaxed">{app.pesan}</p>
+                  <div className="text-xs text-slate-700 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/70 space-y-1">
+                    <span className="font-bold text-slate-600 block">Pesan dari Pelamar:</span>
+                    <p className="leading-relaxed whitespace-pre-line text-slate-700">{app.pesan}</p>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100 text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
                     <div className="flex flex-wrap items-center gap-4 text-slate-600">
-                      <span>Email: <strong className="text-slate-800">{app.applicantEmail}</strong></span>
+                      <span>Email: <strong className="text-slate-900">{app.applicantEmail}</strong></span>
                       {app.applicantPhone && (
                         <a 
                           href={formatWhatsAppUrl(app.applicantPhone)} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="text-emerald-600 hover:underline flex items-center gap-1 font-semibold"
+                          className="text-emerald-700 hover:underline flex items-center gap-1.5 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200"
                         >
-                          WhatsApp ({app.applicantPhone}) <ExternalLink className="w-3 h-3" />
+                          <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                          Hubungi WhatsApp ({app.applicantPhone}) <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
-                      {app.cvUrl && safeHttpUrl(app.cvUrl) && (
+                      {app.cvUrl && (
                         <a 
-                          href={safeHttpUrl(app.cvUrl)!} 
+                          href={app.cvUrl} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="text-[#0284c7] hover:underline flex items-center gap-1 font-semibold"
+                          className="text-[#0284c7] hover:underline flex items-center gap-1 font-bold bg-sky-50 px-3 py-1 rounded-full border border-sky-200"
                         >
+                          <FileText className="w-3.5 h-3.5" />
                           Buka CV PDF <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
@@ -374,16 +384,16 @@ export default function LamaranPage() {
                           href={ensureAbsoluteUrl(app.cvExternalLink)} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="text-[#0284c7] hover:underline flex items-center gap-1 font-semibold"
+                          className="text-slate-700 hover:text-[#0284c7] hover:underline flex items-center gap-1 font-bold"
                         >
-                          Portofolio Eksternal <ExternalLink className="w-3 h-3" />
+                          Portofolio Eksternal <ExternalLink className="w-3 h-3 text-slate-400" />
                         </a>
                       )}
                     </div>
 
                     {/* ACTION BUTTONS FOR JOB POSTER */}
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-400 font-medium">Ubah Status:</span>
+                      <span className="text-[11px] text-slate-500 font-bold">Ubah Status:</span>
                       {updatingId === app.id ? (
                         <Loader2 className="w-4 h-4 animate-spin text-[#0284c7]" />
                       ) : (
@@ -392,7 +402,7 @@ export default function LamaranPage() {
                             type="button"
                             disabled={app.status === 'reviewed'}
                             onClick={() => handleStatusChange(app.id, 'reviewed')}
-                            className="px-2.5 py-1 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 text-[11px] font-semibold transition disabled:opacity-40"
+                            className="px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 text-[11px] font-bold transition disabled:opacity-40 cursor-pointer"
                           >
                             Tinjau
                           </button>
@@ -400,7 +410,7 @@ export default function LamaranPage() {
                             type="button"
                             disabled={app.status === 'accepted'}
                             onClick={() => handleStatusChange(app.id, 'accepted')}
-                            className="px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-semibold transition disabled:opacity-40"
+                            className="px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-[11px] font-bold transition disabled:opacity-40 cursor-pointer"
                           >
                             Terima
                           </button>
@@ -408,7 +418,7 @@ export default function LamaranPage() {
                             type="button"
                             disabled={app.status === 'rejected'}
                             onClick={() => handleStatusChange(app.id, 'rejected')}
-                            className="px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-[11px] font-semibold transition disabled:opacity-40"
+                            className="px-3 py-1 rounded-full border border-red-200 bg-red-50 text-red-800 hover:bg-red-100 text-[11px] font-bold transition disabled:opacity-40 cursor-pointer"
                           >
                             Tolak
                           </button>
@@ -418,236 +428,6 @@ export default function LamaranPage() {
                   </div>
                 </div>
               ))
-            )}
-          </div>
-        )}
-
-        {/* TAB PERMINTAAN KONTAK */}
-        {activeTab === 'contacts' && (
-          <div className="space-y-5">
-            <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-100 flex items-start gap-3 text-xs text-sky-900">
-              <ShieldCheck className="w-4 h-4 text-[#0284c7] shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-slate-900">Proteksi Privasi Nomor WhatsApp</p>
-                <p className="text-slate-600 mt-0.5 text-[11px] leading-relaxed">
-                  Permintaan izin kontak memastikan nomor WhatsApp alumni hanya dibagikan atas persetujuan bersama untuk mencegah spam dan penyalahgunaan identitas.
-                </p>
-              </div>
-            </div>
-
-            {/* SUB-TABS: MASUK vs TERKIRIM (GAP 6.8 & F-10 FIX) */}
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-              <button
-                type="button"
-                onClick={() => setContactSubTab('incoming')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  contactSubTab === 'incoming'
-                    ? 'bg-[#0284c7] text-white shadow-xs'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                Permintaan Masuk ({contactRequests.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setContactSubTab('outgoing')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  contactSubTab === 'outgoing'
-                    ? 'bg-[#0284c7] text-white shadow-xs'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                Permintaan yang Saya Ajukan ({sentContactRequests.length})
-              </button>
-            </div>
-
-            {contactSubTab === 'incoming' ? (
-              contactRequests.length === 0 ? (
-                <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-200">
-                  <Phone className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-slate-700">Belum Ada Permintaan Akses Masuk</p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Saat sesama alumni meminta nomor kontak WhatsApp Anda dari profil publik, permohonan akan tampil di sini.
-                  </p>
-                </div>
-              ) : (
-                contactRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition shadow-xs space-y-4"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-slate-900">{req.requesterName}</h3>
-                          {req.requesterProdi && (
-                            <span className="px-2 py-0.5 rounded-full bg-sky-50 text-[#0284c7] text-[10px] font-semibold border border-sky-100">
-                              {req.requesterProdi}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Email: {req.requesterEmail} • Diajukan: {new Date(req.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </p>
-                      </div>
-
-                      <div>
-                        {req.status === 'approved' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-                            <CheckCircle className="w-3.5 h-3.5" /> Disetujui (WhatsApp Terbuka)
-                          </span>
-                        ) : req.status === 'rejected' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
-                            <XCircle className="w-3.5 h-3.5" /> Ditolak
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
-                            <Clock className="w-3.5 h-3.5" /> Menunggu Respon
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-700">Keperluan:</span>
-                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium">
-                          {req.purpose}
-                        </span>
-                      </div>
-
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 text-xs leading-relaxed">
-                        <p className="text-[11px] font-semibold text-slate-500 mb-1">Pesan Pengantar:</p>
-                        <p className="whitespace-pre-line">{req.message}</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100">
-                      <Link
-                        href={`/profil/${req.requesterUid}`}
-                        className="text-xs font-semibold text-[#0284c7] hover:underline flex items-center gap-1"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" /> Lihat Profil Pemohon
-                      </Link>
-
-                      {updatingContactId === req.id ? (
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Memproses...
-                        </div>
-                      ) : req.status === 'pending' ? (
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleContactStatusChange(req.id, 'rejected')}
-                            className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition cursor-pointer"
-                          >
-                            Tolak
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleContactStatusChange(req.id, 'approved')}
-                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
-                          >
-                            <Phone className="w-3.5 h-3.5" />
-                            Setujui & Bagikan WhatsApp
-                          </button>
-                        </div>
-                      ) : req.status === 'approved' ? (
-                        <button
-                          type="button"
-                          onClick={() => handleContactStatusChange(req.id, 'rejected')}
-                          className="text-xs text-red-600 hover:underline font-medium cursor-pointer"
-                        >
-                          Cabut Akses WhatsApp
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleContactStatusChange(req.id, 'approved')}
-                          className="text-xs text-emerald-600 hover:underline font-semibold cursor-pointer"
-                        >
-                          Ubah Jadi Setujui
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )
-            ) : (
-              sentContactRequests.length === 0 ? (
-                <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-200">
-                  <Phone className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-slate-700">Belum Ada Permintaan Kontak Terkirim</p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Anda belum pernah meminta izin kontak WhatsApp ke profil alumni lain.
-                  </p>
-                </div>
-              ) : (
-                sentContactRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition shadow-xs space-y-4"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900">Permintaan Akses Kontak</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Terkirim pada: {new Date(req.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </p>
-                      </div>
-
-                      <div>
-                        {req.status === 'approved' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-                            <CheckCircle className="w-3.5 h-3.5" /> Disetujui (WhatsApp Terbuka)
-                          </span>
-                        ) : req.status === 'rejected' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
-                            <XCircle className="w-3.5 h-3.5" /> Permintaan Ditolak
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
-                            <Clock className="w-3.5 h-3.5" /> Menunggu Persetujuan
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-700">Keperluan:</span>
-                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium">
-                          {req.purpose}
-                        </span>
-                      </div>
-
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 text-xs leading-relaxed">
-                        <p className="text-[11px] font-semibold text-slate-500 mb-1">Pesan Anda:</p>
-                        <p className="whitespace-pre-line">{req.message}</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-                      <Link
-                        href={`/profil/${req.targetUid}`}
-                        className="text-xs font-semibold text-[#0284c7] hover:underline flex items-center gap-1"
-                      >
-                        Buka Halaman Profil Target <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-
-                      {req.status === 'approved' && (
-                        <Link
-                          href={`/profil/${req.targetUid}`}
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition"
-                        >
-                          <Phone className="w-3.5 h-3.5" />
-                          Hubungi di WhatsApp
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )
             )}
           </div>
         )}

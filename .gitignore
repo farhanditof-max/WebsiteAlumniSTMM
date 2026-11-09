@@ -65,7 +65,7 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# firebase & temp
-firebase-debug*.log
-*.zip
+# Local binaries
+bin/
 
+firebase-debug.log

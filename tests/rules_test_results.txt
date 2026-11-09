@@ -1,6 +1,6 @@
-Executed: 2026-10-24T14:33:33.364Z
-Total Test Cases : 20
-Passed           : 20
+Executed: 2026-11-09T14:27:12.960Z
+Total Test Cases : 23
+Passed           : 23
 Failed           : 0
 Status           : ALL PASS (100% SUCCESS)
 
@@ -27,6 +27,9 @@ TC-17   F-10, F-21, F-22[PASS]    Satu pasangan requester/target hanya punya 1 d
 TC-18   F-07        [PASS]    Sanitasi URL mencegah injeksi skema javascript: atau data: XSS pada tautan portofolio dan CV
 TC-19   F-12        [PASS]    Storage Rules menolak file SVG (vektor XSS) dan membatasi ukuran array portofolio maks 12 item
 TC-20   F-23        [PASS]    Storage Rules memisahkan operasi delete dari create/update sehingga tidak crash request.resource == null
+TC-21   F-FEED-01, F-FEED-02[PASS]    Feed Posts dapat dibaca publik, pembuatan terikat ke authorUid login dan kategori resmi
+TC-22   F-CONV-01   [PASS]    Percakapan pesan antar-alumni terisolasi hanya untuk UID yang terdaftar di participants
+TC-23   F-12, F-FEED-05[PASS]    Storage Rules feed_media menolak SVG (vektor XSS), membatasi ukuran 10MB, dan menerima format foto/PDF sah
 -------------------------------------------------------------------------------
 
 DETAILED AUDIT FINDINGS VERIFICATION:
@@ -132,7 +135,22 @@ Category : Keamanan Client & Storage
 Result   : PASS
 Evidence : Operasi delete dievaluasi secara independen tanpa memeriksa request.resource.size/contentType yang null saat penghapusan.
 
+[TC-21] Feed Posts dapat dibaca publik, pembuatan terikat ke authorUid login dan kategori resmi (F-FEED-01, F-FEED-02)
+Category : Feed Komunitas & Percakapan
+Result   : PASS
+Evidence : Rules mengizinkan publik membaca feed_posts, mewajibkan authorUid == request.auth.uid, dan memvalidasi enum kategori.
+
+[TC-22] Percakapan pesan antar-alumni terisolasi hanya untuk UID yang terdaftar di participants (F-CONV-01)
+Category : Feed Komunitas & Percakapan
+Result   : PASS
+Evidence : Rules membatasi hak baca, update, delete, dan create percakapan hanya untuk pengguna yang merupakan partisipan.
+
+[TC-23] Storage Rules feed_media menolak SVG (vektor XSS), membatasi ukuran 10MB, dan menerima format foto/PDF sah (F-12, F-FEED-05)
+Category : Feed Komunitas & Percakapan
+Result   : PASS
+Evidence : Path feed_media/{userId}/{fileName} membatasi ukuran <10MB dan memvalidasi ContentType hanya gambar/PDF sah (SVG ditolak).
+
 ===============================================================================
-FINAL VERDICT: 20/20 Acceptance Tests PASSED.
+FINAL VERDICT: 23/23 Acceptance Tests PASSED.
 Security Rules, Schema Invariants, and Data Boundaries are fully enforced.
 ===============================================================================

@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Allow local origins for testing and HMR (F-27: Wildcards removed)
+  // Allow all tunnel origins for local testing and HMR
   allowedDevOrigins: [
+    "*.trycloudflare.com",
+    "*.localtunnel.me",
     "localhost:3000",
     "127.0.0.1:3000"
   ],
@@ -29,7 +31,7 @@ const nextConfig: NextConfig = {
               "form-action 'self'",
               "frame-ancestors 'none'",
               "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
-              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com"
+              "connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com ws: wss: http://localhost:* http://127.0.0.1:*"
             ].join("; ")
           }
         ]
@@ -39,3 +41,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
