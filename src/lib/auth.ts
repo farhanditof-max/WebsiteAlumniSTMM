@@ -162,8 +162,7 @@ export async function verifyNomorAlumni(
         angkatan: record.angkatan,
         isRegistered: record.isRegistered,
         registeredUid: record.registeredUid,
-        prodiMismatch: true,
-        expectedProdi: record.prodi
+        prodiMismatch: true
       };
     }
   }
@@ -180,8 +179,7 @@ export async function verifyNomorAlumni(
         angkatan: record.angkatan,
         isRegistered: record.isRegistered,
         registeredUid: record.registeredUid,
-        angkatanMismatch: true,
-        expectedAngkatan: record.angkatan
+        angkatanMismatch: true
       };
     }
   }
@@ -248,19 +246,19 @@ export async function registerAlumni(params: {
 
   if ('nameMismatch' in preVerified && preVerified.nameMismatch) {
     throw new Error(
-      `Pendaftaran ditolak: Nama lengkap "${params.namaLengkap}" tidak cocok dengan data resmi nomor alumni "${cleanNomor}" (${preVerified.nama}). Pastikan penulisan nama sesuai data akademik resmi.`
+      `Pendaftaran ditolak: Nama lengkap tidak cocok dengan data resmi nomor alumni "${cleanNomor}". Pastikan penulisan nama sesuai data akademik resmi.`
     );
   }
 
   if ('prodiMismatch' in preVerified && preVerified.prodiMismatch) {
     throw new Error(
-      `Pendaftaran ditolak: Program Studi "${params.prodi}" tidak cocok dengan data resmi nomor alumni "${cleanNomor}" (${preVerified.expectedProdi}).`
+      `Pendaftaran ditolak: Program Studi tidak cocok dengan data resmi nomor alumni "${cleanNomor}".`
     );
   }
 
   if ('angkatanMismatch' in preVerified && preVerified.angkatanMismatch) {
     throw new Error(
-      `Pendaftaran ditolak: Tahun Kelulusan/Angkatan "${params.angkatan}" tidak cocok dengan data resmi nomor alumni "${cleanNomor}" (${preVerified.expectedAngkatan}).`
+      `Pendaftaran ditolak: Tahun Kelulusan/Angkatan tidak cocok dengan data resmi nomor alumni "${cleanNomor}".`
     );
   }
 
