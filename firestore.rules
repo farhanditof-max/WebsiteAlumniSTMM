@@ -142,10 +142,11 @@ service cloud.firestore {
     }
 
     // Feed Jejaring Sosial Komunitas:
-    // Baca terbuka untuk publik, kreasi/interaksi wajib login
+    // Baca terbuka untuk publik, kreasi/interaksi wajib alumni terverifikasi atau admin
     match /feed_posts/{postId} {
       allow read: if true;
       allow create: if signedIn()
+                    && (exists(/databases/$(database)/documents/users/$(request.auth.uid)) || isAdmin())
                     && request.resource.data.authorUid == request.auth.uid
                     && request.resource.data.content is string
                     && request.resource.data.content.size() > 0
@@ -153,14 +154,18 @@ service cloud.firestore {
                     && request.resource.data.category in ['showreel', 'kolaborasi', 'diskusi', 'pencapaian']
                     && request.resource.data.likesCount == 0
                     && request.resource.data.comments is list;
-      allow update: if signedIn() && (
+      allow update: if signedIn()
+                    && (exists(/databases/$(database)/documents/users/$(request.auth.uid)) || isAdmin())
+                    && (
                       // Pemilik post memperbarui konten
                       (resource.data.authorUid == request.auth.uid && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorUid', 'createdAt']))
                       ||
                       // Pengguna lain yang login memberikan Like atau Komentar
                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'likedBy', 'comments', 'commentsCount', 'updatedAt']))
                     );
-      allow delete: if signedIn() && (resource.data.authorUid == request.auth.uid || isAdmin());
+      allow delete: if signedIn()
+                    && (exists(/databases/$(database)/documents/users/$(request.auth.uid)) || isAdmin())
+                    && (resource.data.authorUid == request.auth.uid || isAdmin());
     }
 
     // Percakapan Pesan Antar-Alumni:
