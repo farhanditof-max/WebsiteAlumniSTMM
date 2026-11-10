@@ -511,23 +511,65 @@ export default function ProfilPage() {
     }
   };
 
+function compressImageToDataUrl(file: File, maxWidth = 320, maxHeight = 320, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(String(e.target?.result || ''));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = (err) => reject(err);
+      img.src = String(e.target?.result || '');
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+
   const handleAvatarUpload = async (file: File) => {
     if (!file) return;
 
-    if (file.size > 3 * 1024 * 1024) {
-      setMsg({ type: 'error', text: 'Ukuran foto profil melebihi batas maksimal 3MB.' });
+    if (file.size > 5 * 1024 * 1024) {
+      setMsg({ type: 'error', text: 'Ukuran foto profil melebihi batas maksimal 5MB.' });
       return;
     }
 
     setUploadingAvatar(true);
     setMsg({ type: '', text: '' });
 
-    if (isDemo || !user) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
+    try {
+      // Kompres foto langsung di browser menjadi dataURL berkualitas tinggi dan sangat ringan (~20KB)
+      const compressedDataUrl = await compressImageToDataUrl(file, 320, 320, 0.85);
+
+      if (isDemo || !user) {
         setSavedProfile((prev) => {
-          const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: dataUrl };
+          const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: compressedDataUrl };
           if (typeof window !== 'undefined') {
             localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
           }
@@ -539,98 +581,33 @@ export default function ProfilPage() {
         setUploadingAvatar(false);
         setMsg({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
         setTimeout(() => setMsg({ type: '', text: '' }), 4000);
-      };
-      reader.readAsDataURL(file);
-      return;
-    }
-
-    try {
-      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const cleanExt = ['jpeg', 'png', 'webp'].includes(rawExt) ? rawExt : 'jpg';
-      let downloadUrl = '';
-
-      try {
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result || ''));
-          reader.onerror = (e) => reject(e);
-          reader.readAsDataURL(file);
-        });
-        const upRes = await fetch('/api/db', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'uploadFile',
-            folder: `avatars_${user.uid}`,
-            fileName: `avatar.${cleanExt}`,
-            dataUrl
-          })
-        });
-        if (upRes.ok) {
-          const upJson = await upRes.json();
-          if (upJson.url) downloadUrl = upJson.url;
-        }
-      } catch {
-        // fallback below
-      }
-
-      if (!downloadUrl) {
-        const storageRef = ref(storage, `avatars/${user.uid}/avatar.${cleanExt}`);
-        await withTimeout(
-          uploadBytes(storageRef, file, { contentType: file.type || `image/${cleanExt === 'jpg' ? 'jpeg' : cleanExt}` }),
-          15000,
-          'Koneksi timeout saat upload foto profil'
-        );
-        downloadUrl = await getDownloadURL(storageRef);
+        return;
       }
 
       const nowIso = new Date().toISOString();
-      await fetch('/api/db', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'setDoc',
-          collection: 'users',
-          id: user.uid,
-          data: { fotoProfil: downloadUrl, updatedAt: nowIso },
-          merge: true
-        })
-      });
-      await fetch('/api/db', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'setDoc',
-          collection: 'public_profiles',
-          id: user.uid,
-          data: { fotoProfil: downloadUrl, updatedAt: nowIso },
-          merge: true
-        })
-      });
 
-      try {
-        await withTimeout(
-          Promise.all([
-            setDoc(doc(db, 'users', user.uid), {
-              fotoProfil: downloadUrl,
-              updatedAt: nowIso
-            }, { merge: true }),
-            setDoc(doc(db, 'public_profiles', user.uid), {
-              fotoProfil: downloadUrl,
-              updatedAt: nowIso
-            }, { merge: true })
-          ]),
-          6000,
-          'Koneksi timeout saat menyimpan URL foto profil'
-        );
-      } catch {
-        // ignore if cloud rules block
-      }
+      // Simpan langsung ke Cloud Firestore (users dan public_profiles) secara atomik
+      await withTimeout(
+        Promise.all([
+          setDoc(doc(db, 'users', user.uid), {
+            fotoProfil: compressedDataUrl,
+            updatedAt: nowIso
+          }, { merge: true }),
+          setDoc(doc(db, 'public_profiles', user.uid), {
+            fotoProfil: compressedDataUrl,
+            updatedAt: nowIso
+          }, { merge: true })
+        ]),
+        8000,
+        'Koneksi timeout saat menyimpan URL foto profil'
+      );
 
+      // Simpan ke cache lokal per-user dan perbarui profil reaktif
       setSavedProfile((prev) => {
-        const updated = { ...(prev || currentProfile || {}), fotoProfil: downloadUrl };
+        const updated = { ...(prev || currentProfile || {}), fotoProfil: compressedDataUrl };
         if (typeof window !== 'undefined') {
           localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
+          window.dispatchEvent(new Event('alumnihub_profile_updated'));
         }
         if (setProfileData) {
           setProfileData(updated as UserProfile);
@@ -640,6 +617,7 @@ export default function ProfilPage() {
 
       await refreshProfile();
       setMsg({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
+      setTimeout(() => setMsg({ type: '', text: '' }), 4000);
     } catch (err: unknown) {
       const e = err as Error;
       setMsg({ type: 'error', text: e.message || 'Gagal mengupload foto profil.' });
