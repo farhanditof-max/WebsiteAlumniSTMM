@@ -21,7 +21,8 @@ import {
   Share2,
   Maximize2,
   Briefcase,
-  MapPin
+  MapPin,
+  MessageSquare
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { ProfileHeaderSkeleton } from '@/components/ui/Skeleton';
@@ -417,6 +418,27 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
                 Kontak Alumni
               </h3>
+
+              {user && user.uid !== profile.uid && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('open-alumni-chat', {
+                      detail: {
+                        uid: profile.uid,
+                        namaLengkap: profile.namaLengkap,
+                        prodi: profile.prodi,
+                        fotoProfil: profile.fotoProfil,
+                        pekerjaanSaatIni: (profile as ExtendedUserProfile).pekerjaanSaatIni
+                      }
+                    }));
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Kirim Pesan Langsung</span>
+                </button>
+              )}
               
               <div className="space-y-3">
                 {(profile as ExtendedUserProfile).domisili && (

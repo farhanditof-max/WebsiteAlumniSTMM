@@ -1,6 +1,5 @@
 'use client';
-/* eslint-disable react-hooks/purity */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   ChevronUp, 
   ChevronDown, 
@@ -8,7 +7,11 @@ import {
   Send, 
   ArrowLeft, 
   Circle, 
-  X
+  X,
+  SquarePen,
+  MessageSquare,
+  Users,
+  Loader2
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { useAuth } from '@/context/AuthContext';
@@ -19,7 +22,8 @@ import {
   where, 
   onSnapshot, 
   setDoc, 
-  arrayUnion 
+  arrayUnion,
+  getDocs 
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -32,6 +36,7 @@ interface Message {
 
 interface Conversation {
   id: string;
+  targetUid?: string;
   name: string;
   prodi: string;
   role: string;
@@ -43,61 +48,15 @@ interface Conversation {
   messages: Message[];
 }
 
-const INITIAL_CONVERSATIONS: Conversation[] = [
-  {
-    id: 'conv-1',
-    name: 'Farhandito Fadila',
-    prodi: 'Animasi',
-    role: '3D Animator di Infinite Studios',
-    online: true,
-    unreadCount: 1,
-    lastMessage: 'Boleh minta kontak WhatsApp-nya Dar buat diskusi rig Blender?',
-    lastTime: '10m',
-    messages: [
-      { id: 'm1', sender: 'them', text: 'Halo Dary! Showreel rigging kamu di feed keren banget.', time: '14:20' },
-      { id: 'm2', sender: 'me', text: 'Halo Dit! Makasih banyak ya, kemarin coba explore auto-rigging add-on.', time: '14:22' },
-      { id: 'm3', sender: 'them', text: 'Boleh minta kontak WhatsApp-nya Dar buat diskusi rig Blender?', time: '14:25' }
-    ]
-  },
-  {
-    id: 'conv-2',
-    name: 'Goklas Simanjuntak',
-    prodi: 'Matekstosi',
-    role: 'Broadcast Director di MNC Media',
-    online: true,
-    unreadCount: 1,
-    lastMessage: 'Halo Mas Dary, lowongan broadcast engineer di MNC masih buka ya.',
-    lastTime: '1j',
-    messages: [
-      { id: 'm4', sender: 'them', text: 'Halo Mas Dary, lowongan broadcast engineer di MNC masih buka ya. Kalau ada alumni MMTC yang mau apply bisa langsung info saya.', time: '13:30' }
-    ]
-  },
-  {
-    id: 'conv-3',
-    name: 'Reza Hambali',
-    prodi: 'Manaprod',
-    role: 'Producer di Lumina Lab',
-    online: false,
-    lastMessage: 'Showreel kamu udah aku tonton, mantap banget visualnya!',
-    lastTime: '1h',
-    messages: [
-      { id: 'm5', sender: 'them', text: 'Showreel kamu udah aku tonton, mantap banget visualnya!', time: 'Kemarin' },
-      { id: 'm6', sender: 'me', text: 'Siap Mas Reza, terima kasih banyak apresiasinya!', time: 'Kemarin' }
-    ]
-  },
-  {
-    id: 'conv-4',
-    name: 'Gilang Ramadhan',
-    prodi: 'Game',
-    role: 'Unity Gameplay Programmer',
-    online: false,
-    lastMessage: 'Thank you sudah baca GDD game indie kami!',
-    lastTime: '2h',
-    messages: [
-      { id: 'm7', sender: 'them', text: 'Thank you sudah baca GDD game indie kami!', time: '2 hari lalu' }
-    ]
-  }
-];
+interface RegisteredAlumni {
+  uid: string;
+  namaLengkap: string;
+  prodi?: string;
+  angkatan?: string;
+  fotoProfil?: string;
+  pekerjaanSaatIni?: string;
+  role?: string;
+}
 
 interface LinkedInMessagingWidgetProps {
   userAvatar?: string;
@@ -109,16 +68,22 @@ export default function LinkedInMessagingWidget({
   userName: propName
 }: LinkedInMessagingWidgetProps = {}) {
   const { user, profile } = useAuth();
-  const userName = propName || profile?.namaLengkap || user?.displayName || 'Dary Halim';
+  const userName = propName || profile?.namaLengkap || user?.displayName || 'Alumni STMM';
   const userAvatar = propAvatar || profile?.fotoProfil || user?.photoURL;
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [inputMessage, setInputMessage] = useState('');
 
-  // Real-time synchronization with Firestore collection 'conversations'
+  // New Chat directory state
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false);
+  const [directoryUsers, setDirectoryUsers] = useState<RegisteredAlumni[]>([]);
+  const [loadingDirectory, setLoadingDirectory] = useState(false);
+  const [directorySearch, setDirectorySearch] = useState('');
+
+  // 1. Real-time synchronization with Firestore collection 'conversations'
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -131,47 +96,46 @@ export default function LinkedInMessagingWidget({
       const unsub = onSnapshot(
         q,
         (snapshot) => {
-          if (!snapshot.empty) {
-            const firestoreConvs: Conversation[] = snapshot.docs.map((d) => {
-              const data = d.data();
-              const participants = (data.participants as string[]) || [];
-              const otherUid = participants.find((uid) => uid !== user.uid) || 'peer';
-              const otherProfile = data.participantProfiles?.[otherUid] || {};
-
-              const messages: Message[] = (data.messages || []).map(
-                (m: { id?: string; senderUid?: string; text?: string; createdAt?: string }) => ({
-                  id: m.id || `m-${Date.now()}`,
-                  sender: m.senderUid === user.uid ? 'me' : 'them',
-                  text: m.text || '',
-                  time: m.createdAt
-                    ? new Date(m.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-                    : 'Baru saja'
-                })
-              );
-
-              return {
-                id: d.id,
-                name: otherProfile.namaLengkap || data.otherName || 'Alumni MMTC',
-                prodi: otherProfile.prodi || data.otherProdi || 'STMM MMTC',
-                role: otherProfile.role || data.otherRole || 'Alumni',
-                avatar: otherProfile.fotoProfil || data.otherAvatar || undefined,
-                online: true,
-                unreadCount: 0,
-                lastMessage: data.lastMessage || (messages[messages.length - 1]?.text || ''),
-                lastTime: data.updatedAt
-                  ? new Date(data.updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-                  : 'Baru saja',
-                messages
-              };
-            });
-
-            // Merge with initial conversations so starter contacts are always available for demo presentation
-            setConversations(() => {
-              const fsIds = new Set(firestoreConvs.map((c) => c.id));
-              const remainingInitials = INITIAL_CONVERSATIONS.filter((c) => !fsIds.has(c.id));
-              return [...firestoreConvs, ...remainingInitials];
-            });
+          if (snapshot.empty) {
+            setConversations([]);
+            return;
           }
+
+          const firestoreConvs: Conversation[] = snapshot.docs.map((d) => {
+            const data = d.data();
+            const participants = (data.participants as string[]) || [];
+            const otherUid = participants.find((uid) => uid !== user.uid) || 'peer';
+            const otherProfile = data.participantProfiles?.[otherUid] || {};
+
+            const messages: Message[] = (data.messages || []).map(
+              (m: { id?: string; senderUid?: string; text?: string; createdAt?: string }) => ({
+                id: m.id || `m-${Date.now()}`,
+                sender: m.senderUid === user.uid ? 'me' : 'them',
+                text: m.text || '',
+                time: m.createdAt
+                  ? new Date(m.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                  : 'Baru saja'
+              })
+            );
+
+            return {
+              id: d.id,
+              targetUid: otherUid,
+              name: otherProfile.namaLengkap || data.otherName || 'Alumni MMTC',
+              prodi: otherProfile.prodi || data.otherProdi || 'STMM MMTC',
+              role: otherProfile.role || data.otherRole || 'Alumni',
+              avatar: otherProfile.fotoProfil || data.otherAvatar || undefined,
+              online: true,
+              unreadCount: 0,
+              lastMessage: data.lastMessage || (messages[messages.length - 1]?.text || ''),
+              lastTime: data.updatedAt
+                ? new Date(data.updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                : 'Baru saja',
+              messages
+            };
+          });
+
+          setConversations(firestoreConvs);
         },
         (error) => {
           console.warn('LinkedInMessagingWidget conversations listener fallback:', error);
@@ -184,13 +148,93 @@ export default function LinkedInMessagingWidget({
     }
   }, [user?.uid]);
 
-  const activeConv = conversations.find(c => c.id === activeChatId);
+  // 2. Fetch registered alumni from public_profiles when New Chat view is opened
+  const fetchDirectory = async () => {
+    if (!user?.uid) return;
+    setLoadingDirectory(true);
+    try {
+      const snap = await getDocs(collection(db, 'public_profiles'));
+      const list: RegisteredAlumni[] = [];
+      snap.forEach((docSnap) => {
+        const d = docSnap.data();
+        const uid = docSnap.id;
+        if (uid !== user.uid) {
+          list.push({
+            uid,
+            namaLengkap: d.namaLengkap || 'Alumni STMM',
+            prodi: d.prodi || 'STMM MMTC',
+            angkatan: d.angkatan || '',
+            fotoProfil: d.fotoProfil || '',
+            pekerjaanSaatIni: d.pekerjaanSaatIni || d.pekerjaan || 'Alumni'
+          });
+        }
+      });
+      setDirectoryUsers(list);
+    } catch (err) {
+      console.warn('Failed to load registered alumni directory for messaging:', err);
+    } finally {
+      setLoadingDirectory(false);
+    }
+  };
 
-  const totalUnread = conversations.reduce((acc, curr) => acc + (curr.unreadCount || 0), 0);
+  const handleOpenNewChat = () => {
+    setIsNewChatOpen(true);
+    fetchDirectory();
+  };
+
+  // 3. Start or open chat with a specific alumnus
+  const startChatWith = useCallback((alumni: RegisteredAlumni) => {
+    if (!user?.uid || alumni.uid === user.uid) return;
+
+    const convDocId = `conv_${[user.uid, alumni.uid].sort().join('_')}`;
+    const existing = conversations.find(c => c.id === convDocId || c.targetUid === alumni.uid);
+
+    if (!existing) {
+      const newConv: Conversation = {
+        id: convDocId,
+        targetUid: alumni.uid,
+        name: alumni.namaLengkap,
+        prodi: alumni.prodi || 'Animasi',
+        role: alumni.pekerjaanSaatIni || 'Alumni STMM MMTC',
+        avatar: alumni.fotoProfil || undefined,
+        online: true,
+        unreadCount: 0,
+        lastMessage: 'Mulai obrolan baru...',
+        lastTime: 'Baru saja',
+        messages: []
+      };
+      setConversations(prev => [newConv, ...prev.filter(c => c.id !== convDocId)]);
+    }
+
+    setActiveChatId(convDocId);
+    setIsNewChatOpen(false);
+    setIsOpen(true);
+  }, [user, conversations]);
+
+  // 4. Global window event listener to open chat from any component (e.g. Profil page)
+  useEffect(() => {
+    const handleOpenChatEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<RegisteredAlumni>;
+      const target = customEvent.detail;
+      if (!target || !target.uid || target.uid === user?.uid) return;
+      startChatWith(target);
+    };
+
+    window.addEventListener('open-alumni-chat', handleOpenChatEvent);
+    return () => window.removeEventListener('open-alumni-chat', handleOpenChatEvent);
+  }, [user?.uid, startChatWith]);
+
+  const activeConv = useMemo(() => {
+    return conversations.find(c => c.id === activeChatId);
+  }, [conversations, activeChatId]);
+
+  const totalUnread = useMemo(() => {
+    return conversations.reduce((acc, curr) => acc + (curr.unreadCount || 0), 0);
+  }, [conversations]);
 
   const handleSelectConv = (id: string) => {
     setActiveChatId(id);
-    // Mark as read
+    setIsNewChatOpen(false);
     setConversations(prev => prev.map(c => {
       if (c.id === id) {
         return { ...c, unreadCount: 0 };
@@ -200,17 +244,19 @@ export default function LinkedInMessagingWidget({
   };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !activeChatId) return;
+    if (!inputMessage.trim() || !activeChatId || !user?.uid) return;
 
     const textToSend = inputMessage.trim();
     const nowIso = new Date().toISOString();
+    const newMsgId = `m-${Date.now()}`;
     const newMsg: Message = {
-      id: `m-${Date.now()}`,
+      id: newMsgId,
       sender: 'me',
       text: textToSend,
-      time: 'Baru saja'
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     };
 
+    // Optimistic UI update
     setConversations(prev => prev.map(c => {
       if (c.id === activeChatId) {
         return {
@@ -225,90 +271,57 @@ export default function LinkedInMessagingWidget({
 
     setInputMessage('');
 
-    // If user is logged in, sync to Firestore collection 'conversations'
-    if (user?.uid) {
-      const convDocId = activeChatId.startsWith('conv_') ? activeChatId : `conv_${user.uid}_${activeChatId}`;
-      const otherParty = activeConv ? {
-        namaLengkap: activeConv.name,
-        prodi: activeConv.prodi,
-        fotoProfil: activeConv.avatar || '',
-        role: activeConv.role
-      } : {
-        namaLengkap: 'Alumni MMTC',
-        prodi: 'STMM MMTC',
-        fotoProfil: '',
-        role: 'Alumni'
-      };
+    // Determine target UID
+    const targetUid = activeConv?.targetUid || (
+      activeChatId.startsWith('conv_')
+        ? activeChatId.replace('conv_', '').split('_').find(id => id !== user.uid)
+        : activeChatId
+    );
 
-      try {
-        await setDoc(doc(db, 'conversations', convDocId), {
-          id: convDocId,
-          participants: [user.uid, activeChatId],
-          participantProfiles: {
-            [user.uid]: {
-              namaLengkap: userName,
-              prodi: profile?.prodi || 'Animasi',
-              fotoProfil: userAvatar || '',
-              role: profile?.pekerjaanSaatIni || 'Alumni STMM MMTC'
-            },
-            [activeChatId]: otherParty
+    if (!targetUid) return;
+
+    const convDocId = activeChatId.startsWith('conv_')
+      ? activeChatId
+      : `conv_${[user.uid, targetUid].sort().join('_')}`;
+
+    const otherParty = activeConv ? {
+      namaLengkap: activeConv.name,
+      prodi: activeConv.prodi,
+      fotoProfil: activeConv.avatar || '',
+      role: activeConv.role
+    } : {
+      namaLengkap: 'Alumni MMTC',
+      prodi: 'STMM MMTC',
+      fotoProfil: '',
+      role: 'Alumni'
+    };
+
+    try {
+      await setDoc(doc(db, 'conversations', convDocId), {
+        id: convDocId,
+        participants: [user.uid, targetUid],
+        participantProfiles: {
+          [user.uid]: {
+            namaLengkap: userName,
+            prodi: profile?.prodi || 'Animasi',
+            fotoProfil: userAvatar || '',
+            role: profile?.pekerjaanSaatIni || 'Alumni STMM MMTC'
           },
-          lastMessage: textToSend,
-          updatedAt: nowIso,
-          messages: arrayUnion({
-            id: newMsg.id,
-            senderUid: user.uid,
-            senderName: userName,
-            text: textToSend,
-            createdAt: nowIso
-          })
-        }, { merge: true });
-      } catch (err) {
-        console.warn('LinkedInMessagingWidget Firestore write warning:', err);
-      }
+          [targetUid]: otherParty
+        },
+        lastMessage: textToSend,
+        updatedAt: nowIso,
+        messages: arrayUnion({
+          id: newMsgId,
+          senderUid: user.uid,
+          senderName: userName,
+          text: textToSend,
+          createdAt: nowIso
+        })
+      }, { merge: true });
+    } catch (err) {
+      console.warn('LinkedInMessagingWidget Firestore write warning:', err);
     }
-
-    // Simulated short auto reply after 1.5s for presentation demo reliability
-    setTimeout(async () => {
-      const replyIso = new Date().toISOString();
-      const replyMsg: Message = {
-        id: `reply-${Date.now()}`,
-        sender: 'them',
-        text: 'Siap Mas, terima kasih ya! Nanti kita sambung lagi diskusinya.',
-        time: 'Baru saja'
-      };
-
-      setConversations(prev => prev.map(c => {
-        if (c.id === activeChatId) {
-          return {
-            ...c,
-            lastMessage: replyMsg.text,
-            lastTime: 'Baru saja',
-            messages: [...c.messages, replyMsg]
-          };
-        }
-        return c;
-      }));
-
-      if (user?.uid) {
-        const convDocId = activeChatId.startsWith('conv_') ? activeChatId : `conv_${user.uid}_${activeChatId}`;
-        try {
-          await setDoc(doc(db, 'conversations', convDocId), {
-            lastMessage: replyMsg.text,
-            updatedAt: replyIso,
-            messages: arrayUnion({
-              id: replyMsg.id,
-              senderUid: activeChatId,
-              senderName: activeConv?.name || 'Alumni STMM',
-              text: replyMsg.text,
-              createdAt: replyIso
-            })
-          }, { merge: true });
-        } catch {
-          // ignore
-        }
-      }
-    }, 1500);
   };
 
   const filteredConversations = conversations.filter(c => 
@@ -317,10 +330,16 @@ export default function LinkedInMessagingWidget({
     c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredDirectory = directoryUsers.filter(u =>
+    u.namaLengkap.toLowerCase().includes(directorySearch.toLowerCase()) ||
+    (u.prodi && u.prodi.toLowerCase().includes(directorySearch.toLowerCase())) ||
+    (u.pekerjaanSaatIni && u.pekerjaanSaatIni.toLowerCase().includes(directorySearch.toLowerCase()))
+  );
+
   return (
     <div 
       className={`fixed bottom-0 right-4 sm:right-6 z-40 w-80 sm:w-88 bg-white rounded-t-2xl shadow-2xl border border-slate-200 border-b-0 overflow-hidden flex flex-col transition-all duration-300 ease-in-out ${
-        isOpen ? 'h-[460px]' : 'h-13'
+        isOpen ? 'h-[480px]' : 'h-13'
       }`}
     >
       {/* ============================================================== */}
@@ -354,9 +373,20 @@ export default function LinkedInMessagingWidget({
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-slate-400">
+        <div className="flex items-center gap-1 text-slate-400" onClick={(e) => e.stopPropagation()}>
+          {isOpen && !isNewChatOpen && (
+            <button
+              type="button"
+              onClick={handleOpenNewChat}
+              className="p-1.5 rounded-lg hover:bg-sky-50 hover:text-[#0284c7] text-slate-500 transition cursor-pointer"
+              title="Mulai Chat Baru"
+            >
+              <SquarePen className="w-4 h-4" />
+            </button>
+          )}
           <button 
             type="button" 
+            onClick={() => setIsOpen(!isOpen)}
             className="p-1 rounded-lg hover:bg-slate-100 hover:text-slate-600 transition"
             title={isOpen ? 'Tutup Pesan' : 'Buka Pesan'}
           >
@@ -371,12 +401,90 @@ export default function LinkedInMessagingWidget({
       {isOpen && (
         <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50">
           
-          {/* VIEW A: CONVERSATION LIST */}
-          {!activeConv ? (
+          {/* VIEW A: NEW CHAT DIRECTORY PICKER */}
+          {isNewChatOpen ? (
+            <div className="flex-1 flex flex-col overflow-hidden bg-white">
+              <div className="p-3 bg-white border-b border-slate-100 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsNewChatOpen(false)}
+                  className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 transition cursor-pointer"
+                  title="Kembali"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <Search className="w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={directorySearch}
+                    onChange={(e) => setDirectorySearch(e.target.value)}
+                    placeholder="Cari nama alumni MMTC..."
+                    className="w-full bg-transparent text-xs text-slate-700 placeholder-slate-400 outline-none"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="p-2 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-[#0284c7]" />
+                <span>Pilih Rekan Alumni Terdaftar</span>
+              </div>
+
+              <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+                {loadingDirectory ? (
+                  <div className="p-8 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#0284c7]" />
+                    <span>Memuat daftar alumni...</span>
+                  </div>
+                ) : filteredDirectory.length > 0 ? (
+                  filteredDirectory.map((alumni) => (
+                    <div
+                      key={alumni.uid}
+                      onClick={() => startChatWith(alumni)}
+                      className="p-3 bg-white hover:bg-sky-50/60 transition cursor-pointer flex items-center gap-3 group"
+                    >
+                      <div className="relative shrink-0">
+                        <div className="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                          <AlumniAvatar src={alumni.fotoProfil} name={alumni.namaLengkap} />
+                        </div>
+                        <Circle className="w-2.5 h-2.5 fill-emerald-500 text-white absolute -bottom-0.5 -right-0.5" />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-900 group-hover:text-[#0284c7] transition truncate">
+                          {alumni.namaLengkap}
+                        </p>
+                        <p className="text-[10px] text-[#0284c7] font-semibold truncate">
+                          {alumni.prodi} {alumni.angkatan ? `• Angkatan ${alumni.angkatan}` : ''}
+                        </p>
+                        <p className="text-[11px] text-slate-500 truncate">
+                          {alumni.pekerjaanSaatIni || 'Alumni STMM MMTC'}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="px-2.5 py-1 rounded-lg bg-sky-50 text-[#0284c7] text-[10px] font-bold group-hover:bg-[#0284c7] group-hover:text-white transition shrink-0"
+                      >
+                        Pesan
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-xs text-slate-400">
+                    Tidak ada alumni ditemukan.
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : !activeConv ? (
+            
+            /* VIEW B: CONVERSATION LIST */
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* SEARCH INPUT */}
-              <div className="p-3 bg-white border-b border-slate-100">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="p-3 bg-white border-b border-slate-100 flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
                   <Search className="w-3.5 h-3.5 text-slate-400" />
                   <input
                     type="text"
@@ -429,20 +537,44 @@ export default function LinkedInMessagingWidget({
                 ))}
 
                 {filteredConversations.length === 0 && (
-                  <div className="p-8 text-center text-xs text-slate-400">
-                    Tidak ada percakapan ditemukan.
+                  <div className="p-8 text-center flex flex-col items-center justify-center my-auto">
+                    <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#0284c7] flex items-center justify-center mb-3 shadow-2xs">
+                      <MessageSquare className="w-6 h-6" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 mb-1">
+                      Belum Ada Pesan
+                    </p>
+                    <p className="text-[11px] text-slate-500 max-w-[210px] leading-relaxed mb-4">
+                      Obrolan masih kosong. Cari rekan alumni terdaftar untuk mulai terhubung dan bertukar pesan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleOpenNewChat}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                    >
+                      <SquarePen className="w-3.5 h-3.5" />
+                      <span>Mulai Chat Baru</span>
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* FOOTER SHORTCUT */}
-              <div className="p-2.5 bg-white border-t border-slate-100 text-center text-[11px] text-slate-400">
-                <span>Terhubung langsung dengan alumni STMM MMTC</span>
+              <div className="p-2.5 bg-white border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 px-3">
+                <span>Terhubung ke alumni MMTC</span>
+                <button
+                  type="button"
+                  onClick={handleOpenNewChat}
+                  className="font-bold text-[#0284c7] hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  <SquarePen className="w-3 h-3" />
+                  <span>Chat Baru</span>
+                </button>
               </div>
             </div>
           ) : (
             
-            /* VIEW B: ACTIVE CHAT ROOM */
+            /* VIEW C: ACTIVE CHAT ROOM */
             <div className="flex-1 flex flex-col overflow-hidden bg-white">
               {/* CHAT HEADER */}
               <div className="px-3 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between shadow-2xs shrink-0">
@@ -470,7 +602,7 @@ export default function LinkedInMessagingWidget({
                       {activeConv.name}
                     </p>
                     <p className="text-[10px] text-emerald-600 font-medium leading-tight">
-                      {activeConv.online ? 'Aktif sekarang' : 'Offline'} • {activeConv.prodi}
+                      {activeConv.online ? 'Aktif' : 'Offline'} • {activeConv.prodi}
                     </p>
                   </div>
                 </div>
@@ -486,25 +618,32 @@ export default function LinkedInMessagingWidget({
 
               {/* MESSAGES BUBBLE AREA */}
               <div className="flex-1 p-3 overflow-y-auto space-y-2.5 bg-slate-50/50">
-                {activeConv.messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col ${msg.sender === 'me' ? 'items-end' : 'items-start'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] p-2.5 rounded-2xl text-xs leading-relaxed shadow-2xs ${
-                        msg.sender === 'me'
-                          ? 'bg-[#0284c7] text-white rounded-br-xs'
-                          : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                    <span className="text-[9px] text-slate-400 px-1 mt-0.5">
-                      {msg.time}
-                    </span>
+                {activeConv.messages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400">
+                    <p className="text-xs font-medium">Belum ada riwayat pesan.</p>
+                    <p className="text-[10px] text-slate-400 mt-1">Kirim pesan pertama untuk menyapa {activeConv.name}!</p>
                   </div>
-                ))}
+                ) : (
+                  activeConv.messages.map(msg => (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${msg.sender === 'me' ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] p-2.5 rounded-2xl text-xs leading-relaxed shadow-2xs ${
+                          msg.sender === 'me'
+                            ? 'bg-[#0284c7] text-white rounded-br-xs'
+                            : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                      <span className="text-[9px] text-slate-400 px-1 mt-0.5">
+                        {msg.time}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* CHAT INPUT FORM */}

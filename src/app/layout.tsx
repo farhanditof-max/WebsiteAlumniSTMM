@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import GlobalMessaging from '@/components/layout/GlobalMessaging';
 
 export const metadata: Metadata = {
   title: 'Dashboard Alumni MMTC Yogyakarta - Portal Karir & Jejaring',
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           {children}
+          <GlobalMessaging />
         </AuthProvider>
       </body>
     </html>

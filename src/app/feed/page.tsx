@@ -34,7 +34,7 @@ import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
-import LinkedInMessagingWidget from '@/components/feed/LinkedInMessagingWidget';
+
 import { parseYouTubeVideoId, safeHttpUrl } from '@/lib/media';
 import { 
   subscribeToFeedPosts, 
@@ -1315,14 +1315,6 @@ export default function FeedPage() {
         subtitle={shareData?.subtitle}
         shareUrl={shareData?.url || ''}
       />
-
-      {/* LINKEDIN-STYLE FLOATING MESSAGING DRAWER (Hanya untuk pengguna login) */}
-      {user && (
-        <LinkedInMessagingWidget 
-          userAvatar={currentUser.avatar}
-          userName={currentUser.name}
-        />
-      )}
     </div>
   );
 }
