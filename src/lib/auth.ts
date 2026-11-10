@@ -22,7 +22,7 @@ import { fetchRegisteredNomorAlumniRest, fetchUserByNomorAlumniRest, fetchUserPr
 // Hardcoded verified alumni whitelist untuk fallback & inisialisasi awal
 export const VERIFIED_ALUMNI_LIST = [
   { nomorAlumni: '903452018000035', nama: 'Dary Halim', prodi: 'Animasi', angkatan: '2018', email: 'dary.halim@alumni.mmtc.ac.id' },
-  { nomorAlumni: '903452019000119', nama: 'Maydia Goklas Pratama Simanjuntak', prodi: 'Animasi', angkatan: '2019', email: 'maydia.goklas@alumni.mmtc.ac.id' },
+  { nomorAlumni: '903452019000119', nama: 'Maydian Goklas Pratama Simanjuntak', prodi: 'Animasi', angkatan: '2019', email: 'maydian.goklas@alumni.mmtc.ac.id' },
   { nomorAlumni: '903452018000189', nama: 'Farhandito Fadila', prodi: 'Animasi', angkatan: '2019', email: 'farhandito.fadila@alumni.mmtc.ac.id' },
   { nomorAlumni: 'MMTC-2018-001', nama: 'Budi Santoso', prodi: 'Animasi', angkatan: '2018', email: 'budi.santoso@alumni.mmtc.ac.id' },
   { nomorAlumni: 'MMTC-2019-042', nama: 'Siti Rahma', prodi: 'Game Design', angkatan: '2019', email: 'siti.rahmawati@alumni.mmtc.ac.id' },

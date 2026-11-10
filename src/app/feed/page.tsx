@@ -26,7 +26,9 @@ import {
   Maximize2, 
   Briefcase,
   ChevronDown,
-  MapPin
+  MapPin,
+  Lock,
+  Loader2
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
 import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
@@ -153,7 +155,7 @@ const POST_CATEGORIES = [
 ];
 
 export default function FeedPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
 
   // Simulated logged-in user profile
   const currentUser = {
@@ -446,6 +448,56 @@ export default function FeedPage() {
     if (selectedFilter === 'semua') return true;
     return post.category === selectedFilter;
   });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
+        <Navbar />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#0284c7]" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">
+        <Navbar />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex items-center justify-center">
+          <div className="max-w-md w-full bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-10 shadow-sm text-center space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0284c7] flex items-center justify-center mx-auto border border-sky-100 shadow-xs">
+              <Lock className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+                Masuk untuk Melihat Feed
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Ruang interaksi, showreel, dan jejaring komunitas ini eksklusif bagi alumni STMM MMTC yang telah terdaftar.
+              </p>
+            </div>
+            <div className="space-y-3 pt-2">
+              <Link
+                href="/login?redirect=/feed"
+                className="w-full py-3.5 px-4 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-sm shadow-xs transition flex items-center justify-center gap-2 active:scale-[0.98]"
+              >
+                Masuk ke Akun Alumni
+              </Link>
+              <Link
+                href="/register"
+                className="w-full py-3 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-sm border border-slate-200 transition flex items-center justify-center gap-2"
+              >
+                Belum punya akun? Daftar
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans">

@@ -27,7 +27,7 @@ const INITIAL_ALUMNI_REGISTRY: Record<string, Record<string, unknown>> = {
   },
   '903452019000119': {
     nomorAlumni: '903452019000119',
-    namaLengkap: 'Maydia Goklas Pratama Simanjuntak',
+    namaLengkap: 'Maydian Goklas Pratama Simanjuntak',
     prodi: 'Animasi',
     angkatan: '2019',
     isRegistered: false,
