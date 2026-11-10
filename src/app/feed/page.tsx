@@ -306,11 +306,16 @@ export default function FeedPage() {
 
       setPosts(prev => [optimisticPost, ...prev.filter(p => p.id !== optimisticPost.id)]);
 
-      // Save to localStorage so profile history immediately shows this post
+      // Save to localStorage per-user so profile history immediately shows this post
       try {
-        const stored = localStorage.getItem('alumni_user_posts');
-        const existing = stored ? JSON.parse(stored) : [];
-        localStorage.setItem('alumni_user_posts', JSON.stringify([optimisticPost, ...existing]));
+        if (user?.uid) {
+          const userKey = `alumni_posts_${user.uid}`;
+          const stored = localStorage.getItem(userKey);
+          const existing = stored ? JSON.parse(stored) : [];
+          localStorage.setItem(userKey, JSON.stringify([optimisticPost, ...existing]));
+          // Remove legacy global key if present to prevent cross-account bleeding
+          localStorage.removeItem('alumni_user_posts');
+        }
       } catch {
         // ignore
       }

@@ -85,62 +85,100 @@ interface AlumniActivityHistoryProps {
 
 export default function AlumniActivityHistory({
   authorUid,
-  authorName = 'Dary Halim',
-  authorProdi = 'Animasi',
+  authorName = 'Alumni MMTC',
+  authorProdi = '',
   authorAvatar = '',
   isOwner = true
 }: AlumniActivityHistoryProps) {
+  const isDemo = !authorUid || authorUid === 'demo-alumni-001';
+
   const [posts, setPosts] = useState<UserActivityPost[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem('alumni_user_posts');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(parsed.map((p: UserActivityPost) => p.id));
-            return [
-              ...parsed,
-              ...DEFAULT_USER_POSTS.filter(p => !existingIds.has(p.id))
-            ];
+        const key = authorUid ? `alumni_posts_${authorUid}` : (isDemo ? 'alumni_posts_demo' : '');
+        if (key) {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return parsed;
+            }
           }
         }
       } catch {
         // ignore
       }
     }
-    return DEFAULT_USER_POSTS;
+    return isDemo ? DEFAULT_USER_POSTS : [];
   });
 
   useEffect(() => {
     let isMounted = true;
-    if (authorUid) {
-      getUserFeedPosts(authorUid).then((userPosts) => {
-        if (!isMounted) return;
-        if (userPosts.length > 0) {
-          const mapped: UserActivityPost[] = userPosts.map(p => ({
-            id: p.id,
-            authorName: p.authorName,
-            authorProdi: p.authorProdi,
-            authorAngkatan: p.authorAngkatan,
-            authorRole: p.authorRole,
-            authorAvatar: p.authorAvatar,
-            timeAgo: p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja',
-            category: p.category,
-            content: p.content,
-            hashtags: p.hashtags,
-            mediaType: p.mediaType,
-            mediaUrl: p.mediaUrl,
-            mediaTitle: p.mediaTitle,
-            mediaSize: p.mediaSize,
-            likesCount: p.likesCount,
-            commentsCount: p.commentsCount
-          }));
-          setPosts(mapped);
-        }
-      }).catch(err => {
-        console.warn('AlumniActivityHistory load posts error:', err);
-      });
+    if (!authorUid || authorUid === 'demo-alumni-001') {
+      return;
     }
+
+    getUserFeedPosts(authorUid).then((userPosts) => {
+      if (!isMounted) return;
+      const mapped: UserActivityPost[] = (userPosts || []).map(p => ({
+        id: p.id,
+        authorName: p.authorName,
+        authorProdi: p.authorProdi,
+        authorAngkatan: p.authorAngkatan,
+        authorRole: p.authorRole,
+        authorAvatar: p.authorAvatar,
+        timeAgo: p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja',
+        category: p.category,
+        content: p.content,
+        hashtags: p.hashtags,
+        mediaType: p.mediaType,
+        mediaUrl: p.mediaUrl,
+        mediaTitle: p.mediaTitle,
+        mediaSize: p.mediaSize,
+        likesCount: p.likesCount,
+        commentsCount: p.commentsCount
+      }));
+
+      // Combine with local optimistic posts for this authorUid only
+      let localPosts: UserActivityPost[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(`alumni_posts_${authorUid}`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) localPosts = parsed;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      const fetchedIds = new Set(mapped.map(p => p.id));
+      const combined = [
+        ...localPosts.filter(p => !fetchedIds.has(p.id)),
+        ...mapped
+      ];
+
+      setPosts(combined);
+    }).catch(err => {
+      console.warn('AlumniActivityHistory load posts error:', err);
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(`alumni_posts_${authorUid}`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              setPosts(parsed);
+              return;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+      setPosts([]);
+    });
+
     return () => { isMounted = false; };
   }, [authorUid]);
 
@@ -248,19 +286,27 @@ export default function AlumniActivityHistory({
       {filteredPosts.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-slate-200 rounded-2xl p-6 space-y-2">
           <MessageSquare className="w-8 h-8 text-slate-300 mx-auto" />
-          <p className="text-sm font-bold text-slate-700">Tidak ada postingan dalam kategori ini</p>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Bagikan karya portofolio, diskusi teknologi, atau update terbaru Anda langsung ke feed alumni.
+          <p className="text-sm font-bold text-slate-700">
+            {selectedCategory === 'semua' 
+              ? 'Belum ada aktivitas atau postingan' 
+              : 'Tidak ada postingan dalam kategori ini'}
           </p>
-          <div className="pt-2">
-            <Link
-              href="/feed"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-2xs"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>Publikasikan Sekarang</span>
-            </Link>
-          </div>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            {isOwner 
+              ? 'Bagikan karya portofolio, diskusi teknologi, atau update terbaru Anda langsung ke feed alumni.'
+              : 'Alumni ini belum mempublikasikan postingan atau aktivitas di komunitas.'}
+          </p>
+          {isOwner && (
+            <div className="pt-2">
+              <Link
+                href="/feed"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold transition shadow-2xs"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Publikasikan Sekarang</span>
+              </Link>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

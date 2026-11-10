@@ -550,11 +550,11 @@ export default function PublicProfilePage({ params }: { params: Promise<{ uid: s
 
             {/* AKTIVITAS & RIWAYAT POSTINGAN ALUMNI (LINKEDIN / FACEBOOK STYLE) */}
             <AlumniActivityHistory 
-              authorUid={rawUid}
+              authorUid={profile.uid || rawUid}
               authorName={profile.namaLengkap}
               authorProdi={profile.prodi}
               authorAvatar={profile.fotoProfil}
-              isOwner={false}
+              isOwner={isOwner}
             />
           </div>
         </div>

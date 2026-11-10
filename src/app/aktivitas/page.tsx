@@ -90,64 +90,100 @@ export default function AktivitasPage() {
   const { user, profile } = useAuth();
 
   const currentUser = {
-    name: profile?.namaLengkap || user?.displayName || 'Dary Halim',
-    prodi: profile?.prodi || 'Animasi',
-    angkatan: profile?.angkatan || '2020',
-    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
+    name: profile?.namaLengkap || user?.displayName || 'Alumni MMTC',
+    prodi: profile?.prodi || '',
+    angkatan: profile?.angkatan || '',
+    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '',
     avatar: profile?.fotoProfil || ''
   };
+
+  const isDemo = !user;
 
   const [posts, setPosts] = useState<UserActivityPost[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem('alumni_user_posts');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(parsed.map((p: UserActivityPost) => p.id));
-            return [
-              ...parsed,
-              ...DEFAULT_POSTS.filter(p => !existingIds.has(p.id))
-            ];
+        const key = user?.uid ? `alumni_posts_${user.uid}` : (isDemo ? 'alumni_posts_demo' : '');
+        if (key) {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return parsed;
+            }
           }
         }
       } catch {
         // ignore
       }
     }
-    return DEFAULT_POSTS;
+    return isDemo ? DEFAULT_POSTS : [];
   });
 
   useEffect(() => {
     let isMounted = true;
-    if (user?.uid) {
-      getUserFeedPosts(user.uid).then((userPosts) => {
-        if (!isMounted) return;
-        if (userPosts.length > 0) {
-          const mapped: UserActivityPost[] = userPosts.map(p => ({
-            id: p.id,
-            authorName: p.authorName,
-            authorProdi: p.authorProdi,
-            authorAngkatan: p.authorAngkatan,
-            authorRole: p.authorRole,
-            authorAvatar: p.authorAvatar,
-            timeAgo: p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja',
-            category: p.category,
-            content: p.content,
-            hashtags: p.hashtags,
-            mediaType: p.mediaType,
-            mediaUrl: p.mediaUrl,
-            mediaTitle: p.mediaTitle,
-            mediaSize: p.mediaSize,
-            likesCount: p.likesCount,
-            commentsCount: p.commentsCount
-          }));
-          setPosts(mapped);
-        }
-      }).catch(err => {
-        console.warn('AktivitasPage load user posts error:', err);
-      });
+    if (!user?.uid) {
+      return;
     }
+
+    getUserFeedPosts(user.uid).then((userPosts) => {
+      if (!isMounted) return;
+      const mapped: UserActivityPost[] = (userPosts || []).map(p => ({
+        id: p.id,
+        authorName: p.authorName,
+        authorProdi: p.authorProdi,
+        authorAngkatan: p.authorAngkatan,
+        authorRole: p.authorRole,
+        authorAvatar: p.authorAvatar,
+        timeAgo: p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja',
+        category: p.category,
+        content: p.content,
+        hashtags: p.hashtags,
+        mediaType: p.mediaType,
+        mediaUrl: p.mediaUrl,
+        mediaTitle: p.mediaTitle,
+        mediaSize: p.mediaSize,
+        likesCount: p.likesCount,
+        commentsCount: p.commentsCount
+      }));
+
+      // Combine with local optimistic posts for this user
+      let localPosts: UserActivityPost[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(`alumni_posts_${user.uid}`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) localPosts = parsed;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      const fetchedIds = new Set(mapped.map(p => p.id));
+      const combined = [
+        ...localPosts.filter(p => !fetchedIds.has(p.id)),
+        ...mapped
+      ];
+
+      setPosts(combined);
+    }).catch(err => {
+      console.warn('AktivitasPage load user posts error:', err);
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(`alumni_posts_${user.uid}`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              setPosts(parsed);
+              return;
+            }
+          }
+        } catch {}
+      }
+      setPosts([]);
+    });
+
     return () => { isMounted = false; };
   }, [user?.uid]);
 
@@ -167,7 +203,9 @@ export default function AktivitasPage() {
     const updated = posts.filter(p => p.id !== id);
     setPosts(updated);
     try {
-      localStorage.setItem('alumni_user_posts', JSON.stringify(updated));
+      const key = user?.uid ? `alumni_posts_${user.uid}` : 'alumni_posts_demo';
+      localStorage.setItem(key, JSON.stringify(updated));
+      localStorage.removeItem('alumni_user_posts');
     } catch {
       // ignore
     }
