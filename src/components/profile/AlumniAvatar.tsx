@@ -13,21 +13,19 @@ export default function AlumniAvatar({
   name, 
   className = 'w-full h-full object-cover' 
 }: AlumniAvatarProps) {
-  const [hasError, setHasError] = useState(false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
-  const effectiveSrc = (src && !hasError) ? src : '/default_avatar.png';
+  const trimmed = src?.trim();
+  const effectiveSrc = (trimmed && trimmed !== failedSrc) ? trimmed : '/default_avatar.png';
 
   return (
     <img
-      key={effectiveSrc}
       src={effectiveSrc}
       alt={name || 'Foto Alumni'}
       className={className}
-      onError={(e) => {
-        if (!hasError && src) {
-          setHasError(true);
-        } else {
-          (e.target as HTMLElement).style.display = 'none';
+      onError={() => {
+        if (effectiveSrc !== '/default_avatar.png') {
+          setFailedSrc(effectiveSrc);
         }
       }}
     />

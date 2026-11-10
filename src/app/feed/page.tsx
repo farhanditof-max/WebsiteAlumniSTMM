@@ -10,7 +10,6 @@ import {
   MessageSquare, 
   Share2, 
   Send, 
-  LayoutGrid,
   Video, 
   Paperclip,
   FileText,
@@ -31,9 +30,11 @@ import {
   Loader2
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
-import { OpenToWorkBadge, ProdiBadge } from '@/components/ui/Badge';
+import { ProdiBadge } from '@/components/ui/Badge';
 import { CinemaLightbox } from '@/components/ui/Modal';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 import { parseYouTubeVideoId, safeHttpUrl } from '@/lib/media';
 import { 
@@ -169,21 +170,45 @@ export default function FeedPage() {
   };
 
   const [posts, setPosts] = useState<FeedPostUI[]>(DEFAULT_POSTS);
+  const [authorAvatars, setAuthorAvatars] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function loadAuthorAvatars() {
+      try {
+        const snap = await getDocs(collection(db, 'public_profiles'));
+        const map: Record<string, string> = {};
+        snap.forEach((d) => {
+          const data = d.data();
+          if (data.fotoProfil) {
+            map[d.id] = data.fotoProfil;
+          }
+        });
+        setAuthorAvatars(map);
+      } catch {
+        // ignore
+      }
+    }
+    loadAuthorAvatars();
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToFeedPosts((fetched) => {
-      if (fetched && fetched.length > 0) {
-        const mapped: FeedPostUI[] = fetched.map(p => ({
-          ...p,
-          timeAgo: formatTimeAgo(p.createdAt),
-          isLiked: user ? (p.likedBy?.includes(user.uid) || false) : false,
-          comments: (p.comments || []).map(c => ({
-            ...c,
-            timeAgo: formatTimeAgo(c.createdAt)
-          }))
-        }));
-        setPosts(mapped);
-      }
+      const basePosts = fetched && fetched.length > 0 ? fetched : INITIAL_CURATED_POSTS;
+      // Combine live user posts with curated showcase posts so media photos and showreels remain visible
+      const fetchedIds = new Set(basePosts.map(p => p.id));
+      const curatedRemaining = INITIAL_CURATED_POSTS.filter(p => !fetchedIds.has(p.id));
+      const combined = [...basePosts, ...curatedRemaining];
+
+      const mapped: FeedPostUI[] = combined.map(p => ({
+        ...p,
+        timeAgo: formatTimeAgo(p.createdAt),
+        isLiked: user ? (p.likedBy?.includes(user.uid) || false) : false,
+        comments: (p.comments || []).map(c => ({
+          ...c,
+          timeAgo: formatTimeAgo(c.createdAt)
+        }))
+      }));
+      setPosts(mapped);
     });
     return () => unsub();
   }, [user]);
@@ -382,7 +407,6 @@ export default function FeedPage() {
     if (!text) return;
 
     const nowIso = new Date().toISOString();
-    // eslint-disable-next-line react-hooks/purity
     const commentId = `c-${Date.now()}`;
     const optimisticComment = {
       id: commentId,
@@ -550,13 +574,10 @@ export default function FeedPage() {
               <div className="bg-white border border-slate-200/90 rounded-[28px] p-3.5 shadow-sm space-y-3">
                 {/* TOP PORTRAIT PHOTO */}
                 <div className="w-full aspect-[4/4.2] rounded-[22px] overflow-hidden bg-slate-100 relative group flex items-center justify-center">
-                  <img
-                    src={currentUser.avatar || '/default_avatar.png'}
-                    alt={currentUser.name}
+                  <AlumniAvatar
+                    src={currentUser.avatar}
+                    name={currentUser.name}
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = '/default_avatar.png';
-                    }}
                   />
                 </div>
 
@@ -963,6 +984,7 @@ export default function FeedPage() {
                 const isFollowingPostAuthor = followedAlumni[post.id] ?? post.isFollowing;
                 const commentsOpen = Boolean(expandedComments[post.id]);
                 const videoId = post.mediaUrl ? parseYouTubeVideoId(post.mediaUrl) : null;
+                const authorAvatarSrc = (user && post.authorUid === user.uid ? currentUser.avatar : '') || (post.authorUid ? authorAvatars[post.authorUid] : '') || post.authorAvatar;
 
                 return (
                   <article
@@ -974,7 +996,7 @@ export default function FeedPage() {
                       <div className="flex items-center gap-3">
                         <Link href={`/profil/${encodeURIComponent(post.authorUid || post.nomorAlumni || '')}`} className="shrink-0">
                           <div className="w-11 h-11 rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-500 to-[#0284c7] text-white flex items-center justify-center font-bold text-base shadow-2xs hover:opacity-90 transition">
-                            <AlumniAvatar src={post.authorAvatar} name={post.authorName} />
+                            <AlumniAvatar src={authorAvatarSrc} name={post.authorName} />
                           </div>
                         </Link>
                         <div>
@@ -1161,8 +1183,8 @@ export default function FeedPage() {
                         {/* LIST COMMENTS */}
                         {post.comments.map(c => (
                           <div key={c.id} className="flex items-start gap-2.5 bg-slate-50 p-3 rounded-2xl">
-                            <div className="w-7 h-7 rounded-xl bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-[10px] text-slate-600 shrink-0">
-                              {c.authorName.charAt(0)}
+                            <div className="w-7 h-7 rounded-xl overflow-hidden flex items-center justify-center font-bold text-[10px] text-white bg-[#0284c7] shrink-0">
+                              <AlumniAvatar src={c.authorAvatar || (c.authorUid ? authorAvatars[c.authorUid] : undefined)} name={c.authorName} />
                             </div>
                             <div className="flex-1 space-y-0.5">
                               <div className="flex items-center justify-between">
