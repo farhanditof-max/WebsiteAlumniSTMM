@@ -90,7 +90,7 @@ export default function RegisterPage() {
 
     if (!/^\d{4}$/.test(angkatan.trim())) {
       setError(
-        "Tahun Angkatan / Kelulusan harus berupa 4 digit angka (contoh: 2018).",
+        "Tahun Kelulusan harus berupa 4 digit angka (contoh: 2018).",
       );
 
       return;
@@ -254,7 +254,7 @@ export default function RegisterPage() {
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  Tahun Angkatan *
+                  Tahun Kelulusan *
                 </label>
 
                 <input

@@ -68,7 +68,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
 const DEMO_PROFILE = {
   uid: 'demo-alumni-001',
   namaLengkap: 'Dary Halim',
-  fotoProfil: '/profile_dary.jpg',
+  fotoProfil: '/default_avatar.png',
   prodi: 'Animasi' as ProdiType,
   angkatan: '2020',
   nomorAlumni: 'MMTC-2020-103',
@@ -115,8 +115,12 @@ const DEMO_PROFILE = {
 const getLocalProfile = (uid?: string): ExtendedUserProfile | null => {
   if (typeof window === 'undefined') return null;
   try {
-    const key = uid ? `mmtc_profile_${uid}` : 'mmtc_demo_profile';
-    const raw = localStorage.getItem(key) || localStorage.getItem('mmtc_demo_profile');
+    if (uid) {
+      const raw = localStorage.getItem(`mmtc_profile_${uid}`);
+      if (raw) return JSON.parse(raw);
+      return null;
+    }
+    const raw = localStorage.getItem('mmtc_demo_profile');
     if (raw) return JSON.parse(raw);
   } catch {
     // ignore
@@ -151,24 +155,24 @@ export default function ProfilPage() {
   // Local state for profile persistence across preview/demo and offline saves
   const [savedProfile, setSavedProfile] = useState<ExtendedUserProfile | null>(() => getLocalProfile(user?.uid));
 
-  const currentProfile: ExtendedUserProfile = 
-    savedProfile || (profile as ExtendedUserProfile | null) || DEMO_PROFILE;
+  const currentProfile: ExtendedUserProfile | null = 
+    savedProfile || (profile as ExtendedUserProfile | null) || (isDemo ? DEMO_PROFILE : null);
 
-  const [namaLengkap, setNamaLengkap] = useState(() => currentProfile.namaLengkap || DEMO_PROFILE.namaLengkap);
-  const [prodi, setProdi] = useState<ProdiType>(() => (currentProfile.prodi as ProdiType) || 'Animasi');
-  const [angkatan, setAngkatan] = useState(() => currentProfile.angkatan || DEMO_PROFILE.angkatan);
-  const [openToWork, setOpenToWork] = useState(() => currentProfile.openToWork ?? true);
-  const [pekerjaanSaatIni, setPekerjaanSaatIni] = useState(() => currentProfile.pekerjaanSaatIni || DEMO_PROFILE.pekerjaanSaatIni);
-  const [domisili, setDomisili] = useState(() => currentProfile.domisili || DEMO_PROFILE.domisili);
-  const [bio, setBio] = useState(() => currentProfile.bio || DEMO_PROFILE.bio);
-  const [phone, setPhone] = useState(() => currentProfile.phone || DEMO_PROFILE.phone);
-  const [linkedinUrl, setLinkedinUrl] = useState(() => currentProfile.linkedinUrl || DEMO_PROFILE.linkedinUrl);
-  const [instagramUrl, setInstagramUrl] = useState(() => currentProfile.instagramUrl || DEMO_PROFILE.instagramUrl);
-  const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>(() => currentProfile.customLinks || DEMO_PROFILE.customLinks);
-  const [cvExternalLink, setCvExternalLink] = useState(() => currentProfile.cvExternalLink || DEMO_PROFILE.cvExternalLink);
+  const [namaLengkap, setNamaLengkap] = useState(() => currentProfile?.namaLengkap || profile?.namaLengkap || user?.displayName || (isDemo ? DEMO_PROFILE.namaLengkap : ''));
+  const [prodi, setProdi] = useState<ProdiType>(() => (currentProfile?.prodi as ProdiType) || (profile?.prodi as ProdiType) || 'Animasi');
+  const [angkatan, setAngkatan] = useState(() => currentProfile?.angkatan || profile?.angkatan || (isDemo ? DEMO_PROFILE.angkatan : ''));
+  const [openToWork, setOpenToWork] = useState(() => currentProfile?.openToWork ?? profile?.openToWork ?? true);
+  const [pekerjaanSaatIni, setPekerjaanSaatIni] = useState(() => currentProfile?.pekerjaanSaatIni || (isDemo ? DEMO_PROFILE.pekerjaanSaatIni : ''));
+  const [domisili, setDomisili] = useState(() => currentProfile?.domisili || (isDemo ? DEMO_PROFILE.domisili : ''));
+  const [bio, setBio] = useState(() => currentProfile?.bio || (isDemo ? DEMO_PROFILE.bio : ''));
+  const [phone, setPhone] = useState(() => currentProfile?.phone || (isDemo ? DEMO_PROFILE.phone : ''));
+  const [linkedinUrl, setLinkedinUrl] = useState(() => currentProfile?.linkedinUrl || (isDemo ? DEMO_PROFILE.linkedinUrl : ''));
+  const [instagramUrl, setInstagramUrl] = useState(() => currentProfile?.instagramUrl || (isDemo ? DEMO_PROFILE.instagramUrl : ''));
+  const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>(() => currentProfile?.customLinks || (isDemo ? DEMO_PROFILE.customLinks : []));
+  const [cvExternalLink, setCvExternalLink] = useState(() => currentProfile?.cvExternalLink || (isDemo ? DEMO_PROFILE.cvExternalLink : ''));
 
   // Portfolio State
-  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(() => currentProfile.portfolio || DEMO_PROFILE.portfolio);
+  const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(() => currentProfile?.portfolio || (isDemo ? DEMO_PROFILE.portfolio : []));
   const [portType, setPortType] = useState<'youtube' | 'pinterest' | 'behance' | 'image' | 'link'>('youtube');
   const [portTitle, setPortTitle] = useState('');
   const [portUrl, setPortUrl] = useState('');
@@ -241,10 +245,9 @@ export default function ProfilPage() {
     if (typeof window !== 'undefined') {
       try {
         const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
-        const currentData = savedProfile || currentProfile || DEMO_PROFILE;
+        const currentData = savedProfile || currentProfile || (user ? {} : DEMO_PROFILE);
         const updated = { ...currentData, portfolio: updatedList };
         localStorage.setItem(storageKey, JSON.stringify(updated));
-        localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
         setSavedProfile(updated as ExtendedUserProfile);
       } catch (err) {
         console.warn('LocalStorage error:', err);
@@ -316,10 +319,9 @@ export default function ProfilPage() {
     if (typeof window !== 'undefined') {
       try {
         const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
-        const currentData = savedProfile || currentProfile || DEMO_PROFILE;
+        const currentData = savedProfile || currentProfile || (user ? {} : DEMO_PROFILE);
         const updated = { ...currentData, portfolio: updatedList };
         localStorage.setItem(storageKey, JSON.stringify(updated));
-        localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
         setSavedProfile(updated as ExtendedUserProfile);
       } catch (err) {
         console.warn('LocalStorage error:', err);
@@ -491,10 +493,9 @@ export default function ProfilPage() {
       }
       
       setSavedProfile((prev) => {
-        const updated = { ...(prev || currentProfile || DEMO_PROFILE), cvFileUrl: downloadUrl };
+        const updated = { ...(prev || currentProfile || {}), cvFileUrl: downloadUrl };
         if (typeof window !== 'undefined') {
           localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
-          localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
         }
         return updated as ExtendedUserProfile;
       });
@@ -627,10 +628,9 @@ export default function ProfilPage() {
       }
 
       setSavedProfile((prev) => {
-        const updated = { ...(prev || currentProfile || DEMO_PROFILE), fotoProfil: downloadUrl };
+        const updated = { ...(prev || currentProfile || {}), fotoProfil: downloadUrl };
         if (typeof window !== 'undefined') {
           localStorage.setItem(`mmtc_profile_${user.uid}`, JSON.stringify(updated));
-          localStorage.setItem('mmtc_demo_profile', JSON.stringify(updated));
         }
         if (setProfileData) {
           setProfileData(updated as UserProfile);
@@ -681,10 +681,10 @@ export default function ProfilPage() {
 
     const fullProfile: ExtendedUserProfile = {
       uid: user ? user.uid : 'demo-alumni-001',
-      nomorAlumni: profile?.nomorAlumni || currentProfile?.nomorAlumni || 'MMTC-2020-103',
+      nomorAlumni: profile?.nomorAlumni || currentProfile?.nomorAlumni || '',
       prodi: profile?.prodi || prodi || 'Animasi',
-      angkatan: profile?.angkatan || angkatan || '2020',
-      email: profile?.email || user?.email || 'alumni@mmtc.ac.id',
+      angkatan: profile?.angkatan || angkatan || '',
+      email: profile?.email || user?.email || '',
       fotoProfil: profile?.fotoProfil || currentProfile?.fotoProfil || '',
       cvFileUrl: profile?.cvFileUrl || currentProfile?.cvFileUrl || '',
       ...usersUpdateData
@@ -695,7 +695,9 @@ export default function ProfilPage() {
       try {
         const storageKey = user ? `mmtc_profile_${user.uid}` : 'mmtc_demo_profile';
         localStorage.setItem(storageKey, JSON.stringify(fullProfile));
-        localStorage.setItem('mmtc_demo_profile', JSON.stringify(fullProfile));
+        if (!user) {
+          localStorage.setItem('mmtc_demo_profile', JSON.stringify(fullProfile));
+        }
         window.dispatchEvent(new Event('alumnihub_profile_updated'));
       } catch (err) {
         console.warn('LocalStorage save error:', err);

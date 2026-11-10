@@ -48,6 +48,9 @@ cloudflared_bin.exe
 # IDE and editors
 .vscode/
 !.vscode/extensions.json
+
+# Local test uploads
+public/uploads/
 .idea/
 *.suo
 *.ntvs*

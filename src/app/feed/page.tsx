@@ -157,15 +157,15 @@ const POST_CATEGORIES = [
 export default function FeedPage() {
   const { user, profile, loading: authLoading } = useAuth();
 
-  // Simulated logged-in user profile
+  // Logged-in user profile with clean per-user data (kosongan default)
   const currentUser = {
-    name: profile?.namaLengkap || user?.displayName || 'Dary Halim',
-    prodi: profile?.prodi || 'Animasi',
-    angkatan: profile?.angkatan || '2020',
-    bio: profile?.bio || 'Multimedia | Graphic Designer | Motion Graphic | Art Director | speaker | Researcher | Magister Ilmu Komunikasi',
-    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '3D Animator di Infinite Studios',
-    domisili: (profile as ExtendedUserProfile | null)?.domisili || 'Sleman, D.I. Yogyakarta',
-    avatar: profile?.fotoProfil || '/profile_dary.jpg'
+    name: profile?.namaLengkap || user?.displayName || 'Alumni MMTC',
+    prodi: profile?.prodi || '',
+    angkatan: profile?.angkatan || '',
+    bio: profile?.bio || '',
+    role: (profile as ExtendedUserProfile | null)?.pekerjaanSaatIni || '',
+    domisili: (profile as ExtendedUserProfile | null)?.domisili || '',
+    avatar: profile?.fotoProfil || ''
   };
 
   const [posts, setPosts] = useState<FeedPostUI[]>(DEFAULT_POSTS);
@@ -544,18 +544,15 @@ export default function FeedPage() {
             {user ? (
               <div className="bg-white border border-slate-200/90 rounded-[28px] p-3.5 shadow-sm space-y-3">
                 {/* TOP PORTRAIT PHOTO */}
-                <div className="w-full aspect-[4/4.2] rounded-[22px] overflow-hidden bg-slate-100 relative group">
+                <div className="w-full aspect-[4/4.2] rounded-[22px] overflow-hidden bg-slate-100 relative group flex items-center justify-center">
                   <img
-                    src={currentUser.avatar || '/profile_dary.jpg'}
+                    src={currentUser.avatar || '/default_avatar.png'}
                     alt={currentUser.name}
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
+                      (e.currentTarget as HTMLImageElement).src = '/default_avatar.png';
                     }}
                   />
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-sky-400 via-sky-500 to-[#0087cc] flex items-center justify-center text-white text-5xl font-black">
-                    {currentUser.name.charAt(0)}
-                  </div>
                 </div>
 
                 {/* PROFILE INFO */}
@@ -563,19 +560,32 @@ export default function FeedPage() {
                   <h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
                     {currentUser.name}
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed line-clamp-3">
-                    {currentUser.bio}
-                  </p>
-                  <p className="text-xs text-slate-700 font-semibold leading-snug truncate pt-0.5">
-                    {currentUser.role}
-                  </p>
-                  <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate">
-                    <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                    <span>{currentUser.domisili}</span>
-                  </p>
-                  <p className="text-[11px] font-bold text-[#0087cc] pt-0.5">
-                    {currentUser.prodi} • Angkatan {currentUser.angkatan}
-                  </p>
+                  {currentUser.bio ? (
+                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed line-clamp-3">
+                      {currentUser.bio}
+                    </p>
+                  ) : null}
+                  {currentUser.role ? (
+                    <p className="text-xs text-slate-700 font-semibold leading-snug truncate pt-0.5">
+                      {currentUser.role}
+                    </p>
+                  ) : null}
+                  {currentUser.domisili ? (
+                    <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span>{currentUser.domisili}</span>
+                    </p>
+                  ) : null}
+                  {(currentUser.prodi || currentUser.angkatan) ? (
+                    <p className="text-[11px] font-bold text-[#0087cc] pt-0.5">
+                      {currentUser.prodi} {currentUser.angkatan ? `• Angkatan ${currentUser.angkatan}` : ''}
+                    </p>
+                  ) : null}
+                  {!currentUser.bio && !currentUser.role && (
+                    <p className="text-[11px] text-slate-400 italic pt-0.5">
+                      Lengkapi bio & data kamu di halaman profil.
+                    </p>
+                  )}
                 </div>
 
                 {/* ACTION BUTTON */}
