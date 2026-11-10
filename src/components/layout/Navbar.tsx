@@ -22,6 +22,7 @@ import {
   CheckCheck
 } from 'lucide-react';
 import AlumniAvatar from '@/components/profile/AlumniAvatar';
+import { subscribeToFeedPosts } from '@/lib/feed';
 
 interface ExtendedProfile {
   namaLengkap?: string;
@@ -42,48 +43,22 @@ interface NotificationItem {
   name?: string;
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    type: 'like',
-    title: 'Farhan Dito menyukai postingan showreel kamu',
-    description: '"Showreel 3D Character Rigging & Animation 2024"',
-    time: '5 menit lalu',
-    link: '/feed',
-    read: false,
-    name: 'Farhan Dito'
-  },
-  {
-    id: 'notif-2',
-    type: 'job',
-    title: 'Lowongan baru relevan: TRANS7',
-    description: 'PT Duta Visual Nusantara Tivi Tujuh membuka posisi "Video Editor Program Magazine"',
-    time: '2 jam lalu',
-    link: '/lowongan',
-    read: false,
-    name: 'TRANS7'
-  },
-  {
-    id: 'notif-3',
-    type: 'comment',
-    title: 'Anindya Larasati mengomentari postingan kamu',
-    description: '"Keren banget breakdown lighting & render-nya mas!"',
-    time: '4 jam lalu',
-    link: '/feed',
-    read: false,
-    name: 'Anindya Larasati'
-  },
-  {
-    id: 'notif-4',
-    type: 'application',
-    title: 'Update Status Lamaran Kerja',
-    description: 'Lamaran di PT Net Mediatama masuk ke tahap "Review Portofolio"',
-    time: '1 hari lalu',
-    link: '/lamaran',
-    read: true,
-    name: 'NET TV'
-  }
-];
+function formatRelativeTime(isoString?: string): string {
+  if (!isoString) return 'Baru saja';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return 'Baru saja';
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return 'Baru saja';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m lalu`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}j lalu`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}h lalu`;
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -92,7 +67,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -100,14 +75,115 @@ export default function Navbar() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Real-time listener untuk notifikasi Like & Komentar pada postingan feed pengguna
+  useEffect(() => {
+    if (!user?.uid) {
+      return;
+    }
+
+    const currentUid = user.uid;
+
+    const unsub = subscribeToFeedPosts((posts) => {
+      // Cari postingan milik pengguna yang sedang login
+      const myPosts = posts.filter(
+        (p) => p.authorUid === currentUid || (profile?.nomorAlumni && p.nomorAlumni === profile.nomorAlumni)
+      );
+
+      const items: (NotificationItem & { timestamp: number })[] = [];
+
+      // Baca status baca dari localStorage per user
+      let readIds = new Set<string>();
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem(`alumni_notif_read_${currentUid}`);
+          if (raw) readIds = new Set(JSON.parse(raw));
+        } catch {
+          // ignore
+        }
+      }
+
+      myPosts.forEach((post) => {
+        // 1. Notifikasi Komentar dari alumni lain
+        (post.comments || []).forEach((c) => {
+          if (c.authorUid && c.authorUid !== currentUid) {
+            const commentText = (c.text || (c as unknown as { content?: string }).content || '').trim();
+            const notifId = `comment_${c.id || c.createdAt}`;
+            const timeMs = c.createdAt ? new Date(c.createdAt).getTime() : Date.now();
+            items.push({
+              id: notifId,
+              type: 'comment',
+              title: `${c.authorName || 'Alumni MMTC'} mengomentari postingan Anda`,
+              description: commentText ? `"${commentText}"` : `Pada postingan "${post.content.slice(0, 45)}..."`,
+              time: formatRelativeTime(c.createdAt),
+              link: '/feed',
+              read: readIds.has(notifId),
+              name: c.authorName,
+              timestamp: timeMs
+            });
+          }
+        });
+
+        // 2. Notifikasi Like dari alumni lain
+        (post.likedBy || []).forEach((likerUid) => {
+          if (likerUid !== currentUid) {
+            const notifId = `like_${post.id}_${likerUid}`;
+            // Cari nama pemberi like dari riwayat komentar atau alias akun terdaftar
+            const commenter = (post.comments || []).find((c) => c.authorUid === likerUid);
+            const likerName = commenter?.authorName 
+              || (likerUid === 'FvCOX2jZf8ZmL8nQyUrWR8g6UAg1' ? 'Maydian Goklas Pratama Simanjuntak' : 'Seorang alumni');
+            const timeMs = post.updatedAt 
+              ? new Date(post.updatedAt).getTime() 
+              : (post.createdAt ? new Date(post.createdAt).getTime() : Date.now());
+            items.push({
+              id: notifId,
+              type: 'like',
+              title: `${likerName} menyukai postingan Anda`,
+              description: `"${post.content.slice(0, 50)}${post.content.length > 50 ? '...' : ''}"`,
+              time: formatRelativeTime(post.updatedAt || post.createdAt),
+              link: '/feed',
+              read: readIds.has(notifId),
+              name: likerName,
+              timestamp: timeMs
+            });
+          }
+        });
+      });
+
+      // Urutkan notifikasi terbaru paling atas
+      items.sort((a, b) => b.timestamp - a.timestamp);
+
+      setNotifications(items);
+    });
+
+    return () => unsub();
+  }, [user?.uid, profile?.nomorAlumni]);
+
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        const allIds = notifications.map((n) => n.id);
+        localStorage.setItem(`alumni_notif_read_${user.uid}`, JSON.stringify(allIds));
+      } catch {
+        // ignore
+      }
+    }
   };
 
   const handleNotificationClick = (item: NotificationItem) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === item.id ? { ...n, read: true } : n))
     );
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        const currentRead: string[] = JSON.parse(localStorage.getItem(`alumni_notif_read_${user.uid}`) || '[]');
+        if (!currentRead.includes(item.id)) {
+          localStorage.setItem(`alumni_notif_read_${user.uid}`, JSON.stringify([...currentRead, item.id]));
+        }
+      } catch {
+        // ignore
+      }
+    }
     setNotificationOpen(false);
     router.push(item.link);
   };

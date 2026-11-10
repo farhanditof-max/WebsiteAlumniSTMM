@@ -684,6 +684,8 @@ export async function deleteFeedPost(postId: string): Promise<void> {
  * Mengambil postingan yang dibuat oleh alumni tertentu (untuk /aktivitas & profil).
  */
 export async function getUserFeedPosts(authorUid: string): Promise<FeedPost[]> {
+  if (!authorUid) return [];
+
   if (typeof window !== 'undefined') {
     try {
       const res = await fetch(`/api/db?collection=feed_posts&authorUid=${encodeURIComponent(authorUid)}`, {
@@ -691,8 +693,8 @@ export async function getUserFeedPosts(authorUid: string): Promise<FeedPost[]> {
       });
       if (res.ok) {
         const json = await res.json();
-        if (Array.isArray(json.items)) {
-          return json.items.map((data: Record<string, unknown>) => ({
+        if (Array.isArray(json.items) && json.items.length > 0) {
+          const mapped = json.items.map((data: Record<string, unknown>) => ({
             ...data,
             id: String(data.id || ''),
             comments: Array.isArray(data.comments) ? data.comments : [],
@@ -700,6 +702,8 @@ export async function getUserFeedPosts(authorUid: string): Promise<FeedPost[]> {
             likesCount: Number(data.likesCount || 0),
             commentsCount: Number(data.commentsCount || 0)
           })) as FeedPost[];
+          mapped.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          return mapped;
         }
       }
     } catch {
@@ -708,14 +712,26 @@ export async function getUserFeedPosts(authorUid: string): Promise<FeedPost[]> {
   }
 
   try {
-    const q = query(
+    // Query by authorUid without mandatory composite index
+    const q1 = query(
       collection(db, 'feed_posts'),
-      where('authorUid', '==', authorUid),
-      orderBy('createdAt', 'desc')
+      where('authorUid', '==', authorUid)
     );
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      return snap.docs.map((d) => {
+    const snap1 = await getDocs(q1);
+    let docs = snap1.docs;
+
+    // If no docs and authorUid might be a nomorAlumni, also query by nomorAlumni
+    if (docs.length === 0) {
+      const q2 = query(
+        collection(db, 'feed_posts'),
+        where('nomorAlumni', '==', authorUid)
+      );
+      const snap2 = await getDocs(q2);
+      docs = snap2.docs;
+    }
+
+    if (docs.length > 0) {
+      const list = docs.map((d) => {
         const data = d.data();
         return {
           ...data,
@@ -726,11 +742,14 @@ export async function getUserFeedPosts(authorUid: string): Promise<FeedPost[]> {
           commentsCount: Number(data.commentsCount || 0)
         } as FeedPost;
       });
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return list;
     }
+    return [];
   } catch (err) {
     console.warn('getUserFeedPosts error, fallback to curated matches:', err);
   }
 
   // Filter fallback jika ada postingan contoh milik authorUid
-  return INITIAL_CURATED_POSTS.filter((p) => p.authorUid === authorUid);
+  return INITIAL_CURATED_POSTS.filter((p) => p.authorUid === authorUid || p.nomorAlumni === authorUid);
 }
